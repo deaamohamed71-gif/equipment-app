@@ -12,16 +12,14 @@
   "description": "برنامج لعمل عروض الاسعار بشكل مبسط وفاعلية كبيرة",
   "icons": [
     {
-      "src": "./icon-192.png",
+      "src": "https://deaamohamed71-gif.github.io/equipment-app/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "./icon-512.png",
+      "src": "https://deaamohamed71-gif.github.io/equipment-app/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
