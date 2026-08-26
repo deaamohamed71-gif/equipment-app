@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تطبيق عروض أسعار المعدات</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body.dark-mode {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            font-size: 14px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin: 10px 0 5px 0;
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger { background-color: #ef4444; }
+        .btn-success { background-color: #10b981; }
+        .btn-whatsapp { background-color: #25d366; }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 3px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        /* تحسين الجدول للموبايل */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .totals-section {
+            background: rgba(59, 130, 246, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        .actions-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .actions-bar button {
+            width: 100%;
+            padding: 10px;
+        }
+
+        @media print {
+            .no-print { display: none; }
+            body { background: white; color: black; padding: 0; }
+            .container { box-shadow: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-controls">
+        <h2>عروض أسعار المعدات</h2>
+        <div class="no-print" style="display: flex; gap: 5px;">
+            <button class="btn" style="padding: 5px 8px; font-size: 0.8rem;" onclick="toggleDarkMode()">🌓</button>
+            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 0.8rem;" onclick="resetData()">🗑️</button>
+        </div>
+    </div>
+
+    <!-- بيانات العميل وعرض الأسعار -->
+    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <label>اسم العميل / الشركة:</label>
+            <input type="text" id="clientName" placeholder="اسم العميل" oninput="saveData()">
+        </div>
+        <div>
+            <label>تاريخ العرض:</label>
+            <input type="date" id="offerDate" oninput="saveData()">
+        </div>
+    </div>
+
+    <!-- جدول بنود المعدات -->
+    <h3>بنود المعدات</h3>
+    <div class="table-responsive">
+        <table id="itemsTable">
+            <thead>
+                <tr>
+                    <th>المعدة</th>
+                    <th>العدد</th>
+                    <th>المدة</th>
+                    <th>الفترة</th>
+                    <th>السعر</th>
+                    <th>الإجمالي</th>
+                    <th class="no-print">حذف</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <!-- الصفوف الديناميكية -->
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-success no-print" style="width: 100%; margin-top: 5px;" onclick="addItemRow()">+ إضافة معدة جديدة</button>
+
+    <!-- التكاليف الإضافية -->
+    <div style="margin-top: 15px;">
+        <h3>المصاريف والضريبة</h3>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 5px;">
+            <div>
+                <label>النقل:</label>
+                <input type="number" id="transportCost" value="0" oninput="calculateTotals()">
+            </div>
+            <div>
+                <label>الإضافات:</label>
+                <input type="number" id="extrasCost" value="0" oninput="calculateTotals()">
+            </div>
+            <div>
+                <label>الضريبة %:</label>
+                <input type="number" id="vatRate" value="0" oninput="calculateTotals()">
+            </div>
+        </div>
+    </div>
+
+    <!-- ملخص الحسابات -->
+    <div class="totals-section">
+        <div class="totals-row">
+            <span>إجمالي المعدات:</span>
+            <span id="subTotal">0.00</span>
+        </div>
+        <div class="totals-row">
+            <span>النقل والإضافات:</span>
+            <span id="totalExtras">0.00</span>
+        </div>
+        <div class="totals-row">
+            <span>قيمة الضريبة:</span>
+            <span id="vatAmount">0.00</span>
+        </div>
+        <hr style="margin: 8px 0; border-color: var(--border-color);">
+        <div class="totals-row" style="font-weight: bold; font-size: 1.15rem; color: var(--primary-color);">
+            <span>الصافي النهائي:</span>
+            <span id="grandTotal">0.00</span>
+        </div>
+    </div>
+
+    <!-- الشروط والملاحظات -->
+    <div class="form-group" style="margin-top: 10px;">
+        <label>الشروط والملاحظات:</label>
+        <textarea id="notes" rows="2" placeholder="ملاحظات السداد، التشغيل، السولار..." oninput="saveData()"></textarea>
+    </div>
+
+    <!-- أزرار الإجراءات النهائية -->
+    <div class="actions-bar no-print">
+        <button class="btn" onclick="window.print()">🖨️ طباعة / PDF</button>
+        <button class="btn btn-whatsapp" onclick="sendWhatsApp()">💬 إرسال واتساب</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('offerDate').valueAsDate = new Date();
+        loadData();
+        if(document.getElementById('itemsBody').rows.length === 0) {
+            addItemRow();
+        }
+    });
+
+    function addItemRow(data = {}) {
+        const tbody = document.getElementById('itemsBody');
+        const row = tbody.insertRow();
+        
+        row.innerHTML = `
+            <td><input type="text" value="${data.name || ''}" placeholder="اسم المعدة" style="width: 110px;" oninput="calculateTotals()"></td>
+            <td><input type="number" value="${data.qty || 1}" min="1" style="width: 50px;" oninput="calculateTotals()"></td>
+            <td><input type="number" value="${data.duration || 1}" min="1" style="width: 50px;" oninput="calculateTotals()"></td>
+            <td>
+                <select style="width: 70px;" onchange="calculateTotals()">
+                    <option value="day" ${data.type === 'day' ? 'selected' : ''}>يوم</option>
+                    <option value="month" ${data.type === 'month' ? 'selected' : ''}>شهر</option>
+                </select>
+            </td>
+            <td><input type="number" value="${data.price || 0}" min="0" style="width: 70px;" oninput="calculateTotals()"></td>
+            <td class="row-total" style="font-weight:bold;">0.00</td>
+            <td class="no-print"><button class="btn btn-danger" style="padding: 4px 8px; font-size:0.75rem;" onclick="this.closest('tr').remove(); calculateTotals();">X</button></td>
+        `;
+        calculateTotals();
+    }
+
+    function calculateTotals() {
+        const rows = document.querySelectorAll('#itemsBody tr');
+        let subTotal = 0;
+
+        rows.forEach(row => {
+            const qty = parseFloat(row.cells[1].querySelector('input').value) || 0;
+            const duration = parseFloat(row.cells[2].querySelector('input').value) || 0;
+            const price = parseFloat(row.cells[4].querySelector('input').value) || 0;
+            
+            const rowTotal = qty * duration * price;
+            row.cells[5].innerText = rowTotal.toFixed(2);
+            subTotal += rowTotal;
+        });
+
+        const transport = parseFloat(document.getElementById('transportCost').value) || 0;
+        const extras = parseFloat(document.getElementById('extrasCost').value) || 0;
+        const totalExtrasVal = transport + extras;
+        
+        const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+        const vatAmountVal = (subTotal + totalExtrasVal) * (vatRate / 100);
+        
+        const grandTotalVal = subTotal + totalExtrasVal + vatAmountVal;
+
+        document.getElementById('subTotal').innerText = subTotal.toFixed(2);
+        document.getElementById('totalExtras').innerText = totalExtrasVal.toFixed(2);
+        document.getElementById('vatAmount').innerText = vatAmountVal.toFixed(2);
+        document.getElementById('grandTotal').innerText = grandTotalVal.toFixed(2);
+
+        saveData();
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    function saveData() {
+        const data = {
+            clientName: document.getElementById('clientName').value,
+            offerDate: document.getElementById('offerDate').value,
+            transportCost: document.getElementById('transportCost').value,
+            extrasCost: document.getElementById('extrasCost').value,
+            vatRate: document.getElementById('vatRate').value,
+            notes: document.getElementById('notes').value,
+            darkMode: document.body.classList.contains('dark-mode'),
+            items: []
+        };
+
+        document.querySelectorAll('#itemsBody tr').forEach(row => {
+            data.items.push({
+                name: row.cells[0].querySelector('input').value,
+                qty: row.cells[1].querySelector('input').value,
+                duration: row.cells[2].querySelector('input').value,
+                type: row.cells[3].querySelector('select').value,
+                price: row.cells[4].querySelector('input').value
+            });
+        });
+
+        localStorage.setItem('equipmentOfferDataMobile', JSON.stringify(data));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('equipmentOfferDataMobile');
+        if (!saved) return;
+        const data = JSON.parse(saved);
+
+        document.getElementById('clientName').value = data.clientName || '';
+        if(data.offerDate) document.getElementById('offerDate').value = data.offerDate;
+        document.getElementById('transportCost').value = data.transportCost || 0;
+        document.getElementById('extrasCost').value = data.extrasCost || 0;
+        document.getElementById('vatRate').value = data.vatRate || 0;
+        document.getElementById('notes').value = data.notes || '';
+        
+        if(data.darkMode) {
+            document.body.classList.add('dark-mode');
+        }
+
+        if(data.items && data.items.length > 0) {
+            document.getElementById('itemsBody').innerHTML = '';
+            data.items.forEach(item => addItemRow(item));
+        }
+    }
+
+    function resetData() {
+        if(confirm('مسح كافة البيانات؟')) {
+            localStorage.removeItem('equipmentOfferDataMobile');
+            location.reload();
+        }
+    }
+
+    function sendWhatsApp() {
+        const client = document.getElementById('clientName').value || 'عميلنا العزيز';
+        const total = document.getElementById('grandTotal').innerText;
+        const notes = document.getElementById('notes').value;
+        
+        let msg = `*عـرض أسـعار إيجـار معدات*\n`;
+        msg += `إلى السيد/ة: ${client}\n`;
+        msg += `------------------\n`;
+        
+        document.querySelectorAll('#itemsBody tr').forEach((row, index) => {
+            const name = row.cells[0].querySelector('input').value || 'معدة';
+            const qty = row.cells[1].querySelector('input').value;
+            const duration = row.cells[2].querySelector('input').value;
+            const type = row.cells[3].querySelector('select').value === 'day' ? 'يوم' : 'شهر';
+            const rowTot = row.cells[5].innerText;
+            msg += `${index+1}- ${name} (العدد: ${qty}) - المدة: ${duration} ${type} - الإجمالي: ${rowTot}\n`;
+        });
+        
+        msg += `------------------\n`;
+        msg += `*الصافي الإجمالي المستحق: ${total} جنيه*\n`;
+        if(notes) msg += `ملاحظات: ${notes}\n`;
+        
+        const encodedUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(encodedUrl, '_blank');
+    }
+</script>
+
+</body>
+</html>
