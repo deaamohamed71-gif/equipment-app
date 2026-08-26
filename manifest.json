@@ -1,0 +1,19 @@
+{
+  "background_color": "#efefef",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Equipment App",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Equipment App",
+  "start_url": "/",
+  "theme_color": "#001ce0",
+  "lang": "ar",
+  "categories": [
+    "cars",
+    "graphics",
+    "graphics &amp; design",
+    "multimedia design"
+  ],
+  "description": "برنامج لعمل عروض الاسعار بشكل مبسط وفاعلية كبيرة"
+}
