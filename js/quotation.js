@@ -504,35 +504,43 @@ function savePDF() {
         }
     }
     
-    // جمع البيانات
-    const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
-    const companyPhone = document.getElementById('companyPhone')?.value || '';
-    const companyAddress = document.getElementById('companyAddress')?.value || '';
-    const companyCommercial = document.getElementById('companyCommercial')?.value || '';
-    const companyTax = document.getElementById('companyTax')?.value || '';
-    const projectName = document.getElementById('projectName')?.value || '';
-    
+    // ====== جلب جميع البيانات من localStorage ======
+    // 1. بيانات الشركة (المحفوظة من company.js)
+    const companyName = localStorage.getItem('field_companyName') || 'شركة المعدات الحديثة';
+    const companyPhone = localStorage.getItem('field_companyPhone') || '';
+    const companyAddress = localStorage.getItem('field_companyAddress') || '';
+    const companyCommercial = localStorage.getItem('field_companyCommercial') || '';
+    const companyTax = localStorage.getItem('field_companyTax') || '';
+    const projectName = localStorage.getItem('field_projectName') || '';
     const logo = localStorage.getItem('companyLogo') || '';
+    
+    // 2. معلومات العرض (من حقول الصفحة الحالية)
     const quotationNumber = document.getElementById('quotationNumber')?.value || 'QT-2026-001';
     const issueDate = document.getElementById('issueDate')?.value || new Date().toISOString().split('T')[0];
     const validityDate = document.getElementById('validityDate')?.value || '';
     
+    // 3. العميل والرسالة
     const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
     const welcomeMessage = document.getElementById('welcomeMessage')?.value || 'نشكركم على ثقتكم';
     
+    // 4. الحقول الإضافية
     const transportGo = document.getElementById('transportGo')?.value || '0';
     const transportBack = document.getElementById('transportBack')?.value || '0';
     const transportFlatbed = document.getElementById('transportFlatbed')?.value || '0';
     const roadCards = document.getElementById('roadCards')?.value || '0';
     const fuelCost = document.getElementById('fuelCost')?.value || '0';
     
+    // 5. الضريبة والإجمالي
     const taxRate = document.getElementById('taxRate')?.value || '0';
     const taxAmount = document.getElementById('taxAmount')?.textContent || '0';
     const totalWithTax = document.getElementById('totalWithTax')?.textContent || '0';
     const totalDisplay = document.getElementById('totalDisplay')?.innerHTML || '0 ج.م';
     
+    // 6. التوقيعات (من localStorage)
     const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
     const sigClient = localStorage.getItem('sig_sigClient') || '';
+    
+    // 7. الملاحظات
     const notesData = notes && notes.length > 0 ? notes : defaultNotes;
     
     // تحديد ما إذا كانت النسخة مجانية للعلامة المائية
