@@ -6,10 +6,8 @@ let clientsChart = null;
 // ====== تهيئة الترخيص ======
 function initReportsLicense() {
     licenseManager.initialize();
-    const info = licenseManager.getLicenseInfo();
     const features = licenseManager.getFeatures();
     
-    // التحقق من صلاحية التقارير
     if (!features.canReports) {
         showPremiumRequiredMessage();
     }
@@ -20,7 +18,6 @@ function showPremiumRequiredMessage() {
     const container = document.querySelector('.reports-container');
     if (!container) return;
     
-    // إضافة رسالة الترقية في بداية الصفحة
     const messageDiv = document.createElement('div');
     messageDiv.className = 'premium-required-message';
     messageDiv.style.cssText = `
@@ -41,7 +38,6 @@ function showPremiumRequiredMessage() {
     `;
     container.prepend(messageDiv);
     
-    // إخفاء المحتوى الحالي
     const sections = container.querySelectorAll('.section-card, .stats-grid, .charts-grid');
     sections.forEach(el => {
         el.style.opacity = '0.3';
@@ -53,13 +49,11 @@ function showPremiumRequiredMessage() {
 function loadReportData() {
     const features = licenseManager.getFeatures();
     
-    // إذا لم تكن التقارير متاحة، نعرض رسالة
     if (!features.canReports) {
         showPremiumRequiredMessage();
         return;
     }
     
-    // تحميل البيانات العادية
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
     
@@ -86,7 +80,6 @@ function loadReportData() {
     generateReport();
 }
 
-// ====== باقي دوال التقارير ======
 function generateReport() {
     const features = licenseManager.getFeatures();
     if (!features.canReports) {
@@ -365,9 +358,7 @@ function printReport() {
     window.print();
 }
 
-// ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    // تهيئة الترخيص
     licenseManager.initialize();
     
     setTimeout(function() {

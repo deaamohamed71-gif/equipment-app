@@ -113,7 +113,6 @@ class LicenseManager {
 
     // ====== تفعيل الترخيص ======
     activateLicense(key) {
-        // مفتاح تجريبي للاختبار
         const validKeys = [
             'EQ2026-X9F7-KL82-MN34',
             'EQ2026-W8E6-JK71-LM23',
@@ -203,10 +202,8 @@ class LicenseManager {
 
     // ====== عرض نافذة التفعيل ======
     showActivationPrompt() {
-        // إذا كنا في صفحة التفعيل، لا نفتحها مرة أخرى
         if (window.location.pathname.includes('activation.html')) return;
         
-        // استخدام confirm لتوجيه المستخدم
         if (confirm('⚠️ هذه الميزة متاحة فقط في النسخة المدفوعة.\n\nهل تريد الانتقال إلى صفحة التفعيل الآن؟')) {
             window.location.href = 'activation.html';
         }

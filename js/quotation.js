@@ -493,7 +493,7 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF محسن مع دعم الجداول الطويلة ======
+// ====== تصدير PDF محسن مع جميع البيانات ======
 function savePDF() {
     // التحقق من وجود licenseManager
     if (typeof licenseManager !== 'undefined') {
@@ -508,306 +508,542 @@ function savePDF() {
     
     showToast('📄 جاري تجهيز ملف PDF...', 'success');
     
-    const container = document.querySelector('.quotation-container');
-    if (!container) {
-        showToast('❌ لم يتم العثور على محتوى للتصدير', 'error');
-        return;
-    }
+    // ====== جمع جميع البيانات ======
+    // 1. معلومات الشركة
+    const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
+    const companyPhone = document.getElementById('companyPhone')?.value || '0123456789';
+    const companyAddress = document.getElementById('companyAddress')?.value || 'القاهرة';
+    const companyCommercial = document.getElementById('companyCommercial')?.value || '123456';
+    const companyTax = document.getElementById('companyTax')?.value || '987654';
+    const projectName = document.getElementById('projectName')?.value || 'برج الأمل';
     
-    // استنساخ المحتوى
-    const clone = container.cloneNode(true);
+    // 2. الشعار
+    const logo = localStorage.getItem('companyLogo') || '';
     
-    // تنظيف النسخة من العناصر غير المرغوب فيها
-    clone.querySelectorAll('.btn, .delete-row, .delete-note, .add-row-area, .saved-offers-row, .header-actions, .no-print, .mode-toggle').forEach(el => el.remove());
+    // 3. معلومات العرض
+    const quotationNumber = document.getElementById('quotationNumber')?.value || 'QT-2026-001';
+    const issueDate = document.getElementById('issueDate')?.value || new Date().toISOString().split('T')[0];
+    const validityDate = document.getElementById('validityDate')?.value || '';
     
-    // تحويل المدخلات إلى نصوص
-    clone.querySelectorAll('input, select').forEach(el => {
-        const span = document.createElement('span');
-        span.textContent = el.value || el.textContent || '---';
-        span.style.cssText = 'font-weight:bold; color:#1a2a3a; font-size:10px;';
-        el.replaceWith(span);
-    });
+    // 4. الشركة المستهدفة والرسالة
+    const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
+    const welcomeMessage = document.getElementById('welcomeMessage')?.value || 'نشكركم على ثقتكم';
     
-    // إزالة أعمدة الإجراءات (حذف)
-    clone.querySelectorAll('th:last-child, td:last-child').forEach(el => {
-        const parent = el.parentElement;
-        if (parent && (el.textContent.includes('✕') || el.textContent.includes('×') || el.querySelector('.delete-row'))) {
-            el.remove();
-        }
-    });
+    // 5. الحقول الإضافية
+    const transportGo = document.getElementById('transportGo')?.value || '0';
+    const transportBack = document.getElementById('transportBack')?.value || '0';
+    const transportFlatbed = document.getElementById('transportFlatbed')?.value || '0';
+    const roadCards = document.getElementById('roadCards')?.value || '0';
+    const fuelCost = document.getElementById('fuelCost')?.value || '0';
     
-    // تنظيف الجدول وتحسينه للطباعة
-    const table = clone.querySelector('table');
-    if (table) {
-        // إزالة العمود الأخير (عمود الحذف)
-        table.querySelectorAll('tr').forEach(row => {
-            const cells = row.querySelectorAll('th, td');
-            if (cells.length > 8) {
-                for (let i = cells.length - 1; i >= 8; i--) {
-                    if (cells[i]) cells[i].remove();
-                }
-            }
-        });
-        
-        // تصغير حجم الخط في الجدول
-        table.style.cssText = 'font-size: 9px; width: 100%; border-collapse: collapse;';
-        
-        // تقليل المسافات بين الأعمدة
-        table.querySelectorAll('th, td').forEach(cell => {
-            cell.style.cssText = 'padding: 3px 2px; text-align: center; border: 1px solid #ddd; font-size: 9px;';
-        });
-        
-        // تحسين رأس الجدول
-        table.querySelectorAll('th').forEach(th => {
-            th.style.cssText = 'background: #1a6b8a; color: white; padding: 4px 2px; text-align: center; font-size: 9px; border: 1px solid #1a6b8a;';
-        });
-        
-        // تصغير عرض أعمدة الإدخال
-        table.querySelectorAll('.equip-name input').forEach(el => {
-            el.style.cssText = 'width: 50px; font-size: 8px; border: none; background: transparent; text-align: center; font-weight: 600;';
-        });
-        table.querySelectorAll('.price-input, .count-input, .spec-input').forEach(el => {
-            el.style.cssText = 'width: 35px; font-size: 8px; border: none; background: transparent; text-align: center;';
-        });
-        table.querySelectorAll('select').forEach(el => {
-            el.style.cssText = 'font-size: 8px; padding: 1px 2px; border: none; background: transparent;';
-        });
-    }
+    // 6. الضريبة والإجمالي
+    const taxRate = document.getElementById('taxRate')?.value || '0';
+    const taxAmount = document.getElementById('taxAmount')?.textContent || '0';
+    const totalWithTax = document.getElementById('totalWithTax')?.textContent || '0';
+    const totalDisplay = document.getElementById('totalDisplay')?.innerHTML || '0 ج.م';
     
-    // إضافة تنسيق الطباعة المحسن
-    const style = document.createElement('style');
-    style.textContent = `
+    // 7. التوقيعات
+    const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
+    const sigClient = localStorage.getItem('sig_sigClient') || '';
+    
+    // 8. الملاحظات
+    const notesData = notes || defaultNotes;
+    
+    // ====== بناء HTML للتصدير ======
+    const htmlContent = `
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>عرض أسعار - ${quotationNumber}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
         @page {
             size: A4 landscape;
-            margin: 6mm 8mm;
+            margin: 8mm 10mm;
         }
-        body { 
-            padding: 8px; 
-            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
             direction: rtl;
-            font-size: 10px;
+            padding: 10px;
+            font-size: 11px;
+            background: white;
+            color: #1a2a3a;
         }
-        .quotation-container { 
-            max-width: 100%; 
+        .quotation-container {
+            max-width: 100%;
             margin: 0 auto;
         }
-        .page-header {
+        
+        /* الهيدر */
+        .pdf-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #1a6b8a;
+            margin-bottom: 10px;
         }
-        .page-header h1 {
-            font-size: 14px;
+        .pdf-header .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .pdf-header .logo-area img {
+            max-height: 60px;
+            max-width: 80px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 4px;
+        }
+        .pdf-header .logo-area .company-info h2 {
+            font-size: 16px;
             color: #1a6b8a;
             margin: 0;
         }
-        .header-actions { display: none !important; }
+        .pdf-header .logo-area .company-info p {
+            font-size: 9px;
+            color: #666;
+            margin: 2px 0;
+        }
+        .pdf-header .quotation-title {
+            text-align: left;
+        }
+        .pdf-header .quotation-title h1 {
+            font-size: 18px;
+            color: #c9a84c;
+            margin: 0;
+        }
+        .pdf-header .quotation-title p {
+            font-size: 10px;
+            color: #666;
+            margin: 2px 0;
+        }
+        
+        /* معلومات العرض */
         .quotation-info {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px 16px;
-            margin: 6px 0;
-            padding: 4px 0;
-            border-bottom: 2px solid #e0e8ec;
+            gap: 8px 20px;
+            padding: 6px 0;
+            border-bottom: 1px solid #e0e8ec;
+            margin-bottom: 6px;
         }
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            font-size: 9px;
-        }
-        .info-item label { font-weight: 600; }
-        .info-item input { border: none; background: transparent; font-size: 9px; width: 80px; }
-        .validity-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #e8f4f8;
-            color: #1a6b8a;
-            font-size: 9px;
-        }
-        .welcome-msg {
+        .quotation-info .info-item {
             display: flex;
             align-items: center;
             gap: 4px;
-            flex-wrap: wrap;
-            padding: 4px 8px;
-            background: #f8fafc;
-            border-radius: 6px;
-            margin: 4px 0;
-            font-size: 9px;
+            font-size: 10px;
         }
-        .welcome-msg input { border: none; background: transparent; font-weight: 500; font-size: 9px; }
+        .quotation-info .info-item strong {
+            color: #1a6b8a;
+        }
+        .validity-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: #e8f4f8;
+            color: #1a6b8a;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        
+        /* العميل */
+        .welcome-msg {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 10px;
+            border: 1px solid #e0e8ec;
+        }
+        .welcome-msg .label {
+            font-weight: 600;
+            color: #1a6b8a;
+        }
+        .welcome-msg .value {
+            font-weight: 500;
+        }
+        
+        /* الجدول */
         .table-wrap {
             overflow: visible !important;
-            border: none !important;
-            background: transparent !important;
-            margin: 4px 0;
+            border: 1px solid #e0e8ec !important;
+            border-radius: 8px !important;
+            margin: 8px 0 !important;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 4px 0;
-            font-size: 8px;
-            page-break-inside: avoid;
+            font-size: 9px;
         }
         th {
             background: #1a6b8a;
             color: white;
-            padding: 3px 2px;
+            padding: 5px 4px;
             text-align: center;
             border: 1px solid #1a6b8a;
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 700;
         }
         td {
-            padding: 3px 2px;
+            padding: 4px 4px;
             text-align: center;
             border: 1px solid #ddd;
-            font-size: 8px;
-        }
-        tr { page-break-inside: avoid; }
-        .equip-name { font-weight: 600; display: flex; align-items: center; gap: 3px; justify-content: center; }
-        .equip-name i { font-size: 9px; }
-        .extra-fields {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 3px 8px;
-            padding: 4px 8px;
-            background: #f8fafc;
-            border-radius: 6px;
-            margin: 4px 0;
             font-size: 9px;
         }
-        .extra-fields .field { display: flex; align-items: center; gap: 3px; }
-        .extra-fields .field-label { font-weight: 500; font-size: 8px; }
-        .extra-fields input { border: none; background: transparent; width: 50px; font-size: 8px; }
+        tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+        .equip-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+        .equip-name i {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        /* الحقول الإضافية */
+        .extra-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 4px 10px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 10px;
+            border: 1px solid #e0e8ec;
+        }
+        .extra-fields .field {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .extra-fields .field-label {
+            font-weight: 500;
+        }
+        .extra-fields .field-value {
+            font-weight: 700;
+            color: #1a6b8a;
+        }
+        
+        /* الضريبة والإجمالي */
         .tax-total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            padding: 4px 8px;
+            padding: 6px 12px;
             background: #f8fafc;
-            border-radius: 6px;
-            margin: 4px 0;
-            font-size: 9px;
+            border-radius: 8px;
+            margin: 6px 0;
+            border: 1px solid #e0e8ec;
         }
-        .tax-section { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 9px; }
-        .tax-section input { border: none; background: transparent; width: 40px; font-size: 8px; }
-        .tax-result { font-weight: 700; color: #1a6b8a; font-size: 9px; }
-        .total-summary {
-            padding: 3px 12px;
-            border-radius: 16px;
+        .tax-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 10px;
+        }
+        .tax-section .label {
+            font-weight: 600;
+        }
+        .tax-result {
             font-weight: 700;
+            color: #1a6b8a;
             font-size: 11px;
+        }
+        .total-summary {
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
             background: #e8f4f8;
-            border: 1px solid #1a6b8a;
+            border: 2px solid #1a6b8a;
             color: #1a6b8a;
         }
-        .total-summary i { color: #c9a84c; }
+        .total-summary i {
+            color: #c9a84c;
+        }
+        .tax-note {
+            font-size: 8px;
+            color: #c9a84c;
+            background: #f5ecc0;
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+        
+        /* الملاحظات */
         .note-section {
-            margin-top: 8px;
-            padding: 6px 10px;
+            margin-top: 10px;
+            padding: 8px 12px;
             border-right: 3px solid #c9a84c;
             background: #f8fafc;
             border: 1px solid #e0e8ec;
             border-right-width: 3px;
-            font-size: 8px;
-            page-break-inside: avoid;
+            border-radius: 8px;
         }
-        .note-section h3 { font-size: 10px; color: #1a6b8a; margin-bottom: 3px; }
-        .note-item { display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px solid #eee; }
-        .note-item i { color: #c9a84c; font-size: 4px; }
-        .note-item .note-text { border: none; background: transparent; font-size: 8px; width: 100%; }
+        .note-section h3 {
+            font-size: 11px;
+            color: #1a6b8a;
+            margin-bottom: 4px;
+        }
+        .note-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 9px;
+        }
+        .note-item i {
+            color: #c9a84c;
+            font-size: 4px;
+        }
+        
+        /* التوقيعات */
         .signature-area {
             display: flex;
-            gap: 16px;
-            margin-top: 10px;
+            gap: 30px;
+            margin-top: 14px;
             flex-wrap: wrap;
-            page-break-inside: avoid;
         }
         .signature-box {
             flex: 1;
             border: 1px dashed #ccc;
-            padding: 8px;
+            padding: 10px 15px;
             text-align: center;
-            min-width: 120px;
+            min-width: 150px;
+            border-radius: 8px;
         }
-        .signature-box .sig-header { display: flex; align-items: center; gap: 4px; justify-content: center; }
-        .signature-box .sig-header i { color: #c9a84c; font-size: 12px; }
-        .signature-box .sig-header h3 { font-size: 9px; margin: 0; }
-        .sig-preview img { max-height: 50px; max-width: 100%; display: block !important; margin: 0 auto; }
-        .sig-placeholder { display: none !important; }
-        .sig-actions { display: none !important; }
-        .sig-hint { display: none !important; }
-        .watermark { display: none !important; }
-        .no-print { display: none !important; }
-        #footer { display: none !important; }
-        #header { display: none !important; }
-        #toast { display: none !important; }
-        .btn { display: none !important; }
-        .add-row-area { display: none !important; }
-        .saved-offers-row { display: none !important; }
-        .delete-row { display: none !important; }
-        .delete-note { display: none !important; }
-        .tax-note { font-size: 7px; color: #c9a84c; background: #f5ecc0; padding: 1px 6px; border-radius: 8px; }
-        .pdf-footer { margin-top: 16px; text-align: center; color: #888; font-size: 8px; border-top: 1px solid #eee; padding-top: 6px; }
-    `;
-    clone.prepend(style);
-    
-    // إضافة علامة مائية للنسخة المجانية
-    let isTrial = true;
-    if (typeof licenseManager !== 'undefined') {
-        const features = licenseManager.getFeatures();
-        isTrial = features.showWatermark || false;
-    }
-    
-    if (isTrial) {
-        const watermark = document.createElement('div');
-        watermark.style.cssText = `
+        .signature-box .sig-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+        .signature-box .sig-header i {
+            color: #c9a84c;
+            font-size: 14px;
+        }
+        .signature-box .sig-header h4 {
+            font-size: 10px;
+            margin: 0;
+            color: #1a6b8a;
+        }
+        .signature-box .sig-preview {
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .signature-box .sig-preview img {
+            max-height: 50px;
+            max-width: 100%;
+        }
+        .signature-box .sig-empty {
+            color: #aaa;
+            font-size: 9px;
+        }
+        
+        /* الفوتر */
+        .pdf-footer {
+            margin-top: 16px;
+            text-align: center;
+            color: #999;
+            font-size: 8px;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+        }
+        
+        /* علامة مائية */
+        .watermark {
             position: fixed;
             bottom: 50%;
             left: 50%;
             transform: translate(-50%, 50%) rotate(-30deg);
-            font-size: 50px;
+            font-size: 60px;
             color: rgba(0,0,0,0.04);
             font-weight: bold;
             pointer-events: none;
             z-index: 9999;
             white-space: nowrap;
-        `;
-        watermark.textContent = 'نسخة تجريبية';
-        clone.appendChild(watermark);
-    }
+        }
+        
+        /* منع تقسيم الجدول */
+        table { page-break-inside: avoid; }
+        tr { page-break-inside: avoid; }
+        .note-section { page-break-inside: avoid; }
+        .signature-area { page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <div class="quotation-container">
+        
+        <!-- ====== الهيدر ====== -->
+        <div class="pdf-header">
+            <div class="logo-area">
+                ${logo ? `<img src="${logo}" alt="شعار الشركة" />` : ''}
+                <div class="company-info">
+                    <h2>${companyName}</h2>
+                    <p><i class="fas fa-phone"></i> ${companyPhone} | <i class="fas fa-map-marker-alt"></i> ${companyAddress}</p>
+                    <p><i class="fas fa-id-card"></i> سجل تجاري: ${companyCommercial} | <i class="fas fa-receipt"></i> الرقم الضريبي: ${companyTax}</p>
+                    <p><i class="fas fa-project-diagram"></i> المشروع: ${projectName}</p>
+                </div>
+            </div>
+            <div class="quotation-title">
+                <h1>عرض أسعار</h1>
+                <p>رقم العرض: <strong>${quotationNumber}</strong></p>
+                <p>تاريخ الإصدار: ${issueDate}</p>
+                ${validityDate ? `<p>تاريخ الصلاحية: ${validityDate}</p>` : ''}
+            </div>
+        </div>
+        
+        <!-- ====== معلومات العميل ====== -->
+        <div class="welcome-msg">
+            <span class="label"><i class="fas fa-handshake"></i> موجه إلى:</span>
+            <span class="value"><strong>${targetCompany}</strong></span>
+            <span style="opacity:0.3;">|</span>
+            <span class="value">${welcomeMessage}</span>
+        </div>
+        
+        <!-- ====== الجدول ====== -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:18%;">المعدة</th>
+                        <th style="width:8%;">الوحدة</th>
+                        <th style="width:8%;">القيمة</th>
+                        <th style="width:10%;">نوع السعر</th>
+                        <th style="width:9%;">المدة</th>
+                        <th style="width:7%;">العدد</th>
+                        <th style="width:12%;">سعر الوحدة</th>
+                        <th style="width:13%;">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(row => `
+                        <tr>
+                            <td class="equip-name">
+                                <i class="fas ${row.icon || getIconForName(row.name) || 'fa-arrow-up'}"></i>
+                                ${row.name || 'غير محدد'}
+                            </td>
+                            <td>${row.unit || '---'}</td>
+                            <td>${row.value || 0}</td>
+                            <td>${row.priceType || '---'}</td>
+                            <td>${row.duration || '---'}</td>
+                            <td>${row.count || 0}</td>
+                            <td>${Number(row.unitPrice || 0).toLocaleString('en-US')}</td>
+                            <td style="font-weight:700; color:#1a6b8a;">${getOperationTotal(row).toLocaleString('en-US')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- ====== الحقول الإضافية ====== -->
+        <div class="extra-fields">
+            <div class="field"><span class="field-label"><i class="fas fa-truck"></i> نقل ذهاب:</span> <span class="field-value">${Number(transportGo).toLocaleString('en-US')} ج.م</span></div>
+            <div class="field"><span class="field-label"><i class="fas fa-truck"></i> نقل عودة:</span> <span class="field-value">${Number(transportBack).toLocaleString('en-US')} ج.م</span></div>
+            <div class="field"><span class="field-label"><i class="fas fa-trailer"></i> مشال:</span> <span class="field-value">${Number(transportFlatbed).toLocaleString('en-US')} ج.م</span></div>
+            <div class="field"><span class="field-label"><i class="fas fa-road"></i> كارتات:</span> <span class="field-value">${Number(roadCards).toLocaleString('en-US')} ج.م</span></div>
+            <div class="field"><span class="field-label"><i class="fas fa-gas-pump"></i> سولار:</span> <span class="field-value">${Number(fuelCost).toLocaleString('en-US')} ج.م</span></div>
+        </div>
+        
+        <!-- ====== الضريبة والإجمالي ====== -->
+        <div class="tax-total-row">
+            <div class="tax-section">
+                <span class="label"><i class="fas fa-percent"></i> VAT:</span>
+                <span>${taxRate}%</span>
+                <span>قيمة الضريبة: <span class="tax-result">${taxAmount} ج.م</span></span>
+                <span>الإجمالي شامل الضريبة: <span class="tax-result">${totalWithTax} ج.م</span></span>
+                ${taxRate == 0 ? '<span class="tax-note">💰 المبلغ الكلي لا يشمل أي ضرائب</span>' : ''}
+            </div>
+            <div class="total-summary">
+                <i class="fas fa-coins"></i> ${totalDisplay.replace(/<[^>]*>/g, '').trim()}
+            </div>
+        </div>
+        
+        <!-- ====== الملاحظات ====== -->
+        ${notesData && notesData.length > 0 ? `
+        <div class="note-section">
+            <h3><i class="fas fa-file-contract"></i> ملاحظات وشروط</h3>
+            ${notesData.map(note => `
+                <div class="note-item">
+                    <i class="fas fa-circle"></i>
+                    <span>${note}</span>
+                </div>
+            `).join('')}
+        </div>
+        ` : ''}
+        
+        <!-- ====== التوقيعات ====== -->
+        <div class="signature-area">
+            <div class="signature-box">
+                <div class="sig-header">
+                    <i class="fas fa-user-tie"></i>
+                    <h4>توقيع الموظف</h4>
+                </div>
+                <div class="sig-preview">
+                    ${sigEmployee ? `<img src="${sigEmployee}" alt="توقيع الموظف" />` : '<span class="sig-empty">لا يوجد توقيع</span>'}
+                </div>
+            </div>
+            <div class="signature-box">
+                <div class="sig-header">
+                    <i class="fas fa-user-check"></i>
+                    <h4>توقيع العميل</h4>
+                </div>
+                <div class="sig-preview">
+                    ${sigClient ? `<img src="${sigClient}" alt="توقيع العميل" />` : '<span class="sig-empty">لا يوجد توقيع</span>'}
+                </div>
+            </div>
+        </div>
+        
+        <!-- ====== الفوتر ====== -->
+        <div class="pdf-footer">
+            تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
+        </div>
+        
+    </div>
+</body>
+</html>
+    `;
     
-    // إضافة تذييل
-    const footer = document.createElement('div');
-    footer.className = 'pdf-footer';
-    const today = new Date().toLocaleDateString('ar-EG');
-    footer.innerHTML = `تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${today}`;
-    clone.appendChild(footer);
-    
-    // إنشاء عنصر مؤقت للتصدير
+    // ====== إنشاء عنصر مؤقت للتصدير ======
     const printContainer = document.createElement('div');
-    printContainer.style.cssText = 'padding: 8px; background: white; direction: rtl;';
-    printContainer.appendChild(clone);
+    printContainer.style.cssText = 'padding: 0; background: white; direction: rtl;';
+    printContainer.innerHTML = htmlContent;
     document.body.appendChild(printContainer);
     
-    // إعدادات التصدير - استخدام Landscape للجداول الكبيرة
+    // ====== إعدادات التصدير ======
     const opt = {
         margin: [6, 8, 6, 8],
-        filename: `Quotation_${document.getElementById('quotationNumber')?.value || 'unknown'}.pdf`,
+        filename: `Quotation_${quotationNumber}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
             scale: 2, 
             useCORS: true,
             letterRendering: true,
             scrollY: 0,
-            windowHeight: clone.scrollHeight,
-            width: clone.scrollWidth
+            windowHeight: printContainer.scrollHeight
         },
         jsPDF: { 
             unit: 'mm', 

@@ -6,12 +6,9 @@ function initDesignLicense() {
     const features = licenseManager.getFeatures();
     const info = licenseManager.getLicenseInfo();
     
-    // إذا كانت النسخة المجانية، نحد من التخصيص
     if (!features.canFullDesign) {
-        // تعطيل بعض أدوات التخصيص
         const colorItems = document.querySelectorAll('.color-item');
         if (colorItems.length > 3) {
-            // إخفاء بعض خيارات الألوان
             for (let i = 3; i < colorItems.length; i++) {
                 colorItems[i].style.opacity = '0.3';
                 colorItems[i].style.pointerEvents = 'none';
@@ -23,7 +20,6 @@ function initDesignLicense() {
             }
         }
         
-        // إضافة رسالة الترقية
         const designContainer = document.querySelector('.design-container');
         if (designContainer) {
             const upgradeMsg = document.createElement('div');
@@ -51,12 +47,9 @@ function initDesignLicense() {
 // ====== الألوان (محدود في المجانية) ======
 function changeColor(color) {
     const features = licenseManager.getFeatures();
-    // السماح فقط بتغيير 3 ألوان في النسخة المجانية
     if (!features.canFullDesign) {
-        // السماح بتغيير اللون الأساسي فقط
         const primaryEl = document.getElementById('primaryColor');
         if (document.activeElement === primaryEl || document.activeElement?.id === 'primaryColorText') {
-            // مسموح
         } else {
             showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
             licenseManager.showActivationPrompt();
@@ -299,7 +292,6 @@ function loadThemeSettings() {
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    // تهيئة الترخيص
     licenseManager.initialize();
     
     setTimeout(function() {

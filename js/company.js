@@ -7,12 +7,10 @@ function initCompanyLicense() {
     licenseManager.initialize();
     const features = licenseManager.getFeatures();
     
-    // إخفاء التوقيع الإلكتروني في النسخة المجانية
     if (!features.canSignatures) {
         const signatureSection = document.querySelector('.signature-area');
         if (signatureSection) {
             signatureSection.style.display = 'none';
-            // عرض رسالة بديلة
             const container = document.querySelector('.section-card:last-child');
             if (container) {
                 const message = document.createElement('div');
@@ -210,7 +208,6 @@ function restoreSignatures() {
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    // تهيئة الترخيص
     licenseManager.initialize();
     
     setTimeout(function() {

@@ -5,7 +5,6 @@ function loadActivationData() {
     const info = licenseManager.getLicenseInfo();
     if (!info) return;
     
-    // تحديث حالة الترخيص
     const statusTitle = document.getElementById('statusTitle');
     const statusDays = document.getElementById('statusDays');
     const statusBarFill = document.getElementById('statusBarFill');
@@ -29,7 +28,6 @@ function loadActivationData() {
         statusIcon.innerHTML = '<i class="fas fa-gift" style="color: var(--primary);"></i>';
     }
     
-    // تحديث الميزات
     updateFeatures(info);
 }
 
@@ -37,7 +35,6 @@ function loadActivationData() {
 function updateFeatures(info) {
     const features = info.features;
     
-    // تحديث قائمة الميزات المجانية
     const freeItems = document.querySelectorAll('#freeFeatures li');
     const freeIcons = [
         features.maxItems >= 3,
@@ -61,7 +58,6 @@ function updateFeatures(info) {
         }
     });
     
-    // تحديث قائمة الميزات المدفوعة
     const premiumItems = document.querySelectorAll('#premiumFeatures li');
     const premiumIcons = [
         features.maxItems === Infinity,
@@ -101,7 +97,6 @@ function activateLicense() {
     messageEl.innerHTML = `<span style="color: ${result.success ? 'var(--success)' : 'var(--danger)'};">${result.message}</span>`;
     
     if (result.success) {
-        // تحديث الواجهة
         setTimeout(() => {
             loadActivationData();
             showToast('🎉 تم تفعيل النسخة المدفوعة بنجاح!', 'success');
@@ -119,20 +114,15 @@ function selectPlan(plan) {
     
     if (confirm(`📢 ${message}\n\nملاحظة: هذه واجهة توضيحية، سيتم ربطها ببوابة الدفع الفعلية لاحقاً.`)) {
         showToast('🔧 جارٍ التوجيه إلى بوابة الدفع...', 'success');
-        // في التطبيق الفعلي، سيتم توجيه المستخدم إلى بوابة الدفع
-        // window.location.href = 'payment.html?plan=' + plan;
     }
 }
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    // تهيئة مدير الترخيص
     licenseManager.initialize();
     
-    // تحميل البيانات
     setTimeout(loadActivationData, 100);
     
-    // الاستماع لتغييرات الترخيص
     licenseManager.addListener(function(info) {
         if (info) {
             loadActivationData();
