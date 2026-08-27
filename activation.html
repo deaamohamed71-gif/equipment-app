@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <base href="/equipment-app/" />
+    <title>تفعيل التطبيق - نظام عروض المعدات</title>
+    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/activation.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
+    
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1a6b8a" />
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">تم بنجاح</span>
+    </div>
+
+    <div id="header"></div>
+
+    <div class="dashboard">
+        <div class="activation-container">
+            <div class="activation-header">
+                <i class="fas fa-key"></i>
+                <h1>تفعيل التطبيق</h1>
+                <p>قم بترقية حسابك للاستفادة من جميع الميزات</p>
+            </div>
+
+            <!-- حالة الترخيص الحالية -->
+            <div class="status-card" id="statusCard">
+                <div class="status-icon" id="statusIcon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="status-info">
+                    <h3 id="statusTitle">النسخة المجانية</h3>
+                    <p id="statusDays">المتبقي: 90 يوماً</p>
+                    <div class="status-bar">
+                        <div class="status-bar-fill" id="statusBarFill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الميزات -->
+            <div class="features-grid">
+                <div class="feature-card free">
+                    <div class="feature-header">
+                        <i class="fas fa-gift"></i>
+                        <h3>الميزات المجانية</h3>
+                    </div>
+                    <ul class="feature-list" id="freeFeatures">
+                        <li><i class="fas fa-check"></i> 3 بنود في العرض</li>
+                        <li><i class="fas fa-check"></i> حفظ 5 عروض</li>
+                        <li><i class="fas fa-check"></i> 5 عملاء كحد أقصى</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF مع علامة مائية</li>
+                        <li><i class="fas fa-times"></i> التقارير والإحصائيات</li>
+                        <li><i class="fas fa-times"></i> التوقيع الإلكتروني</li>
+                        <li><i class="fas fa-times"></i> تخصيص كامل</li>
+                        <li><i class="fas fa-times"></i> تصدير Excel</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card premium">
+                    <div class="premium-badge">مميز</div>
+                    <div class="feature-header">
+                        <i class="fas fa-star"></i>
+                        <h3>النسخة المدفوعة</h3>
+                    </div>
+                    <ul class="feature-list" id="premiumFeatures">
+                        <li><i class="fas fa-check"></i> بنود غير محدودة</li>
+                        <li><i class="fas fa-check"></i> عروض غير محدودة</li>
+                        <li><i class="fas fa-check"></i> عملاء غير محدودين</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF بدون علامة مائية</li>
+                        <li><i class="fas fa-check"></i> التقارير والإحصائيات</li>
+                        <li><i class="fas fa-check"></i> التوقيع الإلكتروني</li>
+                        <li><i class="fas fa-check"></i> تخصيص كامل</li>
+                        <li><i class="fas fa-check"></i> تصدير Excel</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- خطط الاشتراك -->
+            <div class="plans-section">
+                <h2><i class="fas fa-rocket"></i> اختر الخطة المناسبة</h2>
+                <div class="plans-grid">
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <i class="fas fa-calendar-alt"></i>
+                            <h3>شهري</h3>
+                            <div class="plan-price">99 <span>ج.م</span></div>
+                            <p>شحن تلقائي</p>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> جميع الميزات المدفوعة</li>
+                            <li><i class="fas fa-check"></i> دعم فني</li>
+                            <li><i class="fas fa-check"></i> تحديثات مستمرة</li>
+                        </ul>
+                        <button class="btn btn-gold" onclick="selectPlan('monthly')">
+                            <i class="fas fa-shopping-cart"></i> اشتراك شهري
+                        </button>
+                    </div>
+
+                    <div class="plan-card popular">
+                        <div class="popular-badge">الأكثر طلباً</div>
+                        <div class="plan-header">
+                            <i class="fas fa-calendar-check"></i>
+                            <h3>سنوي</h3>
+                            <div class="plan-price">999 <span>ج.م</span></div>
+                            <p>وفر 15%</p>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> جميع الميزات المدفوعة</li>
+                            <li><i class="fas fa-check"></i> دعم فني مميز</li>
+                            <li><i class="fas fa-check"></i> تحديثات مستمرة</li>
+                            <li><i class="fas fa-check"></i> خصم 15%</li>
+                        </ul>
+                        <button class="btn btn-gold" onclick="selectPlan('yearly')">
+                            <i class="fas fa-shopping-cart"></i> اشتراك سنوي
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إدخال مفتاح التفعيل -->
+            <div class="activation-form">
+                <h3><i class="fas fa-key"></i> لديك مفتاح تفعيل؟</h3>
+                <div class="activation-input">
+                    <input type="text" id="licenseKeyInput" placeholder="أدخل مفتاح التفعيل هنا" />
+                    <button class="btn btn-success" onclick="activateLicense()">
+                        <i class="fas fa-check"></i> تفعيل
+                    </button>
+                </div>
+                <div id="activationMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/main.js"></script>
+    <script src="js/license.js"></script>
+    <script src="js/activation.js"></script>
+</body>
+</html>

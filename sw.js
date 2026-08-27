@@ -1,10 +1,11 @@
-const CACHE_NAME = 'equipment-quotation-v7';
+const CACHE_NAME = 'equipment-quotation-v8';
 const ASSETS_TO_CACHE = [
   'index.html',
   'quotation.html',
   'company.html',
   'design.html',
   'reports.html',
+  'activation.html',
   'manifest.json',
   'css/main.css',
   'css/index.css',
@@ -12,12 +13,15 @@ const ASSETS_TO_CACHE = [
   'css/company.css',
   'css/design.css',
   'css/reports.css',
+  'css/activation.css',
   'js/main.js',
   'js/index.js',
   'js/quotation.js',
   'js/company.js',
   'js/design.js',
-  'js/reports.js'
+  'js/reports.js',
+  'js/activation.js',
+  'js/license.js'
 ];
 
 const EXTERNAL_ASSETS = [
