@@ -1,7 +1,69 @@
-// js/design.js - كود صفحة التصميم
+// js/design.js - كود صفحة التصميم مع نظام الترخيص
 
-// ====== الألوان ======
+// ====== تهيئة الترخيص ======
+function initDesignLicense() {
+    licenseManager.initialize();
+    const features = licenseManager.getFeatures();
+    const info = licenseManager.getLicenseInfo();
+    
+    // إذا كانت النسخة المجانية، نحد من التخصيص
+    if (!features.canFullDesign) {
+        // تعطيل بعض أدوات التخصيص
+        const colorItems = document.querySelectorAll('.color-item');
+        if (colorItems.length > 3) {
+            // إخفاء بعض خيارات الألوان
+            for (let i = 3; i < colorItems.length; i++) {
+                colorItems[i].style.opacity = '0.3';
+                colorItems[i].style.pointerEvents = 'none';
+                const lockIcon = document.createElement('i');
+                lockIcon.className = 'fas fa-lock';
+                lockIcon.style.cssText = 'color: var(--gold); font-size: 0.7rem; margin-right: 4px;';
+                lockIcon.title = 'متاح فقط في النسخة المدفوعة';
+                colorItems[i].querySelector('label')?.appendChild(lockIcon);
+            }
+        }
+        
+        // إضافة رسالة الترقية
+        const designContainer = document.querySelector('.design-container');
+        if (designContainer) {
+            const upgradeMsg = document.createElement('div');
+            upgradeMsg.style.cssText = `
+                background: rgba(201, 168, 76, 0.05);
+                border: 2px dashed var(--gold);
+                border-radius: 16px;
+                padding: 1.5rem;
+                text-align: center;
+                margin-bottom: 1.5rem;
+            `;
+            upgradeMsg.innerHTML = `
+                <i class="fas fa-palette" style="font-size: 2rem; color: var(--gold);"></i>
+                <h3 style="color: var(--text); font-family: 'Cairo', sans-serif;">🔒 التخصيص الكامل متاح فقط في النسخة المدفوعة</h3>
+                <p style="color: var(--text-light);">قم بترقية حسابك للاستفادة من جميع خيارات التصميم</p>
+                <button class="btn btn-gold" onclick="window.location.href='activation.html'" style="margin-top: 0.5rem;">
+                    <i class="fas fa-rocket"></i> ترقية الآن
+                </button>
+            `;
+            designContainer.prepend(upgradeMsg);
+        }
+    }
+}
+
+// ====== الألوان (محدود في المجانية) ======
 function changeColor(color) {
+    const features = licenseManager.getFeatures();
+    // السماح فقط بتغيير 3 ألوان في النسخة المجانية
+    if (!features.canFullDesign) {
+        // السماح بتغيير اللون الأساسي فقط
+        const primaryEl = document.getElementById('primaryColor');
+        if (document.activeElement === primaryEl || document.activeElement?.id === 'primaryColorText') {
+            // مسموح
+        } else {
+            showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
+    }
+    
     document.documentElement.style.setProperty('--primary', color);
     document.documentElement.style.setProperty('--primary-light', color + '20');
     document.documentElement.style.setProperty('--primary-dark', color);
@@ -10,6 +72,13 @@ function changeColor(color) {
 }
 
 function changeGold(color) {
+    const features = licenseManager.getFeatures();
+    if (!features.canFullDesign) {
+        showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     document.documentElement.style.setProperty('--gold', color);
     document.documentElement.style.setProperty('--gold-light', color + '30');
     localStorage.setItem('goldColor', color);
@@ -17,6 +86,13 @@ function changeGold(color) {
 }
 
 function changeBgColor(color) {
+    const features = licenseManager.getFeatures();
+    if (!features.canFullDesign) {
+        showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     document.documentElement.style.setProperty('--body-bg', color);
     localStorage.setItem('bgColor', color);
     if (!document.body.classList.contains('dark-mode')) {
@@ -26,18 +102,39 @@ function changeBgColor(color) {
 }
 
 function changeTextColor(color) {
+    const features = licenseManager.getFeatures();
+    if (!features.canFullDesign) {
+        showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     document.documentElement.style.setProperty('--text', color);
     localStorage.setItem('textColor', color);
     document.getElementById('textColorText').value = color;
 }
 
 function changeIconColor(color) {
+    const features = licenseManager.getFeatures();
+    if (!features.canFullDesign) {
+        showToast('⚠️ تخصيص الألوان الكامل متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     document.documentElement.style.setProperty('--icon-color', color);
     localStorage.setItem('iconColorPicker', color);
     document.getElementById('iconColorText').value = color;
 }
 
 function resetDesignColors() {
+    const features = licenseManager.getFeatures();
+    if (!features.canFullDesign) {
+        showToast('⚠️ إعادة تعيين الألوان متاحة فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     const defaultColors = {
         primary: '#1a6b8a',
         gold: '#c9a84c',
@@ -61,7 +158,7 @@ function resetDesignColors() {
     showToast('✅ تم إعادة تعيين الألوان', 'success');
 }
 
-// ====== تحميل الألوان في صفحة التصميم ======
+// ====== تحميل الألوان ======
 function loadDesignColors() {
     const primary = localStorage.getItem('primaryColor');
     const gold = localStorage.getItem('goldColor');
@@ -142,7 +239,6 @@ function applyIconToSelected() {
     const icon = document.querySelector('input[name="iconSelect"]:checked')?.value;
     if (!icon) { showToast('⚠️ الرجاء اختيار أيقونة', 'error'); return; }
     
-    // نحتاج إلى تمرير الأيقونة إلى صفحة العرض
     localStorage.setItem('selectedIcon', icon);
     showToast('✅ تم حفظ الأيقونة المختارة', 'success');
 }
@@ -179,7 +275,6 @@ function setTheme(theme) {
         document.body.classList.remove('dark-mode');
         localStorage.setItem('themeModeV2', 'light');
     } else {
-        // Auto - بناءً على تفضيلات النظام
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (prefersDark) {
             document.body.classList.add('dark-mode');
@@ -204,7 +299,11 @@ function loadThemeSettings() {
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
+    // تهيئة الترخيص
+    licenseManager.initialize();
+    
     setTimeout(function() {
+        initDesignLicense();
         loadDesignColors();
         loadFontSettings();
         loadIconSettings();

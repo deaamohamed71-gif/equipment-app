@@ -1,6 +1,41 @@
-// js/company.js - كود صفحة الشركة
+// js/company.js - كود صفحة الشركة مع نظام الترخيص
 
-const MAX_SIGNATURE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_SIGNATURE_SIZE = 2 * 1024 * 1024;
+
+// ====== تهيئة الترخيص ======
+function initCompanyLicense() {
+    licenseManager.initialize();
+    const features = licenseManager.getFeatures();
+    
+    // إخفاء التوقيع الإلكتروني في النسخة المجانية
+    if (!features.canSignatures) {
+        const signatureSection = document.querySelector('.signature-area');
+        if (signatureSection) {
+            signatureSection.style.display = 'none';
+            // عرض رسالة بديلة
+            const container = document.querySelector('.section-card:last-child');
+            if (container) {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    text-align: center;
+                    padding: 2rem;
+                    background: rgba(201, 168, 76, 0.05);
+                    border-radius: 16px;
+                    border: 2px dashed var(--gold);
+                `;
+                message.innerHTML = `
+                    <i class="fas fa-lock" style="font-size: 2rem; color: var(--gold);"></i>
+                    <h3 style="color: var(--text); font-family: 'Cairo', sans-serif;">🔒 التوقيع الإلكتروني متاح فقط في النسخة المدفوعة</h3>
+                    <p style="color: var(--text-light);">قم بترقية حسابك للاستفادة من هذه الميزة</p>
+                    <button class="btn btn-gold" onclick="window.location.href='activation.html'" style="margin-top: 0.5rem;">
+                        <i class="fas fa-rocket"></i> ترقية الآن
+                    </button>
+                `;
+                container.appendChild(message);
+            }
+        }
+    }
+}
 
 // ====== الشعار ======
 function uploadLogo(event) {
@@ -22,7 +57,6 @@ function uploadLogo(event) {
     
     const reader = new FileReader();
     reader.onload = function(ev) {
-        // ضغط الصورة
         const img = new Image();
         img.onload = function() {
             const MAX_SIZE = 200;
@@ -72,7 +106,6 @@ function loadCompanyData() {
         if (val !== null && el) el.value = val;
     });
     
-    // تحميل الشعار
     const logo = localStorage.getItem('companyLogo');
     const preview = document.getElementById('logoPreview');
     const placeholder = document.getElementById('logoPlaceholder');
@@ -97,8 +130,16 @@ function autoSaveCompany() {
     });
 }
 
-// ====== التوقيع الإلكتروني ======
+// ====== التوقيع الإلكتروني (مدفوع) ======
 function uploadSignature(type, input) {
+    const features = licenseManager.getFeatures();
+    if (!features.canSignatures) {
+        showToast('⚠️ التوقيع الإلكتروني متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        input.value = '';
+        return;
+    }
+    
     const file = input.files[0];
     if (!file) return;
     
@@ -150,6 +191,9 @@ function clearSignature(type) {
 }
 
 function restoreSignatures() {
+    const features = licenseManager.getFeatures();
+    if (!features.canSignatures) return;
+    
     ['sigEmployee', 'sigClient'].forEach(type => {
         const saved = localStorage.getItem('sig_' + type);
         if (saved && saved.startsWith('data:image')) {
@@ -166,7 +210,11 @@ function restoreSignatures() {
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
+    // تهيئة الترخيص
+    licenseManager.initialize();
+    
     setTimeout(function() {
+        initCompanyLicense();
         loadCompanyData();
         restoreSignatures();
     }, 100);

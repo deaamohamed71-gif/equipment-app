@@ -1,17 +1,57 @@
 // js/index.js - كود الصفحة الرئيسية
 
+// ====== تحميل بيانات الترخيص ======
+function loadLicenseStatus() {
+    const info = licenseManager.getLicenseInfo();
+    const statusEl = document.getElementById('licenseStatusText');
+    
+    if (!statusEl) return;
+    
+    if (info) {
+        if (info.isPremium) {
+            statusEl.innerHTML = `
+                <i class="fas fa-crown" style="color: var(--gold);"></i>
+                🎉 أنت مشترك في <strong>النسخة المدفوعة</strong> - جميع الميزات متاحة!
+            `;
+        } else {
+            const daysLeft = info.daysLeft;
+            let statusColor = 'var(--success)';
+            let statusText = 'نشطة';
+            
+            if (daysLeft < 10) {
+                statusColor = 'var(--danger)';
+                statusText = 'تنتهي قريباً!';
+            } else if (daysLeft < 30) {
+                statusColor = 'var(--warning)';
+                statusText = 'شبه منتهية';
+            }
+            
+            statusEl.innerHTML = `
+                <i class="fas fa-gift" style="color: var(--primary);"></i>
+                📋 النسخة <strong>المجانية</strong> - متبقي <strong style="color: ${statusColor};">${daysLeft} يوماً</strong> (${statusText})
+                <span style="font-size:0.75rem; opacity:0.6; margin-right:8px;">
+                    | الحد الأقصى: 3 بنود، 5 عروض، 5 عملاء
+                </span>
+            `;
+        }
+    } else {
+        statusEl.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+            ⚠️ لم يتم العثور على ترخيص. الرجاء تفعيل التطبيق.
+        `;
+    }
+}
+
 // ====== تحميل البيانات ======
 function loadDashboardData() {
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
     const equipmentData = JSON.parse(localStorage.getItem('equipDataV12') || '[]');
     
-    // تحديث الإحصائيات
     document.getElementById('totalOffers').textContent = offers.length;
     document.getElementById('totalClients').textContent = clients.length;
     document.getElementById('totalEquipment').textContent = equipmentData.length || 0;
     
-    // حساب الإيرادات الإجمالية
     let totalRevenue = 0;
     offers.forEach(offer => {
         if (offer.data && Array.isArray(offer.data)) {
@@ -24,11 +64,9 @@ function loadDashboardData() {
     });
     document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('en-US') + ' ج.م';
     
-    // عرض أحدث العروض
     renderRecentOffers(offers);
 }
 
-// ====== عرض أحدث العروض ======
 function renderRecentOffers(offers) {
     const tbody = document.getElementById('recentOffersList');
     if (!tbody) return;
@@ -44,10 +82,8 @@ function renderRecentOffers(offers) {
         return;
     }
     
-    // عرض آخر 5 عروض
     const recent = offers.slice(-5).reverse();
     tbody.innerHTML = recent.map(offer => {
-        // حساب الإجمالي
         let total = 0;
         if (offer.data && Array.isArray(offer.data)) {
             offer.data.forEach(row => {
@@ -64,7 +100,7 @@ function renderRecentOffers(offers) {
             <tr onclick="location.href='quotation.html'">
                 <td><strong>${offer.name || 'عرض غير مسمى'}</strong></td>
                 <td>${offer.targetCompany || 'غير محدد'}</td>
-                <td>${offer.createdAt || new Date().toLocaleDateString('ar-EG')}</td>
+                <td>${offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG')}</td>
                 <td>${total.toLocaleString('en-US')} ج.م</td>
                 <td><span class="status-badge ${statusClass}">${status}</span></td>
             </tr>
@@ -72,11 +108,8 @@ function renderRecentOffers(offers) {
     }).join('');
 }
 
-// ====== تحديد حالة العرض ======
 function getOfferStatus(offer) {
     if (!offer) return 'قيد الانتظار';
-    
-    // التحقق من تاريخ الصلاحية
     const expiryDate = offer.expiryDate || offer.validityDate;
     if (expiryDate) {
         const expiry = new Date(expiryDate);
@@ -85,12 +118,23 @@ function getOfferStatus(offer) {
         if (now < new Date(expiry.getTime() - 7 * 24 * 60 * 60 * 1000)) return 'نشط';
         return 'قيد الانتظار';
     }
-    
     return 'نشط';
 }
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    // تأخير التحميل قليلاً لضمان تحميل الهيدر
-    setTimeout(loadDashboardData, 100);
+    // تهيئة الترخيص
+    licenseManager.initialize();
+    
+    // الاستماع لتغييرات الترخيص
+    licenseManager.addListener(function(info) {
+        if (info) {
+            loadLicenseStatus();
+        }
+    });
+    
+    setTimeout(function() {
+        loadLicenseStatus();
+        loadDashboardData();
+    }, 150);
 });

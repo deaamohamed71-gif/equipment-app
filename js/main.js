@@ -1,10 +1,9 @@
-// js/main.js - الكود الأساسي المشترك
+// js/main.js - الكود الأساسي المشترك مع نظام الترخيص
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     if (!toast) {
-        // إنشاء التوست إذا لم يكن موجوداً
         const newToast = document.createElement('div');
         newToast.id = 'toast';
         newToast.className = 'toast';
@@ -30,7 +29,6 @@ function toggleMode() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('themeModeV2', isDark ? 'dark' : 'light');
     
-    // تحديث أيقونة الوضع في كل الصفحات
     document.querySelectorAll('.mode-toggle').forEach(btn => {
         btn.innerHTML = isDark ? 
             '<i class="fas fa-sun"></i> فاتح' : 
@@ -77,11 +75,11 @@ function loadColors() {
 
 // ====== تحميل الهيدر والفوتر ======
 function loadHeaderFooter() {
-    // تحميل الهيدر
     const headerPlaceholder = document.getElementById('header');
     if (headerPlaceholder) {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const isDark = document.body.classList.contains('dark-mode');
+        const isActivationPage = currentPage === 'activation.html';
         
         headerPlaceholder.innerHTML = `
             <div class="header-logo">
@@ -104,6 +102,11 @@ function loadHeaderFooter() {
                 <a href="design.html" ${currentPage === 'design.html' ? 'class="active"' : ''}>
                     <i class="fas fa-palette"></i> التصميم
                 </a>
+                ${!isActivationPage ? `
+                    <a href="activation.html" class="btn btn-gold" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-key"></i> التفعيل
+                    </a>
+                ` : ''}
                 <button class="btn mode-toggle" onclick="toggleMode()">
                     <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i> 
                     ${isDark ? 'فاتح' : 'غامق'}
@@ -111,7 +114,6 @@ function loadHeaderFooter() {
             </nav>
         `;
         
-        // تحميل الشعار
         const logo = localStorage.getItem('companyLogo');
         if (logo && logo.startsWith('data:image')) {
             const img = document.getElementById('headerLogo');
@@ -120,17 +122,36 @@ function loadHeaderFooter() {
         }
     }
     
-    // تحميل الفوتر
     const footerPlaceholder = document.getElementById('footer');
     if (footerPlaceholder) {
+        const features = licenseManager ? licenseManager.getFeatures() : { isPremium: false };
+        const status = features.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        
         footerPlaceholder.innerHTML = `
-            <p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة</p>
+            <p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status}</p>
         `;
     }
 }
 
 // ====== التهيئة العامة ======
 function initApp() {
+    // تهيئة مدير الترخيص
+    if (typeof licenseManager !== 'undefined') {
+        licenseManager.initialize();
+        
+        // الاستماع لتغييرات الترخيص
+        licenseManager.addListener(function(info) {
+            if (info) {
+                // تحديث الفوتر
+                const footer = document.getElementById('footer');
+                if (footer) {
+                    const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+                    footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status}</p>`;
+                }
+            }
+        });
+    }
+    
     loadMode();
     loadColors();
     loadHeaderFooter();

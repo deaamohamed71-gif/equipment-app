@@ -1,20 +1,16 @@
-// js/quotation.js - كود صفحة العرض
+// js/quotation.js - كود صفحة العرض مع نظام الترخيص
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
     { name: 'رافعة مقصية', unit: 'متر', value: 18, priceType: 'شهري', duration: 'شهور', count: 1, unitPrice: 60000 },
     { name: 'ونش أحمال', unit: 'طن', value: 35, priceType: 'يومي', duration: 'أيام', count: 22, unitPrice: 2500 },
-    { name: 'فورك لفت', unit: 'متر', value: 12, priceType: 'يومي', duration: 'ساعات', count: 80, unitPrice: 150 },
-    { name: 'مانليفت', unit: 'طن', value: 20, priceType: 'شهري', duration: 'شهور', count: 1, unitPrice: 54000 }
+    { name: 'فورك لفت', unit: 'متر', value: 12, priceType: 'يومي', duration: 'ساعات', count: 80, unitPrice: 150 }
 ];
 
 const defaultNotes = [
     '1. أسعار الإيجار أعلاه لا تشمل قيمة ضريبة القيمة المضافة (VAT).',
     '2. يتحمل المستأجر تكاليف الإعاشة والإقامة لطاقم التشغيل طوال فترة التعاقد.',
-    '3. يتحمل المستأجر المسؤولية الكاملة عن تأمين المعدات ضد السرقة أو التلف أو الحريق.',
-    '4. يتم احتساب ساعات أو أيام العمل الفعلية طبقاً لكشوف التشغيل المعتمدة.',
-    '5. الوقود وزيوت التشغيل اليومية على حساب المستأجر.',
-    '6. اليومية تحسب على أساس 8 ساعات عمل، والشهرية على أساس 26 يوم عمل (208 ساعة).'
+    '3. يتحمل المستأجر المسؤولية الكاملة عن تأمين المعدات ضد السرقة أو التلف أو الحريق.'
 ];
 
 const iconMap = {
@@ -28,6 +24,35 @@ const defaultIcon = 'fa-arrow-up';
 let data = [];
 let notes = [];
 let selectedRowIndex = -1;
+let isPremium = false;
+
+// ====== تهيئة الترخيص ======
+function initLicense() {
+    licenseManager.initialize();
+    const info = licenseManager.getLicenseInfo();
+    isPremium = info ? info.isPremium : false;
+    
+    // تحديث الواجهة بناءً على الترخيص
+    updateUIForLicense();
+}
+
+// ====== تحديث الواجهة حسب الترخيص ======
+function updateUIForLicense() {
+    const features = licenseManager.getFeatures();
+    
+    // إذا كانت النسخة المجانية، نعرض حد البنود
+    if (!features.isPremium) {
+        const maxItems = features.maxItems;
+        const currentCount = data.length;
+        
+        // إذا تجاوزنا الحد، نحذف البنود الزائدة
+        if (currentCount > maxItems) {
+            data = data.slice(0, maxItems);
+            showToast(`⚠️ النسخة المجانية تسمح بـ ${maxItems} بنود فقط. تم تقليص العرض.`, 'error');
+            renderTable();
+        }
+    }
+}
 
 // ====== العمليات الحسابية ======
 function getOperationTotal(row) {
@@ -57,16 +82,24 @@ function renderTable() {
     
     const fragment = document.createDocumentFragment();
     const iconColor = document.getElementById('iconColorPicker')?.value || '#888';
+    const features = licenseManager.getFeatures();
+    const maxItems = features.maxItems;
+    const isPremium = features.isPremium;
     
     data.forEach((row, index) => {
         const tr = document.createElement('tr');
         const icon = row.icon || getIconForName(row.name) || defaultIcon;
         const opTotal = getOperationTotal(row);
         
+        // عرض حد البنود في واجهة المستخدم
+        const isLastItem = index === data.length - 1;
+        const showLimitWarning = !isPremium && index >= maxItems - 1;
+        
         tr.innerHTML = `
             <td class="equip-name" onclick="selectRow(${index})" style="cursor:pointer;">
                 <i class="fas ${icon}" style="color:${iconColor}; font-size:1rem;"></i> 
                 <input type="text" style="width:110px; border-radius:20px; padding:0.15rem 0.3rem; text-align:center; border:1px solid var(--border); background:transparent; font-size:0.8rem;" value="${row.name}" onchange="updateField(${index}, 'name', this.value)" />
+                ${!isPremium && showLimitWarning ? '<i class="fas fa-lock" style="color:var(--gold); font-size:0.7rem;" title="الحد الأقصى للبنود في النسخة المجانية"></i>' : ''}
             </td>
             <td>
                 <select onchange="updateField(${index}, 'unit', this.value)" style="font-size:0.8rem;">
@@ -124,8 +157,30 @@ function deleteRow(index) {
     renderTable();
 }
 
+// ====== إضافة صف مع التحقق من الترخيص ======
 function addRow() {
-    data.push({ name: 'معدة جديدة', unit: 'متر', value: 0, priceType: 'يومي', duration: 'أيام', count: 1, unitPrice: 0, icon: defaultIcon });
+    const features = licenseManager.getFeatures();
+    const currentCount = data.length;
+    const maxItems = features.maxItems;
+    
+    // التحقق من الحد الأقصى للبنود
+    if (currentCount >= maxItems) {
+        const msg = `⚠️ النسخة المجانية تسمح بـ ${maxItems} بنود فقط. قم بالترقية للاستفادة من المزيد.`;
+        showToast(msg, 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
+    data.push({ 
+        name: 'معدة جديدة', 
+        unit: 'متر', 
+        value: 0, 
+        priceType: 'يومي', 
+        duration: 'أيام', 
+        count: 1, 
+        unitPrice: 0, 
+        icon: defaultIcon 
+    });
     renderTable();
     showToast('📝 تم إضافة صف جديد', 'success');
 }
@@ -245,13 +300,24 @@ function updateValidityStatus() {
 
 // ====== العروض المحفوظة ======
 function saveCurrentOffer() {
-    const name = document.getElementById('quotationNumber')?.value || 'عرض غير مسمى';
+    const features = licenseManager.getFeatures();
+    const maxOffers = features.maxOffers;
     let savedOffers = [];
+    
     try {
         savedOffers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     } catch { savedOffers = []; }
     
+    // التحقق من الحد الأقصى للعروض
+    if (!features.isPremium && savedOffers.length >= maxOffers) {
+        showToast(`⚠️ النسخة المجانية تسمح بـ ${maxOffers} عروض فقط. قم بالترقية للاستفادة من المزيد.`, 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
+    const name = document.getElementById('quotationNumber')?.value || 'عرض غير مسمى';
     const cleanData = data.filter(row => row.name && row.name.trim().length > 0);
+    
     if (cleanData.length === 0) {
         showToast('⚠️ لا توجد بيانات صالحة للحفظ', 'error');
         return;
@@ -346,11 +412,24 @@ function loadClientList() {
 }
 
 function addClient() {
+    const features = licenseManager.getFeatures();
+    const maxClients = features.maxClients;
+    let clients = getClients();
+    
+    // التحقق من الحد الأقصى للعملاء
+    if (!features.isPremium && clients.length >= maxClients) {
+        showToast(`⚠️ النسخة المجانية تسمح بـ ${maxClients} عملاء فقط. قم بالترقية للاستفادة من المزيد.`, 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     const name = document.getElementById('newClientName')?.value.trim();
     const phone = document.getElementById('newClientPhone')?.value.trim();
     const email = document.getElementById('newClientEmail')?.value.trim();
+    
     if (!name) { showToast('⚠️ الرجاء إدخال اسم العميل', 'error'); return; }
-    let clients = getClients().filter(c => c.name !== name);
+    
+    clients = clients.filter(c => c.name !== name);
     clients.push({ name, phone, email });
     localStorage.setItem('savedClients', JSON.stringify(clients));
     loadClientList();
@@ -403,13 +482,43 @@ function removeClient(name) {
 
 // ====== تصدير ======
 function savePDF() {
+    const features = licenseManager.getFeatures();
+    
+    // التحقق من صلاحية التصدير
+    if (!features.canExportPDF) {
+        showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     const element = document.querySelector('.quotation-container');
     if (!element) return;
-    html2pdf().from(element).save('Quotation.pdf');
+    
+    // إضافة علامة مائية للنسخة المجانية
+    if (features.showWatermark) {
+        const watermark = document.createElement('div');
+        watermark.style.cssText = 'position:fixed;bottom:50%;left:50%;transform:translate(-50%,50%)rotate(-30deg);font-size:60px;color:rgba(0,0,0,0.05);font-weight:bold;pointer-events:none;z-index:9999;';
+        watermark.textContent = 'نسخة تجريبية';
+        document.body.appendChild(watermark);
+    }
+    
+    html2pdf().from(element).save('Quotation.pdf').then(() => {
+        // إزالة العلامة المائية بعد التصدير
+        document.querySelectorAll('.watermark').forEach(el => el.remove());
+    });
     showToast('📄 جاري تصدير الـ PDF', 'success');
 }
 
 function exportExcel() {
+    const features = licenseManager.getFeatures();
+    
+    // التحقق من صلاحية تصدير Excel
+    if (!features.canExportExcel) {
+        showToast('⚠️ تصدير Excel متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     let wb = XLSX.utils.book_new();
     let wsData = [["المعدة", "الوحدة", "القيمة", "نوع السعر", "المدة", "العدد", "سعر الوحدة", "الإجمالي"]];
     data.forEach(r => wsData.push([r.name, r.unit, r.value, r.priceType, r.duration, r.count, r.unitPrice, getOperationTotal(r)]));
@@ -443,6 +552,9 @@ function shareOptions() {
 
 // ====== التهيئة ======
 function loadQuotationData() {
+    // تهيئة الترخيص
+    initLicense();
+    
     // تحميل البيانات
     const saved = localStorage.getItem('equipDataV12');
     if (saved) {
@@ -485,6 +597,9 @@ function loadQuotationData() {
     const taxRate = localStorage.getItem('taxRate');
     const taxRateEl = document.getElementById('taxRate');
     if (taxRate && taxRateEl) taxRateEl.value = taxRate;
+    
+    // تحديث الواجهة حسب الترخيص
+    updateUIForLicense();
     
     // العرض
     renderTable();

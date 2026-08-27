@@ -1,14 +1,68 @@
-// js/reports.js - كود صفحة التقارير
+// js/reports.js - كود صفحة التقارير مع نظام الترخيص
 
 let offersChart = null;
 let clientsChart = null;
 
+// ====== تهيئة الترخيص ======
+function initReportsLicense() {
+    licenseManager.initialize();
+    const info = licenseManager.getLicenseInfo();
+    const features = licenseManager.getFeatures();
+    
+    // التحقق من صلاحية التقارير
+    if (!features.canReports) {
+        showPremiumRequiredMessage();
+    }
+}
+
+// ====== عرض رسالة الترقية ======
+function showPremiumRequiredMessage() {
+    const container = document.querySelector('.reports-container');
+    if (!container) return;
+    
+    // إضافة رسالة الترقية في بداية الصفحة
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'premium-required-message';
+    messageDiv.style.cssText = `
+        background: rgba(201, 168, 76, 0.1);
+        border: 2px solid var(--gold);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    `;
+    messageDiv.innerHTML = `
+        <i class="fas fa-lock" style="font-size: 3rem; color: var(--gold); margin-bottom: 0.5rem;"></i>
+        <h2 style="color: var(--text); font-family: 'Cairo', sans-serif;">🔒 هذه الميزة متاحة فقط في النسخة المدفوعة</h2>
+        <p style="color: var(--text-light); margin: 0.5rem 0;">قم بترقية حسابك للاستفادة من التقارير والإحصائيات المتقدمة</p>
+        <button class="btn btn-gold" onclick="window.location.href='activation.html'" style="margin-top: 1rem;">
+            <i class="fas fa-rocket"></i> ترقية الآن
+        </button>
+    `;
+    container.prepend(messageDiv);
+    
+    // إخفاء المحتوى الحالي
+    const sections = container.querySelectorAll('.section-card, .stats-grid, .charts-grid');
+    sections.forEach(el => {
+        el.style.opacity = '0.3';
+        el.style.pointerEvents = 'none';
+    });
+}
+
 // ====== تحميل البيانات ======
 function loadReportData() {
+    const features = licenseManager.getFeatures();
+    
+    // إذا لم تكن التقارير متاحة، نعرض رسالة
+    if (!features.canReports) {
+        showPremiumRequiredMessage();
+        return;
+    }
+    
+    // تحميل البيانات العادية
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
     
-    // تحميل العملاء في الفلتر
     const clientSelect = document.getElementById('reportClient');
     if (clientSelect) {
         clientSelect.innerHTML = '<option value="">الكل</option>';
@@ -20,7 +74,6 @@ function loadReportData() {
         });
     }
     
-    // تعيين التواريخ الافتراضية
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -33,17 +86,21 @@ function loadReportData() {
     generateReport();
 }
 
-// ====== توليد التقرير ======
+// ====== باقي دوال التقارير ======
 function generateReport() {
+    const features = licenseManager.getFeatures();
+    if (!features.canReports) {
+        showPremiumRequiredMessage();
+        return;
+    }
+    
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     const from = document.getElementById('reportFrom')?.value;
     const to = document.getElementById('reportTo')?.value;
     const client = document.getElementById('reportClient')?.value;
     const status = document.getElementById('reportStatus')?.value;
     
-    // فلترة العروض
     let filtered = offers.filter(offer => {
-        // فلتر التاريخ
         if (from || to) {
             const date = offer.createdAt || offer.expiryDate;
             if (date) {
@@ -52,9 +109,7 @@ function generateReport() {
                 if (to && d > new Date(to)) return false;
             }
         }
-        // فلتر العميل
         if (client && offer.targetCompany !== client) return false;
-        // فلتر الحالة
         if (status) {
             const offerStatus = getOfferStatus(offer);
             const statusMap = {
@@ -72,7 +127,6 @@ function generateReport() {
     updateCharts(filtered);
 }
 
-// ====== تحديث الإحصائيات ======
 function updateReportStats(offers) {
     let totalRevenue = 0;
     let activeOffers = 0;
@@ -96,7 +150,6 @@ function updateReportStats(offers) {
     document.getElementById('reportActiveOffers').textContent = activeOffers;
 }
 
-// ====== عرض جدول التقارير ======
 function renderReportTable(offers) {
     const tbody = document.getElementById('reportsTableBody');
     if (!tbody) return;
@@ -122,7 +175,7 @@ function renderReportTable(offers) {
                 }
             });
         }
-        tax = total * 0.14; // ضريبة 14%
+        tax = total * 0.14;
         
         const status = getOfferStatus(offer);
         const statusClass = status === 'نشط' ? 'active' : status === 'منتهي' ? 'expired' : 'pending';
@@ -146,7 +199,6 @@ function renderReportTable(offers) {
     }).join('');
 }
 
-// ====== حالة العرض ======
 function getOfferStatus(offer) {
     if (!offer) return 'قيد الانتظار';
     const expiryDate = offer.expiryDate || offer.validityDate;
@@ -160,7 +212,6 @@ function getOfferStatus(offer) {
     return 'نشط';
 }
 
-// ====== عرض العرض ======
 function viewOffer(name) {
     if (name) {
         localStorage.setItem('viewOfferName', name);
@@ -168,9 +219,7 @@ function viewOffer(name) {
     }
 }
 
-// ====== الرسوم البيانية ======
 function updateCharts(offers) {
-    // إحصائيات العروض حسب الشهر
     const monthlyData = {};
     offers.forEach(offer => {
         if (offer.createdAt) {
@@ -184,7 +233,6 @@ function updateCharts(offers) {
     const months = Object.keys(monthlyData).sort();
     const counts = months.map(m => monthlyData[m]);
     
-    // إحصائيات العملاء
     const clientData = {};
     offers.forEach(offer => {
         if (offer.targetCompany) {
@@ -195,7 +243,6 @@ function updateCharts(offers) {
     const clientLabels = Object.keys(clientData);
     const clientCounts = Object.values(clientData);
     
-    // تحديث رسم العروض
     const ctx1 = document.getElementById('offersChart')?.getContext('2d');
     if (ctx1) {
         if (offersChart) offersChart.destroy();
@@ -227,7 +274,6 @@ function updateCharts(offers) {
         });
     }
     
-    // تحديث رسم العملاء
     const ctx2 = document.getElementById('clientsChart')?.getContext('2d');
     if (ctx2) {
         if (clientsChart) clientsChart.destroy();
@@ -271,8 +317,14 @@ function updateChartType() {
     }
 }
 
-// ====== التصدير ======
 function exportReportPDF() {
+    const features = licenseManager.getFeatures();
+    if (!features.canReports) {
+        showToast('⚠️ التقارير متاحة فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     const element = document.querySelector('.reports-container');
     if (!element) return;
     html2pdf().from(element).save('Reports.pdf');
@@ -280,6 +332,13 @@ function exportReportPDF() {
 }
 
 function exportReportExcel() {
+    const features = licenseManager.getFeatures();
+    if (!features.canExportExcel) {
+        showToast('⚠️ تصدير Excel متاح فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
+    
     const rows = document.querySelectorAll('#reportsTableBody tr');
     const data = [['رقم العرض', 'العميل', 'التاريخ', 'الإجمالي', 'الضريبة', 'الإجمالي شامل الضريبة', 'الحالة']];
     rows.forEach(row => {
@@ -297,10 +356,22 @@ function exportReportExcel() {
 }
 
 function printReport() {
+    const features = licenseManager.getFeatures();
+    if (!features.canReports) {
+        showToast('⚠️ التقارير متاحة فقط في النسخة المدفوعة', 'error');
+        licenseManager.showActivationPrompt();
+        return;
+    }
     window.print();
 }
 
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(loadReportData, 100);
+    // تهيئة الترخيص
+    licenseManager.initialize();
+    
+    setTimeout(function() {
+        initReportsLicense();
+        loadReportData();
+    }, 100);
 });
