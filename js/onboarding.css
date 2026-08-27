@@ -1,0 +1,235 @@
+/* css/onboarding.css - أنماط صفحة الترحيب */
+
+.onboarding-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1.5rem;
+    background: var(--body-bg, #f0f4f8);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .onboarding-container {
+    background: var(--body-bg-dark, #0d0a08);
+}
+
+.onboarding-slide {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    animation: fadeSlide 0.5s ease;
+    padding: 1rem 0;
+}
+
+.onboarding-slide.active {
+    display: flex;
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.onboarding-slide .icon-wrapper {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--primary-light, #e8f4f8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 3.5rem;
+    color: var(--primary, #1a6b8a);
+    border: 2px solid var(--border, #e0e8ec);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .onboarding-slide .icon-wrapper {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.onboarding-slide h2 {
+    font-size: 1.6rem;
+    color: var(--text, #1a2a3a);
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 0.8rem;
+}
+
+.onboarding-slide p {
+    font-size: 1rem;
+    color: var(--text-light, #4a5a6a);
+    font-family: 'Cairo', sans-serif;
+    line-height: 1.8;
+    max-width: 320px;
+}
+
+body.dark-mode .onboarding-slide h2 {
+    color: #d4c8a0;
+}
+
+body.dark-mode .onboarding-slide p {
+    color: #a09880;
+}
+
+/* النقاط */
+.onboarding-dots {
+    display: flex;
+    gap: 0.6rem;
+    margin: 1.5rem 0;
+}
+
+.onboarding-dots .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border, #e0e8ec);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.onboarding-dots .dot.active {
+    background: var(--primary, #1a6b8a);
+    transform: scale(1.3);
+    width: 24px;
+    border-radius: 6px;
+}
+
+body.dark-mode .onboarding-dots .dot {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .onboarding-dots .dot.active {
+    background: var(--gold, #c9a84c);
+}
+
+/* الأزرار */
+.onboarding-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.onboarding-buttons .btn-skip {
+    background: transparent;
+    border: none;
+    color: var(--text-light, #4a5a6a);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s;
+}
+
+.onboarding-buttons .btn-skip:hover {
+    color: var(--text, #1a2a3a);
+}
+
+.onboarding-buttons .btn-next {
+    padding: 0.6rem 1.8rem;
+    border-radius: 30px;
+    border: none;
+    background: var(--primary, #1a6b8a);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.onboarding-buttons .btn-next:hover {
+    background: var(--primary-dark, #0d4a62);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.onboarding-buttons .btn-start {
+    padding: 0.6rem 2rem;
+    border-radius: 30px;
+    border: none;
+    background: var(--gold, #c9a84c);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.onboarding-buttons .btn-start:hover {
+    background: #b8953a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .onboarding-buttons .btn-skip {
+    color: #a09880;
+}
+
+body.dark-mode .onboarding-buttons .btn-skip:hover {
+    color: #d4c8a0;
+}
+
+/* الهيدر الصغير */
+.onboarding-header {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+}
+
+.onboarding-header .logo-text {
+    font-size: 1.1rem;
+    color: var(--primary, #1a6b8a);
+    font-weight: 800;
+    font-family: 'Cairo', sans-serif;
+}
+
+.onboarding-header .logo-text i {
+    color: var(--gold, #c9a84c);
+    margin-left: 6px;
+}
+
+/* تحسينات الموبايل */
+@media (max-width: 480px) {
+    .onboarding-slide .icon-wrapper {
+        width: 90px;
+        height: 90px;
+        font-size: 2.5rem;
+    }
+    
+    .onboarding-slide h2 {
+        font-size: 1.3rem;
+    }
+    
+    .onboarding-slide p {
+        font-size: 0.9rem;
+    }
+    
+    .onboarding-buttons .btn-next,
+    .onboarding-buttons .btn-start {
+        font-size: 0.85rem;
+        padding: 0.5rem 1.4rem;
+    }
+}
