@@ -1,4 +1,4 @@
-// js/license.js - نظام الترخيص مع Firebase
+// js/license.js - نظام الترخيص مع Firebase والتحقق التلقائي
 
 class LicenseManager {
     constructor() {
@@ -10,6 +10,7 @@ class LicenseManager {
         this.licenseData = null;
         this.isValidated = false;
         this.callbacks = [];
+        this.verificationInterval = null;
     }
 
     // ====== التهيئة ======
@@ -19,6 +20,14 @@ class LicenseManager {
             try {
                 this.licenseData = JSON.parse(saved);
                 this.isValidated = this.isLicenseValid(this.licenseData);
+                
+                // ✅ التحقق من Firebase بعد التهيئة (غير متزامن)
+                this.verifyLicenseWithFirebase().then(valid => {
+                    if (!valid) {
+                        this.notifyListeners();
+                        this.updateUIAfterValidation();
+                    }
+                });
             } catch {
                 this.isValidated = false;
             }
@@ -29,6 +38,10 @@ class LicenseManager {
         }
         
         this.notifyListeners();
+        
+        // بدء التحقق الدوري كل 5 دقائق
+        this.startPeriodicVerification();
+        
         return this.isValidated;
     }
 
@@ -66,6 +79,86 @@ class LicenseManager {
         }
         
         return true;
+    }
+
+    // ====== التحقق من الترخيص من Firebase ======
+    async verifyLicenseWithFirebase() {
+        const saved = localStorage.getItem(this.STORAGE_KEY);
+        if (!saved) return true;
+        
+        let license;
+        try {
+            license = JSON.parse(saved);
+        } catch {
+            return true;
+        }
+        
+        // لو الترخيص مش مدفوع (مجاني)، مش هنتأكد منه
+        if (!license.isPremium) return true;
+        
+        // لو فيه مفتاح، نتأكد من Firebase
+        const key = license.licenseKey;
+        if (!key) return true;
+        
+        // استدعاء دالة Firebase المعلنة عالمياً
+        if (typeof window.verifyLicenseWithFirebase === 'function') {
+            try {
+                const result = await window.verifyLicenseWithFirebase(key);
+                if (!result.valid) {
+                    // الترخيص مش صحيح، نلغيه
+                    this.licenseData = null;
+                    this.isValidated = false;
+                    this.startTrial();
+                    this.notifyListeners();
+                    showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة التجريبية.', 'error');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.warn('فشل التحقق من Firebase، نستخدم النسخة المحلية:', error);
+                return true;
+            }
+        }
+        
+        return true;
+    }
+
+    // ====== التحقق الدوري كل 5 دقائق ======
+    startPeriodicVerification() {
+        if (this.verificationInterval) {
+            clearInterval(this.verificationInterval);
+        }
+        
+        this.verificationInterval = setInterval(() => {
+            this.verifyLicenseWithFirebase().then(valid => {
+                if (!valid) {
+                    this.notifyListeners();
+                    this.updateUIAfterValidation();
+                }
+            });
+        }, 5 * 60 * 1000); // 5 دقائق
+    }
+
+    // ====== تحديث الواجهة بعد التحقق ======
+    updateUIAfterValidation() {
+        const info = this.getLicenseInfo();
+        if (info && !info.isPremium) {
+            const statusEl = document.getElementById('licenseStatusText');
+            if (statusEl) {
+                statusEl.innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    ⚠️ تم إلغاء الترخيص المدفوع. جاري التحويل للنسخة المجانية.
+                `;
+            }
+            // تحديث الفوتر
+            const footer = document.getElementById('footer');
+            if (footer) {
+                footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية</p>`;
+            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
     }
 
     // ====== الحصول على الميزات المتاحة ======
@@ -139,11 +232,9 @@ class LicenseManager {
                 }
             } catch (error) {
                 console.error("خطأ في الاتصال بخادم Firebase:", error);
-                // 2. في حالة فشل الاتصال، نستخدم النسخة المحلية الاحتياطية
                 return this.activateLicenseLocal(key);
             }
         } else {
-            // 3. إذا لم يتم تحميل Firebase، نستخدم النسخة المحلية
             return this.activateLicenseLocal(key);
         }
     }
@@ -202,6 +293,7 @@ class LicenseManager {
             daysLeft: daysLeft,
             isExpired: isExpired,
             isPremium: this.licenseData.isPremium || false,
+            licenseKey: this.licenseData.licenseKey || null,
             features: this.getFeatures()
         };
     }

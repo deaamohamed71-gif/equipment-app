@@ -1,4 +1,4 @@
-// js/index.js - كود الصفحة الرئيسية
+// js/index.js - كود الصفحة الرئيسية مع التحقق من الترخيص
 
 // ====== تحميل بيانات الترخيص ======
 function loadLicenseStatus() {
@@ -39,6 +39,28 @@ function loadLicenseStatus() {
             <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
             ⚠️ لم يتم العثور على ترخيص. الرجاء تفعيل التطبيق.
         `;
+    }
+}
+
+// ====== التحقق من الترخيص من Firebase عند تحميل الصفحة ======
+async function verifyLicenseOnLoad() {
+    const info = licenseManager.getLicenseInfo();
+    if (info && info.isPremium && info.licenseKey) {
+        if (typeof window.verifyLicenseWithFirebase === 'function') {
+            try {
+                const result = await window.verifyLicenseWithFirebase(info.licenseKey);
+                if (!result.valid) {
+                    licenseManager.licenseData = null;
+                    licenseManager.isValidated = false;
+                    licenseManager.startTrial();
+                    licenseManager.notifyListeners();
+                    showToast('⚠️ تم إلغاء الترخيص المدفوع.', 'error');
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            } catch (error) {
+                console.warn('فشل التحقق من Firebase:', error);
+            }
+        }
     }
 }
 
@@ -126,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // تهيئة الترخيص
     licenseManager.initialize();
     
-    // الاستماع لتغييرات الترخيص
     licenseManager.addListener(function(info) {
         if (info) {
             loadLicenseStatus();
@@ -136,5 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         loadLicenseStatus();
         loadDashboardData();
+        verifyLicenseOnLoad();
     }, 150);
 });

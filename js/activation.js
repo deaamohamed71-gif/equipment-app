@@ -93,7 +93,6 @@ async function activateLicense() {
         return;
     }
     
-    // ✅ التحقق عبر Firebase
     messageEl.innerHTML = '<span style="color: var(--primary);">⏳ جاري التحقق من المفتاح...</span>';
     
     const result = await licenseManager.activateLicense(key);
@@ -120,11 +119,36 @@ function selectPlan(plan) {
     }
 }
 
+// ====== التحقق من الترخيص من Firebase عند تحميل صفحة التفعيل ======
+async function verifyLicenseOnActivationPage() {
+    const info = licenseManager.getLicenseInfo();
+    if (info && info.isPremium && info.licenseKey) {
+        if (typeof window.verifyLicenseWithFirebase === 'function') {
+            try {
+                const result = await window.verifyLicenseWithFirebase(info.licenseKey);
+                if (!result.valid) {
+                    licenseManager.licenseData = null;
+                    licenseManager.isValidated = false;
+                    licenseManager.startTrial();
+                    licenseManager.notifyListeners();
+                    showToast('⚠️ تم إلغاء الترخيص المدفوع.', 'error');
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            } catch (error) {
+                console.warn('فشل التحقق من Firebase:', error);
+            }
+        }
+    }
+}
+
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
     licenseManager.initialize();
     
-    setTimeout(loadActivationData, 100);
+    setTimeout(() => {
+        loadActivationData();
+        verifyLicenseOnActivationPage();
+    }, 100);
     
     licenseManager.addListener(function(info) {
         if (info) {

@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك مع نظام الترخيص
+// js/main.js - الكود الأساسي المشترك مع التحقق من الترخيص
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -133,16 +133,43 @@ function loadHeaderFooter() {
     }
 }
 
+// ====== التحقق من الترخيص عند بدء التطبيق ======
+async function checkLicenseOnStart() {
+    if (typeof licenseManager !== 'undefined') {
+        const info = licenseManager.getLicenseInfo();
+        if (info && info.isPremium && info.licenseKey) {
+            if (typeof window.verifyLicenseWithFirebase === 'function') {
+                try {
+                    const result = await window.verifyLicenseWithFirebase(info.licenseKey);
+                    if (!result.valid) {
+                        licenseManager.licenseData = null;
+                        licenseManager.isValidated = false;
+                        licenseManager.startTrial();
+                        licenseManager.notifyListeners();
+                        showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة التجريبية.', 'error');
+                        // تحديث الفوتر
+                        const footer = document.getElementById('footer');
+                        if (footer) {
+                            footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية</p>`;
+                        }
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                } catch (error) {
+                    console.warn('فشل التحقق من Firebase عند بدء التشغيل:', error);
+                }
+            }
+        }
+    }
+}
+
 // ====== التهيئة العامة ======
 function initApp() {
     // تهيئة مدير الترخيص
     if (typeof licenseManager !== 'undefined') {
         licenseManager.initialize();
         
-        // الاستماع لتغييرات الترخيص
         licenseManager.addListener(function(info) {
             if (info) {
-                // تحديث الفوتر
                 const footer = document.getElementById('footer');
                 if (footer) {
                     const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
@@ -155,6 +182,9 @@ function initApp() {
     loadMode();
     loadColors();
     loadHeaderFooter();
+    
+    // التحقق من الترخيص بعد ثانية
+    setTimeout(checkLicenseOnStart, 1500);
 }
 
 // تشغيل التهيئة عند تحميل الصفحة
