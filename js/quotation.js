@@ -493,7 +493,7 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF محسن ======
+// ====== تصدير PDF محسن مع دعم الجداول الطويلة ======
 function savePDF() {
     // التحقق من وجود licenseManager
     if (typeof licenseManager !== 'undefined') {
@@ -524,7 +524,7 @@ function savePDF() {
     clone.querySelectorAll('input, select').forEach(el => {
         const span = document.createElement('span');
         span.textContent = el.value || el.textContent || '---';
-        span.style.cssText = 'font-weight:bold; color:#1a2a3a;';
+        span.style.cssText = 'font-weight:bold; color:#1a2a3a; font-size:10px;';
         el.replaceWith(span);
     });
     
@@ -536,9 +536,10 @@ function savePDF() {
         }
     });
     
-    // تنظيف الجدول
+    // تنظيف الجدول وتحسينه للطباعة
     const table = clone.querySelector('table');
     if (table) {
+        // إزالة العمود الأخير (عمود الحذف)
         table.querySelectorAll('tr').forEach(row => {
             const cells = row.querySelectorAll('th, td');
             if (cells.length > 8) {
@@ -547,38 +548,213 @@ function savePDF() {
                 }
             }
         });
+        
+        // تصغير حجم الخط في الجدول
+        table.style.cssText = 'font-size: 9px; width: 100%; border-collapse: collapse;';
+        
+        // تقليل المسافات بين الأعمدة
+        table.querySelectorAll('th, td').forEach(cell => {
+            cell.style.cssText = 'padding: 3px 2px; text-align: center; border: 1px solid #ddd; font-size: 9px;';
+        });
+        
+        // تحسين رأس الجدول
+        table.querySelectorAll('th').forEach(th => {
+            th.style.cssText = 'background: #1a6b8a; color: white; padding: 4px 2px; text-align: center; font-size: 9px; border: 1px solid #1a6b8a;';
+        });
+        
+        // تصغير عرض أعمدة الإدخال
+        table.querySelectorAll('.equip-name input').forEach(el => {
+            el.style.cssText = 'width: 50px; font-size: 8px; border: none; background: transparent; text-align: center; font-weight: 600;';
+        });
+        table.querySelectorAll('.price-input, .count-input, .spec-input').forEach(el => {
+            el.style.cssText = 'width: 35px; font-size: 8px; border: none; background: transparent; text-align: center;';
+        });
+        table.querySelectorAll('select').forEach(el => {
+            el.style.cssText = 'font-size: 8px; padding: 1px 2px; border: none; background: transparent;';
+        });
     }
     
-    // إضافة تنسيق الطباعة
+    // إضافة تنسيق الطباعة المحسن
     const style = document.createElement('style');
     style.textContent = `
-        body { padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl; }
-        .quotation-container { max-width: 1000px; margin: 0 auto; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th { background: #1a6b8a; color: white; padding: 10px; text-align: center; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
-        .total-summary { font-size: 1.2rem; font-weight: bold; color: #1a6b8a; }
-        .note-section { margin-top: 20px; padding: 15px; border-right: 3px solid #c9a84c; background: #f8fafc; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .tax-section { margin: 10px 0; }
-        .signature-area { display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
-        .signature-box { flex: 1; border: 1px dashed #ccc; padding: 15px; text-align: center; min-width: 200px; }
-        .sig-preview img { max-height: 80px; max-width: 100%; }
-        .quotation-info { display: flex; flex-wrap: wrap; gap: 15px; margin: 10px 0; }
-        .info-item { display: flex; align-items: center; gap: 5px; }
-        .validity-badge { display: inline-block; padding: 3px 12px; border-radius: 15px; background: #e8f4f8; color: #1a6b8a; }
-        .welcome-msg { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 10px; }
-        .extra-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; padding: 10px; background: #f8fafc; border-radius: 10px; margin: 10px 0; }
-        .extra-fields .field { display: flex; align-items: center; gap: 5px; }
-        .tax-total-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 10px; margin: 10px 0; }
+        @page {
+            size: A4 landscape;
+            margin: 6mm 8mm;
+        }
+        body { 
+            padding: 8px; 
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+            direction: rtl;
+            font-size: 10px;
+        }
+        .quotation-container { 
+            max-width: 100%; 
+            margin: 0 auto;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .page-header h1 {
+            font-size: 14px;
+            color: #1a6b8a;
+            margin: 0;
+        }
+        .header-actions { display: none !important; }
+        .quotation-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin: 6px 0;
+            padding: 4px 0;
+            border-bottom: 2px solid #e0e8ec;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 9px;
+        }
+        .info-item label { font-weight: 600; }
+        .info-item input { border: none; background: transparent; font-size: 9px; width: 80px; }
+        .validity-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e8f4f8;
+            color: #1a6b8a;
+            font-size: 9px;
+        }
+        .welcome-msg {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            padding: 4px 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 9px;
+        }
+        .welcome-msg input { border: none; background: transparent; font-weight: 500; font-size: 9px; }
+        .table-wrap {
+            overflow: visible !important;
+            border: none !important;
+            background: transparent !important;
+            margin: 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 4px 0;
+            font-size: 8px;
+            page-break-inside: avoid;
+        }
+        th {
+            background: #1a6b8a;
+            color: white;
+            padding: 3px 2px;
+            text-align: center;
+            border: 1px solid #1a6b8a;
+            font-size: 8px;
+            font-weight: 700;
+        }
+        td {
+            padding: 3px 2px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 8px;
+        }
+        tr { page-break-inside: avoid; }
+        .equip-name { font-weight: 600; display: flex; align-items: center; gap: 3px; justify-content: center; }
+        .equip-name i { font-size: 9px; }
+        .extra-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 3px 8px;
+            padding: 4px 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 9px;
+        }
+        .extra-fields .field { display: flex; align-items: center; gap: 3px; }
+        .extra-fields .field-label { font-weight: 500; font-size: 8px; }
+        .extra-fields input { border: none; background: transparent; width: 50px; font-size: 8px; }
+        .tax-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 4px 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 9px;
+        }
+        .tax-section { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 9px; }
+        .tax-section input { border: none; background: transparent; width: 40px; font-size: 8px; }
+        .tax-result { font-weight: 700; color: #1a6b8a; font-size: 9px; }
+        .total-summary {
+            padding: 3px 12px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 11px;
+            background: #e8f4f8;
+            border: 1px solid #1a6b8a;
+            color: #1a6b8a;
+        }
+        .total-summary i { color: #c9a84c; }
+        .note-section {
+            margin-top: 8px;
+            padding: 6px 10px;
+            border-right: 3px solid #c9a84c;
+            background: #f8fafc;
+            border: 1px solid #e0e8ec;
+            border-right-width: 3px;
+            font-size: 8px;
+            page-break-inside: avoid;
+        }
+        .note-section h3 { font-size: 10px; color: #1a6b8a; margin-bottom: 3px; }
+        .note-item { display: flex; align-items: center; gap: 4px; padding: 2px 0; border-bottom: 1px solid #eee; }
+        .note-item i { color: #c9a84c; font-size: 4px; }
+        .note-item .note-text { border: none; background: transparent; font-size: 8px; width: 100%; }
+        .signature-area {
+            display: flex;
+            gap: 16px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            page-break-inside: avoid;
+        }
+        .signature-box {
+            flex: 1;
+            border: 1px dashed #ccc;
+            padding: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .signature-box .sig-header { display: flex; align-items: center; gap: 4px; justify-content: center; }
+        .signature-box .sig-header i { color: #c9a84c; font-size: 12px; }
+        .signature-box .sig-header h3 { font-size: 9px; margin: 0; }
+        .sig-preview img { max-height: 50px; max-width: 100%; display: block !important; margin: 0 auto; }
+        .sig-placeholder { display: none !important; }
+        .sig-actions { display: none !important; }
+        .sig-hint { display: none !important; }
         .watermark { display: none !important; }
         .no-print { display: none !important; }
-        .signature-box .sig-actions { display: none !important; }
-        .sig-preview img { display: block !important; max-height: 80px; }
-        .sig-placeholder { display: none !important; }
         #footer { display: none !important; }
         #header { display: none !important; }
         #toast { display: none !important; }
+        .btn { display: none !important; }
+        .add-row-area { display: none !important; }
+        .saved-offers-row { display: none !important; }
+        .delete-row { display: none !important; }
+        .delete-note { display: none !important; }
+        .tax-note { font-size: 7px; color: #c9a84c; background: #f5ecc0; padding: 1px 6px; border-radius: 8px; }
+        .pdf-footer { margin-top: 16px; text-align: center; color: #888; font-size: 8px; border-top: 1px solid #eee; padding-top: 6px; }
     `;
     clone.prepend(style);
     
@@ -596,7 +772,7 @@ function savePDF() {
             bottom: 50%;
             left: 50%;
             transform: translate(-50%, 50%) rotate(-30deg);
-            font-size: 80px;
+            font-size: 50px;
             color: rgba(0,0,0,0.04);
             font-weight: bold;
             pointer-events: none;
@@ -609,20 +785,20 @@ function savePDF() {
     
     // إضافة تذييل
     const footer = document.createElement('div');
-    footer.style.cssText = 'margin-top: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px;';
+    footer.className = 'pdf-footer';
     const today = new Date().toLocaleDateString('ar-EG');
     footer.innerHTML = `تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${today}`;
     clone.appendChild(footer);
     
     // إنشاء عنصر مؤقت للتصدير
     const printContainer = document.createElement('div');
-    printContainer.style.cssText = 'padding: 20px; background: white; direction: rtl;';
+    printContainer.style.cssText = 'padding: 8px; background: white; direction: rtl;';
     printContainer.appendChild(clone);
     document.body.appendChild(printContainer);
     
-    // إعدادات التصدير
+    // إعدادات التصدير - استخدام Landscape للجداول الكبيرة
     const opt = {
-        margin: [10, 10, 10, 10],
+        margin: [6, 8, 6, 8],
         filename: `Quotation_${document.getElementById('quotationNumber')?.value || 'unknown'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
@@ -630,18 +806,21 @@ function savePDF() {
             useCORS: true,
             letterRendering: true,
             scrollY: 0,
-            windowHeight: clone.scrollHeight
+            windowHeight: clone.scrollHeight,
+            width: clone.scrollWidth
         },
         jsPDF: { 
             unit: 'mm', 
             format: 'a4', 
-            orientation: 'portrait' 
+            orientation: 'landscape'
         },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
     html2pdf().set(opt).from(printContainer).save().then(() => {
-        document.body.removeChild(printContainer);
+        if (document.body.contains(printContainer)) {
+            document.body.removeChild(printContainer);
+        }
         showToast('✅ تم تصدير PDF بنجاح', 'success');
     }).catch(err => {
         if (document.body.contains(printContainer)) {
