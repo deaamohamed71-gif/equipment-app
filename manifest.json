@@ -1,15 +1,30 @@
 {
   "name": "نظام عروض أسعار المعدات",
   "short_name": "عروض المعدات",
+  "description": "نظام متكامل لإدارة عروض أسعار إيجار المعدات الثقيلة",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f0f4f8",
   "theme_color": "#1a6b8a",
+  "orientation": "portrait",
+  "categories": ["business", "productivity"],
+  "lang": "ar",
+  "dir": "rtl",
   "icons": [
     {
       "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/svgs/solid/truck.svg",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/svgs/solid/truck.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false,
+  "related_applications": []
 }

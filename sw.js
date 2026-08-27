@@ -1,26 +1,158 @@
-const CACHE_NAME = 'equipment-quotation-v3';
-const assetsToCache = [
+const CACHE_NAME = 'equipment-quotation-v4';
+const ASSETS_TO_CACHE = [
   'index.html',
   'manifest.json'
 ];
 
+// إضافة الموارد الخارجية التي يجب تخزينها مؤقتاً
+const EXTERNAL_ASSETS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+];
+
+// التثبيت - تخزين الملفات الأساسية
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assetsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        // تخزين الملفات الأساسية
+        return cache.addAll(ASSETS_TO_CACHE)
+          .catch(err => {
+            console.warn('Failed to cache assets:', err);
+            // محاولة تخزين ما يمكن تخزينه
+            return Promise.all(
+              ASSETS_TO_CACHE.map(url => 
+                cache.add(url).catch(() => {})
+              )
+            );
+          });
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
+// التنشيط - تنظيف الكاش القديم
 self.addEventListener('activate', event => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames
+            .filter(name => name !== CACHE_NAME)
+            .map(name => caches.delete(name))
+        );
+      })
+      .then(() => clients.claim())
+  );
 });
 
+// استراتيجية: Network First مع Fallback إلى Cache
 self.addEventListener('fetch', event => {
+  const request = event.request;
+  
+  // تجاهل طلبات التحليلات والإحصائيات
+  if (request.url.includes('analytics') || request.url.includes('tracking')) {
+    return;
+  }
+
+  // استراتيجية مختلفة للموارد الخارجية
+  if (request.url.includes('cdnjs') || request.url.includes('googleapis')) {
+    event.respondWith(
+      caches.match(request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            // تحديث الكاش في الخلفية
+            fetch(request)
+              .then(response => {
+                if (response.ok) {
+                  caches.open(CACHE_NAME)
+                    .then(cache => cache.put(request, response));
+                }
+              })
+              .catch(() => {});
+            return cachedResponse;
+          }
+          return fetch(request)
+            .then(response => {
+              if (response.ok) {
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME)
+                  .then(cache => cache.put(request, responseClone));
+              }
+              return response;
+            })
+            .catch(() => {
+              // لا يوجد بديل للموارد الخارجية
+              return new Response('Resource unavailable', { status: 503 });
+            });
+        })
+    );
+    return;
+  }
+
+  // استراتيجية: Network First للملفات الرئيسية
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    fetch(request)
+      .then(response => {
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request)
+          .then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // صفحة الخطأ المخصصة
+            return new Response(`
+              <!DOCTYPE html>
+              <html dir="rtl" lang="ar">
+                <head>
+                  <meta charset="UTF-8">
+                  <title>غير متصل</title>
+                  <style>
+                    body { font-family: 'Cairo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; background: #f0f4f8; margin: 0; padding: 20px; }
+                    .offline { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+                    .offline i { font-size: 60px; color: #c9a84c; margin-bottom: 20px; }
+                    .offline h2 { color: #1a6b8a; margin-bottom: 10px; }
+                    .offline p { color: #666; }
+                    .offline .btn { display: inline-block; margin-top: 20px; padding: 12px 30px; background: #1a6b8a; color: white; border-radius: 30px; text-decoration: none; }
+                  </style>
+                </head>
+                <body>
+                  <div class="offline">
+                    <i class="fas fa-wifi-slash"></i>
+                    <h2>⚠️ غير متصل بالإنترنت</h2>
+                    <p>الرجاء التحقق من اتصالك بالشبكة</p>
+                    <button class="btn" onclick="location.reload()">🔄 إعادة المحاولة</button>
+                  </div>
+                </body>
+              </html>
+            `, {
+              headers: { 'Content-Type': 'text/html' }
+            });
+          });
+      })
+  );
+});
+
+// الاستماع لرسائل التحديث
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
+
+// تحديث التطبيق عند تغيير الإصدار
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
   );
 });
