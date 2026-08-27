@@ -1,4 +1,4 @@
-// js/quotation.js - كود صفحة العرض مع نظام الترخيص
+// js/quotation.js - كود صفحة العرض مع نظام الترخيص ودالة PDF المحسنة
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
@@ -28,24 +28,23 @@ let isPremium = false;
 
 // ====== تهيئة الترخيص ======
 function initLicense() {
-    licenseManager.initialize();
-    const info = licenseManager.getLicenseInfo();
-    isPremium = info ? info.isPremium : false;
-    
-    // تحديث الواجهة بناءً على الترخيص
-    updateUIForLicense();
+    if (typeof licenseManager !== 'undefined') {
+        licenseManager.initialize();
+        const info = licenseManager.getLicenseInfo();
+        isPremium = info ? info.isPremium : false;
+        updateUIForLicense();
+    }
 }
 
 // ====== تحديث الواجهة حسب الترخيص ======
 function updateUIForLicense() {
+    if (typeof licenseManager === 'undefined') return;
     const features = licenseManager.getFeatures();
     
-    // إذا كانت النسخة المجانية، نعرض حد البنود
     if (!features.isPremium) {
         const maxItems = features.maxItems;
         const currentCount = data.length;
         
-        // إذا تجاوزنا الحد، نحذف البنود الزائدة
         if (currentCount > maxItems) {
             data = data.slice(0, maxItems);
             showToast(`⚠️ النسخة المجانية تسمح بـ ${maxItems} بنود فقط. تم تقليص العرض.`, 'error');
@@ -82,7 +81,12 @@ function renderTable() {
     
     const fragment = document.createDocumentFragment();
     const iconColor = document.getElementById('iconColorPicker')?.value || '#888';
-    const features = licenseManager.getFeatures();
+    let features = { maxItems: 3, isPremium: false };
+    
+    if (typeof licenseManager !== 'undefined') {
+        features = licenseManager.getFeatures();
+    }
+    
     const maxItems = features.maxItems;
     const isPremium = features.isPremium;
     
@@ -91,9 +95,7 @@ function renderTable() {
         const icon = row.icon || getIconForName(row.name) || defaultIcon;
         const opTotal = getOperationTotal(row);
         
-        // عرض حد البنود في واجهة المستخدم
-        const isLastItem = index === data.length - 1;
-        const showLimitWarning = !isPremium && index >= maxItems - 1;
+        const showLimitWarning = !isPremium && index >= maxItems - 1 && index === data.length - 1;
         
         tr.innerHTML = `
             <td class="equip-name" onclick="selectRow(${index})" style="cursor:pointer;">
@@ -159,11 +161,17 @@ function deleteRow(index) {
 
 // ====== إضافة صف مع التحقق من الترخيص ======
 function addRow() {
+    if (typeof licenseManager === 'undefined') {
+        data.push({ name: 'معدة جديدة', unit: 'متر', value: 0, priceType: 'يومي', duration: 'أيام', count: 1, unitPrice: 0, icon: defaultIcon });
+        renderTable();
+        showToast('📝 تم إضافة صف جديد', 'success');
+        return;
+    }
+    
     const features = licenseManager.getFeatures();
     const currentCount = data.length;
     const maxItems = features.maxItems;
     
-    // التحقق من الحد الأقصى للبنود
     if (currentCount >= maxItems) {
         const msg = `⚠️ النسخة المجانية تسمح بـ ${maxItems} بنود فقط. قم بالترقية للاستفادة من المزيد.`;
         showToast(msg, 'error');
@@ -171,16 +179,7 @@ function addRow() {
         return;
     }
     
-    data.push({ 
-        name: 'معدة جديدة', 
-        unit: 'متر', 
-        value: 0, 
-        priceType: 'يومي', 
-        duration: 'أيام', 
-        count: 1, 
-        unitPrice: 0, 
-        icon: defaultIcon 
-    });
+    data.push({ name: 'معدة جديدة', unit: 'متر', value: 0, priceType: 'يومي', duration: 'أيام', count: 1, unitPrice: 0, icon: defaultIcon });
     renderTable();
     showToast('📝 تم إضافة صف جديد', 'success');
 }
@@ -300,6 +299,11 @@ function updateValidityStatus() {
 
 // ====== العروض المحفوظة ======
 function saveCurrentOffer() {
+    if (typeof licenseManager === 'undefined') {
+        saveOfferDirectly();
+        return;
+    }
+    
     const features = licenseManager.getFeatures();
     const maxOffers = features.maxOffers;
     let savedOffers = [];
@@ -308,14 +312,22 @@ function saveCurrentOffer() {
         savedOffers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     } catch { savedOffers = []; }
     
-    // التحقق من الحد الأقصى للعروض
     if (!features.isPremium && savedOffers.length >= maxOffers) {
         showToast(`⚠️ النسخة المجانية تسمح بـ ${maxOffers} عروض فقط. قم بالترقية للاستفادة من المزيد.`, 'error');
         licenseManager.showActivationPrompt();
         return;
     }
     
+    saveOfferDirectly();
+}
+
+function saveOfferDirectly() {
     const name = document.getElementById('quotationNumber')?.value || 'عرض غير مسمى';
+    let savedOffers = [];
+    try {
+        savedOffers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
+    } catch { savedOffers = []; }
+    
     const cleanData = data.filter(row => row.name && row.name.trim().length > 0);
     
     if (cleanData.length === 0) {
@@ -412,15 +424,16 @@ function loadClientList() {
 }
 
 function addClient() {
-    const features = licenseManager.getFeatures();
-    const maxClients = features.maxClients;
-    let clients = getClients();
-    
-    // التحقق من الحد الأقصى للعملاء
-    if (!features.isPremium && clients.length >= maxClients) {
-        showToast(`⚠️ النسخة المجانية تسمح بـ ${maxClients} عملاء فقط. قم بالترقية للاستفادة من المزيد.`, 'error');
-        licenseManager.showActivationPrompt();
-        return;
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        const maxClients = features.maxClients;
+        let clients = getClients();
+        
+        if (!features.isPremium && clients.length >= maxClients) {
+            showToast(`⚠️ النسخة المجانية تسمح بـ ${maxClients} عملاء فقط. قم بالترقية للاستفادة من المزيد.`, 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
     }
     
     const name = document.getElementById('newClientName')?.value.trim();
@@ -429,7 +442,7 @@ function addClient() {
     
     if (!name) { showToast('⚠️ الرجاء إدخال اسم العميل', 'error'); return; }
     
-    clients = clients.filter(c => c.name !== name);
+    let clients = getClients().filter(c => c.name !== name);
     clients.push({ name, phone, email });
     localStorage.setItem('savedClients', JSON.stringify(clients));
     loadClientList();
@@ -480,43 +493,174 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير ======
+// ====== تصدير PDF محسن ======
 function savePDF() {
-    const features = licenseManager.getFeatures();
+    // التحقق من وجود licenseManager
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        
+        if (!features.canExportPDF) {
+            showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
+    }
     
-    // التحقق من صلاحية التصدير
-    if (!features.canExportPDF) {
-        showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
-        licenseManager.showActivationPrompt();
+    showToast('📄 جاري تجهيز ملف PDF...', 'success');
+    
+    const container = document.querySelector('.quotation-container');
+    if (!container) {
+        showToast('❌ لم يتم العثور على محتوى للتصدير', 'error');
         return;
     }
     
-    const element = document.querySelector('.quotation-container');
-    if (!element) return;
+    // استنساخ المحتوى
+    const clone = container.cloneNode(true);
+    
+    // تنظيف النسخة من العناصر غير المرغوب فيها
+    clone.querySelectorAll('.btn, .delete-row, .delete-note, .add-row-area, .saved-offers-row, .header-actions, .no-print, .mode-toggle').forEach(el => el.remove());
+    
+    // تحويل المدخلات إلى نصوص
+    clone.querySelectorAll('input, select').forEach(el => {
+        const span = document.createElement('span');
+        span.textContent = el.value || el.textContent || '---';
+        span.style.cssText = 'font-weight:bold; color:#1a2a3a;';
+        el.replaceWith(span);
+    });
+    
+    // إزالة أعمدة الإجراءات (حذف)
+    clone.querySelectorAll('th:last-child, td:last-child').forEach(el => {
+        const parent = el.parentElement;
+        if (parent && (el.textContent.includes('✕') || el.textContent.includes('×') || el.querySelector('.delete-row'))) {
+            el.remove();
+        }
+    });
+    
+    // تنظيف الجدول
+    const table = clone.querySelector('table');
+    if (table) {
+        table.querySelectorAll('tr').forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            if (cells.length > 8) {
+                for (let i = cells.length - 1; i >= 8; i--) {
+                    if (cells[i]) cells[i].remove();
+                }
+            }
+        });
+    }
+    
+    // إضافة تنسيق الطباعة
+    const style = document.createElement('style');
+    style.textContent = `
+        body { padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl; }
+        .quotation-container { max-width: 1000px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th { background: #1a6b8a; color: white; padding: 10px; text-align: center; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; text-align: center; }
+        .total-summary { font-size: 1.2rem; font-weight: bold; color: #1a6b8a; }
+        .note-section { margin-top: 20px; padding: 15px; border-right: 3px solid #c9a84c; background: #f8fafc; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .tax-section { margin: 10px 0; }
+        .signature-area { display: flex; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
+        .signature-box { flex: 1; border: 1px dashed #ccc; padding: 15px; text-align: center; min-width: 200px; }
+        .sig-preview img { max-height: 80px; max-width: 100%; }
+        .quotation-info { display: flex; flex-wrap: wrap; gap: 15px; margin: 10px 0; }
+        .info-item { display: flex; align-items: center; gap: 5px; }
+        .validity-badge { display: inline-block; padding: 3px 12px; border-radius: 15px; background: #e8f4f8; color: #1a6b8a; }
+        .welcome-msg { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 10px; }
+        .extra-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; padding: 10px; background: #f8fafc; border-radius: 10px; margin: 10px 0; }
+        .extra-fields .field { display: flex; align-items: center; gap: 5px; }
+        .tax-total-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 10px; background: #f8fafc; border-radius: 10px; margin: 10px 0; }
+        .watermark { display: none !important; }
+        .no-print { display: none !important; }
+        .signature-box .sig-actions { display: none !important; }
+        .sig-preview img { display: block !important; max-height: 80px; }
+        .sig-placeholder { display: none !important; }
+        #footer { display: none !important; }
+        #header { display: none !important; }
+        #toast { display: none !important; }
+    `;
+    clone.prepend(style);
     
     // إضافة علامة مائية للنسخة المجانية
-    if (features.showWatermark) {
-        const watermark = document.createElement('div');
-        watermark.style.cssText = 'position:fixed;bottom:50%;left:50%;transform:translate(-50%,50%)rotate(-30deg);font-size:60px;color:rgba(0,0,0,0.05);font-weight:bold;pointer-events:none;z-index:9999;';
-        watermark.textContent = 'نسخة تجريبية';
-        document.body.appendChild(watermark);
+    let isTrial = true;
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        isTrial = features.showWatermark || false;
     }
     
-    html2pdf().from(element).save('Quotation.pdf').then(() => {
-        // إزالة العلامة المائية بعد التصدير
-        document.querySelectorAll('.watermark').forEach(el => el.remove());
+    if (isTrial) {
+        const watermark = document.createElement('div');
+        watermark.style.cssText = `
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%) rotate(-30deg);
+            font-size: 80px;
+            color: rgba(0,0,0,0.04);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 9999;
+            white-space: nowrap;
+        `;
+        watermark.textContent = 'نسخة تجريبية';
+        clone.appendChild(watermark);
+    }
+    
+    // إضافة تذييل
+    const footer = document.createElement('div');
+    footer.style.cssText = 'margin-top: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px;';
+    const today = new Date().toLocaleDateString('ar-EG');
+    footer.innerHTML = `تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${today}`;
+    clone.appendChild(footer);
+    
+    // إنشاء عنصر مؤقت للتصدير
+    const printContainer = document.createElement('div');
+    printContainer.style.cssText = 'padding: 20px; background: white; direction: rtl;';
+    printContainer.appendChild(clone);
+    document.body.appendChild(printContainer);
+    
+    // إعدادات التصدير
+    const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Quotation_${document.getElementById('quotationNumber')?.value || 'unknown'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            letterRendering: true,
+            scrollY: 0,
+            windowHeight: clone.scrollHeight
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    
+    html2pdf().set(opt).from(printContainer).save().then(() => {
+        document.body.removeChild(printContainer);
+        showToast('✅ تم تصدير PDF بنجاح', 'success');
+    }).catch(err => {
+        if (document.body.contains(printContainer)) {
+            document.body.removeChild(printContainer);
+        }
+        showToast('❌ حدث خطأ أثناء تصدير PDF', 'error');
+        console.error('PDF Export Error:', err);
     });
-    showToast('📄 جاري تصدير الـ PDF', 'success');
 }
 
+// ====== تصدير Excel ======
 function exportExcel() {
-    const features = licenseManager.getFeatures();
-    
-    // التحقق من صلاحية تصدير Excel
-    if (!features.canExportExcel) {
-        showToast('⚠️ تصدير Excel متاح فقط في النسخة المدفوعة', 'error');
-        licenseManager.showActivationPrompt();
-        return;
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        if (!features.canExportExcel) {
+            showToast('⚠️ تصدير Excel متاح فقط في النسخة المدفوعة', 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
     }
     
     let wb = XLSX.utils.book_new();
@@ -553,7 +697,9 @@ function shareOptions() {
 // ====== التهيئة ======
 function loadQuotationData() {
     // تهيئة الترخيص
-    initLicense();
+    if (typeof licenseManager !== 'undefined') {
+        initLicense();
+    }
     
     // تحميل البيانات
     const saved = localStorage.getItem('equipDataV12');
@@ -599,7 +745,9 @@ function loadQuotationData() {
     if (taxRate && taxRateEl) taxRateEl.value = taxRate;
     
     // تحديث الواجهة حسب الترخيص
-    updateUIForLicense();
+    if (typeof licenseManager !== 'undefined') {
+        updateUIForLicense();
+    }
     
     // العرض
     renderTable();
