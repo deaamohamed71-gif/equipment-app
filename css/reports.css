@@ -69,9 +69,9 @@ body.dark-mode .filter-group label {
 
 body.dark-mode .filter-group input,
 body.dark-mode .filter-group select {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     color: #d4c8a0;
-    border-color: rgba(255,255,255,0.06);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 /* الرسوم البيانية */
@@ -90,8 +90,8 @@ body.dark-mode .filter-group select {
 }
 
 body.dark-mode .chart-box {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .chart-header {
@@ -127,9 +127,9 @@ body.dark-mode .chart-header h3 {
 }
 
 body.dark-mode .chart-header select {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     color: #d4c8a0;
-    border-color: rgba(255,255,255,0.06);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .chart-box canvas {
@@ -153,7 +153,7 @@ body.dark-mode .chart-header select {
 }
 
 body.dark-mode #reportsTableBody tr:hover td {
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* تحسينات الموبايل */

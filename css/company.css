@@ -142,9 +142,9 @@
 }
 
 body.dark-mode .form-group input {
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     color: #d4c8a0;
-    border-color: rgba(255,255,255,0.06);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 body.dark-mode .form-group label {
@@ -171,8 +171,8 @@ body.dark-mode .form-group label {
 }
 
 body.dark-mode .signature-box {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .sig-header {
@@ -244,7 +244,7 @@ body.dark-mode .sig-header h3 {
 
 body.dark-mode .sig-preview {
     background: #2a2420;
-    border-color: rgba(255,255,255,0.06);
+    border-color: rgba(255, 255, 255, 0.06);
 }
 
 .sig-actions {
