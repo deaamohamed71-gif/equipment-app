@@ -1,0 +1,298 @@
+/* css/company.css - أنماط صفحة الشركة */
+
+.company-container .page-header {
+    margin-bottom: 1.5rem;
+}
+
+.company-container .page-header h1 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    font-family: 'Cairo', sans-serif;
+}
+
+.company-container .page-header h1 i {
+    color: var(--gold);
+    margin-left: 10px;
+}
+
+.page-subtitle {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+/* قسم الشعار */
+.logo-upload-area {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.logo-preview {
+    width: 160px;
+    height: 160px;
+    border-radius: 16px;
+    border: 2px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: none;
+}
+
+.logo-preview img.show {
+    display: block;
+}
+
+.logo-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.logo-placeholder i {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.logo-placeholder span {
+    font-size: 0.85rem;
+}
+
+.logo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1;
+}
+
+.logo-actions .btn {
+    justify-content: center;
+}
+
+.logo-actions input[type="file"] {
+    display: none;
+}
+
+.logo-hint {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+/* نموذج الشركة */
+.company-form {
+    margin-top: 0.5rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-group label i {
+    color: var(--gold);
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    padding: 0.5rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Cairo', sans-serif;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 107, 138, 0.1);
+}
+
+body.dark-mode .form-group input {
+    background: rgba(0,0,0,0.3);
+    color: #d4c8a0;
+    border-color: rgba(255,255,255,0.06);
+}
+
+body.dark-mode .form-group label {
+    color: #d4c8a0;
+}
+
+/* التوقيع الإلكتروني */
+.signature-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.signature-box {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 1.2rem;
+    background: var(--bg-light);
+    transition: all 0.3s ease;
+}
+
+.signature-box:hover {
+    border-color: var(--gold);
+}
+
+body.dark-mode .signature-box {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.06);
+}
+
+.sig-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.sig-header i {
+    font-size: 1.4rem;
+    color: var(--gold);
+}
+
+.sig-header h3 {
+    font-size: 1rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+body.dark-mode .sig-header h3 {
+    color: #d4c8a0;
+}
+
+.sig-preview {
+    width: 100%;
+    min-height: 120px;
+    max-height: 200px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
+    position: relative;
+}
+
+.sig-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: none;
+}
+
+.sig-preview img.show {
+    display: block;
+}
+
+.sig-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.sig-placeholder i {
+    font-size: 2rem;
+    opacity: 0.3;
+}
+
+.sig-placeholder span {
+    font-size: 0.8rem;
+}
+
+body.dark-mode .sig-preview {
+    background: #2a2420;
+    border-color: rgba(255,255,255,0.06);
+}
+
+.sig-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.sig-actions input[type="file"] {
+    display: none;
+}
+
+.sig-hint {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    opacity: 0.6;
+    margin-top: 0.5rem;
+}
+
+/* تحسينات الموبايل */
+@media (max-width: 768px) {
+    .logo-upload-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .logo-preview {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .logo-actions {
+        width: 100%;
+        align-items: center;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .signature-area {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-preview {
+        width: 100px;
+        height: 100px;
+    }
+}

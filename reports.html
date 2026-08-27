@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>التقارير والإحصائيات</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/reports.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">تم التحميل بنجاح</span>
+    </div>
+
+    <div id="header"></div>
+
+    <div class="dashboard">
+        <div class="reports-container">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h1>
+                <p class="page-subtitle">تحليل أداء العروض والإيرادات</p>
+            </div>
+
+            <!-- فلتر التقارير -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-filter"></i> فلترة التقارير</h2>
+                    <button class="btn btn-primary" onclick="generateReport()">
+                        <i class="fas fa-sync"></i> تحديث التقرير
+                    </button>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> من</label>
+                        <input type="date" id="reportFrom" />
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> إلى</label>
+                        <input type="date" id="reportTo" />
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-filter"></i> العميل</label>
+                        <select id="reportClient">
+                            <option value="">الكل</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-tag"></i> الحالة</label>
+                        <select id="reportStatus">
+                            <option value="">الكل</option>
+                            <option value="active">نشط</option>
+                            <option value="expired">منتهي</option>
+                            <option value="pending">قيد الانتظار</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الإحصائيات السريعة -->
+            <div class="stats-grid" id="reportStats">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+                    <div class="stat-number" id="reportTotalOffers">0</div>
+                    <div class="stat-label">إجمالي العروض</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-number" id="reportTotalRevenue">0</div>
+                    <div class="stat-label">إجمالي الإيرادات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="reportUniqueClients">0</div>
+                    <div class="stat-label">عدد العملاء</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-number" id="reportActiveOffers">0</div>
+                    <div class="stat-label">العروض النشطة</div>
+                </div>
+            </div>
+
+            <!-- الرسوم البيانية -->
+            <div class="charts-grid">
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-line"></i> توزيع العروض</h3>
+                        <select id="chartType" onchange="updateChartType()">
+                            <option value="bar">أعمدة</option>
+                            <option value="line">خطي</option>
+                            <option value="pie">دائري</option>
+                        </select>
+                    </div>
+                    <canvas id="offersChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-pie-chart"></i> توزيع العملاء</h3>
+                    </div>
+                    <canvas id="clientsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- جدول العروض -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> قائمة العروض</h2>
+                    <div class="table-actions">
+                        <button class="btn btn-gold btn-sm" onclick="exportReportPDF()">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="exportReportExcel()">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="printReport()">
+                            <i class="fas fa-print"></i> طباعة
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم العرض</th>
+                                <th>العميل</th>
+                                <th>التاريخ</th>
+                                <th>الإجمالي</th>
+                                <th>الضريبة</th>
+                                <th>الإجمالي شامل الضريبة</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align:center;color:var(--text-light);">
+                                    <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/main.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>
