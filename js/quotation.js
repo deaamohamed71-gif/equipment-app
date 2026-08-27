@@ -1,4 +1,4 @@
-// js/quotation.js - كود صفحة العرض مع نظام الترخيص ودالة PDF المحسنة
+// js/quotation.js - كود صفحة العرض كاملاً ومحدثاً
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
@@ -159,7 +159,6 @@ function deleteRow(index) {
     renderTable();
 }
 
-// ====== إضافة صف مع التحقق من الترخيص ======
 function addRow() {
     if (typeof licenseManager === 'undefined') {
         data.push({ name: 'معدة جديدة', unit: 'متر', value: 0, priceType: 'يومي', duration: 'أيام', count: 1, unitPrice: 0, icon: defaultIcon });
@@ -271,7 +270,7 @@ function saveData() {
 }
 
 function autoSave() {
-    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage'].forEach(id => {
+    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage','companyName','companyPhone','companyAddress','companyCommercial','companyTax','projectName'].forEach(id => {
         const el = document.getElementById(id);
         if (el) localStorage.setItem('field_' + id, el.value);
     });
@@ -493,22 +492,18 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF محسن مع دعم التنسيقات الداخلية والتحقق من الترخيص ======
+// ====== تصدير PDF محسن مع دعم العلامة المائية والقيم الديناميكية الحية ======
 function savePDF() {
-    // التحقق من صلاحية الترخيص لتصدير الـ PDF
+    let isFreeVersion = true;
     if (typeof licenseManager !== 'undefined') {
         const features = licenseManager.getFeatures();
-        if (!features.canExportPDF) {
-            showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
-            licenseManager.showActivationPrompt();
-            return;
-        }
+        isFreeVersion = !features.isPremium;
     }
     
     const loadingToast = showToast('📄 جاري تجهيز ملف PDF...', 'success');
 
     try {
-        // 1. جمع البيانات الأساسية من الحقول النشطة
+        // قراءة البيانات الحالية المحدثة من حقول الإدخال في الشاشة مباشرة
         const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
         const companyPhone = document.getElementById('companyPhone')?.value || '';
         const companyAddress = document.getElementById('companyAddress')?.value || '';
@@ -539,7 +534,7 @@ function savePDF() {
         const sigClient = localStorage.getItem('sig_sigClient') || '';
         const notesData = notes && notes.length > 0 ? notes : defaultNotes;
 
-        // 2. تجميع بنود الأسعار وحساب العمليات
+        // تجميع بنود الأسعار
         let itemsHtml = '';
         data.forEach((row, index) => {
             const opTotal = getOperationTotal(row);
@@ -561,7 +556,6 @@ function savePDF() {
             `;
         });
 
-        // 3. بناء هيكل HTML كامل للطباعة والتصدير بتنسيقات داخلية ثابتة لضمان توافقية الطباعة
         const printContainer = document.createElement('div');
         printContainer.dir = 'rtl';
         printContainer.style.cssText = `
@@ -574,9 +568,20 @@ function savePDF() {
             color: #1a2a3a;
             padding: 12mm;
             box-sizing: border-box;
+            position: relative;
         `;
 
+        let watermarkHtml = '';
+        if (isFreeVersion) {
+            watermarkHtml = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 65px; color: rgba(200, 200, 200, 0.22); font-weight: bold; z-index: 9999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
+                    Graphic Studio 3D - Free Version
+                </div>
+            `;
+        }
+
         printContainer.innerHTML = `
+            ${watermarkHtml}
             <!-- الهيدر -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 3px solid #1a6b8a; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -673,7 +678,6 @@ function savePDF() {
 
         document.body.appendChild(printContainer);
 
-        // 4. خيارات تصدير الـ PDF عبر مكتبة html2pdf
         const opt = {
             margin: [6, 8, 6, 8],
             filename: `Quotation_${quotationNumber}.pdf`,
@@ -692,7 +696,6 @@ function savePDF() {
             }
         };
 
-        // 5. التنفيذ والحفظ
         html2pdf().set(opt).from(printContainer).save().then(() => {
             if (document.body.contains(printContainer)) {
                 document.body.removeChild(printContainer);
@@ -759,12 +762,10 @@ function shareOptions() {
 
 // ====== التهيئة ======
 function loadQuotationData() {
-    // تهيئة الترخيص
     if (typeof licenseManager !== 'undefined') {
         initLicense();
     }
     
-    // تحميل البيانات
     const saved = localStorage.getItem('equipDataV12');
     if (saved) {
         try { data = JSON.parse(saved); } 
@@ -777,14 +778,13 @@ function loadQuotationData() {
     try { notes = JSON.parse(savedNotes) || [...defaultNotes]; } 
     catch { notes = [...defaultNotes]; }
     
-    // تحميل القيم من localStorage
-    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage'].forEach(id => {
+    // تحميل القيم من localStorage (شاملة حقول الشركة والمشروع)
+    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage','companyName','companyPhone','companyAddress','companyCommercial','companyTax','projectName'].forEach(id => {
         const val = localStorage.getItem('field_' + id);
         const el = document.getElementById(id);
         if (val !== null && el) el.value = val;
     });
     
-    // تعيين التواريخ الافتراضية
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const future = new Date(now);
@@ -796,7 +796,6 @@ function loadQuotationData() {
     if (issueDateEl && !issueDateEl.value) issueDateEl.value = today;
     if (validityDateEl && !validityDateEl.value) validityDateEl.value = futureStr;
     
-    // تحميل الحقول الإضافية
     ['transportGo','transportBack','transportFlatbed','roadCards','fuelCost'].forEach(id => {
         const val = localStorage.getItem('extra_' + id);
         const el = document.getElementById(id);
@@ -807,12 +806,10 @@ function loadQuotationData() {
     const taxRateEl = document.getElementById('taxRate');
     if (taxRate && taxRateEl) taxRateEl.value = taxRate;
     
-    // تحديث الواجهة حسب الترخيص
     if (typeof licenseManager !== 'undefined') {
         updateUIForLicense();
     }
     
-    // العرض
     renderTable();
     renderNotes();
     updateTotalSummary();
