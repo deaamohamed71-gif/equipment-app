@@ -932,3 +932,57 @@ body.dark-mode ::-webkit-scrollbar-thumb {
 body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: var(--gold);
 }
+/* ====== حل مشكلة التداخل بين الصفحات ====== */
+
+/* التأكد من أن كل صفحة مستقلة */
+.dashboard {
+    position: relative;
+    z-index: 1;
+}
+
+/* منع ظهور أجزاء من صفحات أخرى */
+.main-content,
+.quotation-container,
+.company-container,
+.design-container,
+.reports-container {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+}
+
+/* التأكد من أن المودالات فوق كل شيء */
+.modal-overlay {
+    z-index: 9998;
+}
+
+.modal-overlay .modal-content {
+    z-index: 9999;
+}
+
+/* التأكد من أن الهيدر والفوتر في مكانهما الصحيح */
+#header {
+    position: relative;
+    z-index: 100;
+}
+
+#footer {
+    position: relative;
+    z-index: 100;
+}
+
+/* حل مشكلة overflow */
+body {
+    overflow-x: hidden;
+}
+
+.dashboard {
+    overflow: hidden;
+}
+
+/* منع التداخل بين الصفحات عند الطباعة */
+@media print {
+    .modal-overlay {
+        display: none !important;
+    }
+}
