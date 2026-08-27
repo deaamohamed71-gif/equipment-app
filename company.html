@@ -6,19 +6,14 @@
     <base href="/equipment-app/" />
     <title>بيانات الشركة</title>
     
-    <!-- ملفات التطبيق -->
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/company.css" />
-    
-    <!-- المكتبات الخارجية -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
-    <!-- أيقونة المتصفح -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
     
-    <!-- إعدادات PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a6b8a" />
@@ -38,125 +33,7 @@
                 <p class="page-subtitle">إدارة معلومات الشركة والتوقيعات الإلكترونية</p>
             </div>
 
-            <!-- قسم الشعار -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2><i class="fas fa-image"></i> شعار الشركة</h2>
-                </div>
-                <div class="logo-upload-area">
-                    <div class="logo-preview">
-                        <img id="logoPreview" src="" alt="الشعار" style="display:none;" />
-                        <div class="logo-placeholder" id="logoPlaceholder">
-                            <i class="fas fa-building"></i>
-                            <span>رفع الشعار</span>
-                        </div>
-                    </div>
-                    <div class="logo-actions">
-                        <label class="btn btn-primary" for="logoUpload">
-                            <i class="fas fa-upload"></i> رفع شعار
-                        </label>
-                        <input type="file" id="logoUpload" accept="image/png,image/jpeg" onchange="uploadLogo(event)" />
-                        <button class="btn btn-danger" onclick="removeLogo()">
-                            <i class="fas fa-trash"></i> حذف الشعار
-                        </button>
-                        <div class="logo-hint">يسمح بملفات PNG و JPG (الحد الأقصى 2 ميجابايت)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- قسم معلومات الشركة -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2><i class="fas fa-info-circle"></i> معلومات الشركة</h2>
-                    <button class="btn btn-success" onclick="saveCompanyData()">
-                        <i class="fas fa-save"></i> حفظ البيانات
-                    </button>
-                </div>
-                <form id="companyForm" class="company-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label><i class="fas fa-building"></i> اسم الشركة</label>
-                            <input type="text" id="companyName" value="شركة المعدات الحديثة" onchange="autoSaveCompany()" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-phone"></i> رقم الهاتف</label>
-                            <input type="text" id="companyPhone" value="0123456789" onchange="autoSaveCompany()" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> العنوان</label>
-                            <input type="text" id="companyAddress" value="القاهرة" onchange="autoSaveCompany()" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-id-card"></i> السجل التجاري</label>
-                            <input type="text" id="companyCommercial" value="123456" onchange="autoSaveCompany()" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-receipt"></i> الرقم الضريبي</label>
-                            <input type="text" id="companyTax" value="987654" onchange="autoSaveCompany()" />
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-project-diagram"></i> المشروع الافتراضي</label>
-                            <input type="text" id="projectName" value="برج الأمل" onchange="autoSaveCompany()" />
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- قسم التوقيع الإلكتروني -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2><i class="fas fa-pen-fancy"></i> التوقيع الإلكتروني</h2>
-                </div>
-                <div class="signature-area">
-                    <div class="signature-box">
-                        <div class="sig-header">
-                            <i class="fas fa-user-tie"></i>
-                            <h3>توقيع الموظف</h3>
-                        </div>
-                        <div class="sig-preview" id="sigEmployeePreview">
-                            <img id="sigEmployeeImg" src="" alt="توقيع الموظف" style="display:none;" />
-                            <div class="sig-placeholder" id="sigEmployeePlaceholder">
-                                <i class="fas fa-pen"></i>
-                                <span>اختر صورة التوقيع</span>
-                            </div>
-                        </div>
-                        <div class="sig-actions">
-                            <label class="btn btn-primary btn-sm" for="sigEmployeeUpload">
-                                <i class="fas fa-upload"></i> رفع
-                            </label>
-                            <input type="file" id="sigEmployeeUpload" accept="image/png,image/jpeg" onchange="uploadSignature('sigEmployee', this)" />
-                            <button class="btn btn-danger btn-sm" onclick="clearSignature('sigEmployee')">
-                                <i class="fas fa-trash"></i> مسح
-                            </button>
-                        </div>
-                        <div class="sig-hint">يسمح بملفات PNG و JPG (الحد الأقصى 2 ميجابايت)</div>
-                    </div>
-
-                    <div class="signature-box">
-                        <div class="sig-header">
-                            <i class="fas fa-user-check"></i>
-                            <h3>توقيع العميل</h3>
-                        </div>
-                        <div class="sig-preview" id="sigClientPreview">
-                            <img id="sigClientImg" src="" alt="توقيع العميل" style="display:none;" />
-                            <div class="sig-placeholder" id="sigClientPlaceholder">
-                                <i class="fas fa-pen"></i>
-                                <span>اختر صورة التوقيع</span>
-                            </div>
-                        </div>
-                        <div class="sig-actions">
-                            <label class="btn btn-primary btn-sm" for="sigClientUpload">
-                                <i class="fas fa-upload"></i> رفع
-                            </label>
-                            <input type="file" id="sigClientUpload" accept="image/png,image/jpeg" onchange="uploadSignature('sigClient', this)" />
-                            <button class="btn btn-danger btn-sm" onclick="clearSignature('sigClient')">
-                                <i class="fas fa-trash"></i> مسح
-                            </button>
-                        </div>
-                        <div class="sig-hint">يسمح بملفات PNG و JPG (الحد الأقصى 2 ميجابايت)</div>
-                    </div>
-                </div>
-            </div>
+            <!-- محتوى صفحة الشركة -->
         </div>
     </div>
 

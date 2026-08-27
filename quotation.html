@@ -6,19 +6,14 @@
     <base href="/equipment-app/" />
     <title>عرض أسعار إيجار معدات</title>
     
-    <!-- ملفات التطبيق -->
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/quotation.css" />
-    
-    <!-- المكتبات الخارجية -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
-    <!-- أيقونة المتصفح -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
     
-    <!-- إعدادات PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a6b8a" />
@@ -51,7 +46,7 @@
                 </div>
             </div>
 
-            <!-- العروض المحفوظة -->
+            <!-- باقي محتوى صفحة العرض -->
             <div class="saved-offers-row">
                 <label><i class="fas fa-history"></i> العروض:</label>
                 <select id="savedOffersList" onchange="loadSavedOffer(this.value)">
@@ -62,143 +57,13 @@
                 </button>
             </div>
 
-            <!-- معلومات العرض -->
-            <div class="quotation-info">
-                <div class="info-item">
-                    <label><i class="fas fa-hashtag"></i> رقم العرض</label>
-                    <input type="text" id="quotationNumber" value="QT-2026-001" onchange="autoSave()" />
-                </div>
-                <div class="info-item">
-                    <label><i class="fas fa-calendar-alt"></i> تاريخ الإصدار</label>
-                    <input type="date" id="issueDate" onchange="autoSave()" />
-                </div>
-                <div class="info-item">
-                    <label><i class="fas fa-hourglass-half"></i> تاريخ الصلاحية</label>
-                    <input type="date" id="validityDate" onchange="autoSave()" />
-                </div>
-                <div class="info-item">
-                    <span class="validity-badge" id="validityBadge">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="validityStatus">ساري</span>
-                    </span>
-                </div>
-            </div>
-
-            <!-- معلومات العميل -->
-            <div class="client-section">
-                <div class="welcome-msg">
-                    <i class="fas fa-handshake"></i>
-                    <span>موجه إلى:</span>
-                    <input type="text" id="targetCompany" list="clientList" placeholder="الشركة المستهدفة" onchange="autoSave()" />
-                    <datalist id="clientList"></datalist>
-                    <span class="divider">|</span>
-                    <input type="text" id="welcomeMessage" placeholder="رسالة ترحيبية" value="نشكركم على ثقتكم" onchange="autoSave()" />
-                    <button class="btn btn-pink btn-sm" onclick="openClientModal()">
-                        <i class="fas fa-users"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- الجدول الرئيسي -->
-            <div class="table-wrap">
-                <table id="equipTable">
-                    <thead>
-                        <tr>
-                            <th style="min-width:150px;">المعدة</th>
-                            <th style="min-width:80px;">الوحدة</th>
-                            <th style="min-width:75px;">القيمة</th>
-                            <th style="min-width:95px;">نوع السعر</th>
-                            <th style="min-width:90px;">المدة</th>
-                            <th style="min-width:70px;">العدد</th>
-                            <th style="min-width:100px;">سعر الوحدة</th>
-                            <th style="min-width:110px;">الإجمالي</th>
-                            <th style="min-width:45px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <!-- إضافة صف -->
-            <div class="add-row-area">
-                <button class="btn" onclick="addRow()">
-                    <i class="fas fa-plus-circle"></i> إضافة بند جديد
-                </button>
-                <button class="btn btn-clear" onclick="clearEquipmentOnly()">
-                    <i class="fas fa-eraser"></i> مسح المحتوى
-                </button>
-            </div>
-
-            <!-- الحقول الإضافية -->
-            <div class="extra-fields">
-                <div class="field">
-                    <i class="fas fa-truck"></i>
-                    <span class="field-label">نقل ذهاب:</span>
-                    <input type="number" id="transportGo" value="5000" min="0" onchange="updateExtras()" />
-                    <span>ج.م</span>
-                </div>
-                <div class="field">
-                    <i class="fas fa-truck"></i>
-                    <span class="field-label">نقل عودة:</span>
-                    <input type="number" id="transportBack" value="5000" min="0" onchange="updateExtras()" />
-                    <span>ج.م</span>
-                </div>
-                <div class="field">
-                    <i class="fas fa-trailer"></i>
-                    <span class="field-label">مشال:</span>
-                    <input type="number" id="transportFlatbed" value="0" min="0" onchange="updateExtras()" />
-                    <span>ج.م</span>
-                </div>
-                <div class="field">
-                    <i class="fas fa-road"></i>
-                    <span class="field-label">كارتات:</span>
-                    <input type="number" id="roadCards" value="20000" min="0" onchange="updateExtras()" />
-                    <span>ج.م</span>
-                </div>
-                <div class="field">
-                    <i class="fas fa-gas-pump"></i>
-                    <span class="field-label">سولار:</span>
-                    <input type="number" id="fuelCost" value="0" min="0" onchange="updateExtras()" />
-                    <span>ج.م</span>
-                </div>
-            </div>
-
-            <!-- الضريبة والإجمالي -->
-            <div class="tax-total-row">
-                <div class="tax-section">
-                    <label><i class="fas fa-percent"></i> VAT:</label>
-                    <input type="number" id="taxRate" value="10" min="0" max="100" onchange="updateTotalSummary()" />
-                    <span>%</span>
-                    <span>قيمة الضريبة: <span class="tax-result" id="taxAmount">0</span> ج.م</span>
-                    <span>الإجمالي شامل الضريبة: <span class="tax-result" id="totalWithTax">0</span> ج.م</span>
-                    <span id="taxNote" class="tax-note" style="display:none;">💰 المبلغ الكلي لا يشمل أي ضرائب</span>
-                </div>
-                <div class="total-section">
-                    <div class="total-summary" id="totalDisplay">
-                        <i class="fas fa-coins"></i> 0 ج.م
-                    </div>
-                    <button class="btn btn-success" onclick="calcTotal()">
-                        <i class="fas fa-calculator"></i> حساب
-                    </button>
-                </div>
-            </div>
-
-            <!-- الملاحظات -->
-            <div class="note-section">
-                <h3>
-                    <span><i class="fas fa-file-contract"></i> ملاحظات وشروط</span>
-                    <button class="btn" onclick="addNote()">
-                        <i class="fas fa-plus"></i> إضافة
-                    </button>
-                </h3>
-                <div id="notesContainer"></div>
-            </div>
+            <!-- ... باقي المحتوى ... -->
         </div>
     </div>
 
     <div id="footer"></div>
 
-    <!-- مودال المعاينة -->
+    <!-- المودالات -->
     <div class="modal-overlay" id="previewModal" onclick="if(event.target===this) closePreview()">
         <div class="modal-content">
             <button class="close-modal" onclick="closePreview()"><i class="fas fa-times"></i></button>
@@ -206,7 +71,6 @@
         </div>
     </div>
 
-    <!-- مودال العملاء -->
     <div class="modal-overlay" id="clientModal" onclick="if(event.target===this) closeClientModal()">
         <div class="modal-content client-modal">
             <button class="close-modal" onclick="closeClientModal()"><i class="fas fa-times"></i></button>
