@@ -492,7 +492,7 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF محسن مع دعم العلامة المائية والقيم الديناميكية الحية ======
+// ====== تصدير PDF محسن مع العلامة المائية وقراءة القيم الحية ======
 function savePDF() {
     let isFreeVersion = true;
     if (typeof licenseManager !== 'undefined') {
@@ -503,7 +503,6 @@ function savePDF() {
     const loadingToast = showToast('📄 جاري تجهيز ملف PDF...', 'success');
 
     try {
-        // قراءة البيانات الحالية المحدثة من حقول الإدخال في الشاشة مباشرة
         const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
         const companyPhone = document.getElementById('companyPhone')?.value || '';
         const companyAddress = document.getElementById('companyAddress')?.value || '';
@@ -534,16 +533,14 @@ function savePDF() {
         const sigClient = localStorage.getItem('sig_sigClient') || '';
         const notesData = notes && notes.length > 0 ? notes : defaultNotes;
 
-        // تجميع بنود الأسعار
         let itemsHtml = '';
         data.forEach((row, index) => {
             const opTotal = getOperationTotal(row);
-            const icon = row.icon || getIconForName(row.name) || 'fa-arrow-up';
             
             itemsHtml += `
                 <tr style="background-color: ${index % 2 === 0 ? '#f8fafc' : '#ffffff'};">
                     <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px; font-weight: bold;">
-                        <i class="fas ${icon}" style="color: #888; margin-left: 4px;"></i> ${row.name || 'غير محدد'}
+                        ${row.name || 'غير محدد'}
                     </td>
                     <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.unit || '---'}</td>
                     <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.value || 0}</td>
@@ -559,22 +556,24 @@ function savePDF() {
         const printContainer = document.createElement('div');
         printContainer.dir = 'rtl';
         printContainer.style.cssText = `
-            position: absolute;
-            left: -9999px;
+            position: fixed;
             top: 0;
-            width: 297mm;
+            right: 0;
+            width: 1122px;
             background: #ffffff;
             font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
             color: #1a2a3a;
-            padding: 12mm;
+            padding: 25px;
             box-sizing: border-box;
-            position: relative;
+            z-index: -9999;
+            opacity: 0.01;
+            pointer-events: none;
         `;
 
         let watermarkHtml = '';
         if (isFreeVersion) {
             watermarkHtml = `
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 65px; color: rgba(200, 200, 200, 0.22); font-weight: bold; z-index: 9999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 70px; color: rgba(200, 200, 200, 0.25); font-weight: bold; z-index: 999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
                     Graphic Studio 3D - Free Version
                 </div>
             `;
@@ -582,10 +581,9 @@ function savePDF() {
 
         printContainer.innerHTML = `
             ${watermarkHtml}
-            <!-- الهيدر -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 3px solid #1a6b8a; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    ${logo ? `<img src="${logo}" alt="شعار الشركة" style="max-height: 50px; max-width: 70px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
+                    ${logo ? `<img src="${logo}" crossorigin="anonymous" alt="شعار الشركة" style="max-height: 50px; max-width: 70px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
                     <div>
                         <h2 style="font-size: 15px; color: #1a6b8a; margin: 0;">${companyName}</h2>
                         <p style="font-size: 9px; color: #666; margin: 2px 0;">هاتف: ${companyPhone} | العنوان: ${companyAddress}</p>
@@ -599,7 +597,6 @@ function savePDF() {
                 </div>
             </div>
 
-            <!-- معلومات العميل -->
             <div style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; font-size: 10px; border: 1px solid #e0e8ec;">
                 <span style="font-weight: bold; color: #1a6b8a;">موجه إلى:</span>
                 <span><strong>${targetCompany}</strong></span>
@@ -607,7 +604,6 @@ function savePDF() {
                 <span>${welcomeMessage}</span>
             </div>
 
-            <!-- جدول البنود -->
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
                 <thead>
                     <tr style="background: #1a6b8a; color: white;">
@@ -626,7 +622,6 @@ function savePDF() {
                 </tbody>
             </table>
 
-            <!-- الحقول الإضافية -->
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; font-size: 9px; border: 1px solid #e0e8ec; text-align: center;">
                 <div>نقل ذهاب: <strong>${Number(transportGo).toLocaleString('en-US')} ج.م</strong></div>
                 <div>نقل عودة: <strong>${Number(transportBack).toLocaleString('en-US')} ج.م</strong></div>
@@ -635,7 +630,6 @@ function savePDF() {
                 <div>سولار: <strong>${Number(fuelCost).toLocaleString('en-US')} ج.م</strong></div>
             </div>
 
-            <!-- الضريبة والإجمالي النهائي -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e0e8ec;">
                 <div style="font-size: 9px;">
                     <strong>VAT (${taxRate}%):</strong> قيمة الضريبة: <strong>${taxAmount} ج.م</strong> | الإجمالي شامل الضريبة: <strong>${totalWithTax} ج.م</strong>
@@ -646,7 +640,6 @@ function savePDF() {
                 </div>
             </div>
 
-            <!-- الملاحظات والشروط -->
             ${notesData && notesData.length > 0 ? `
                 <div style="margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid #e0e8ec; border-right: 3px solid #c9a84c; border-radius: 6px;">
                     <h3 style="font-size: 10px; color: #1a6b8a; margin: 0 0 4px 0;">ملاحظات وشروط:</h3>
@@ -654,23 +647,21 @@ function savePDF() {
                 </div>
             ` : ''}
 
-            <!-- التوقيعات -->
             <div style="display: flex; gap: 20px; margin-top: 15px;">
                 <div style="flex: 1; border: 1px dashed #ccc; padding: 8px; text-align: center; border-radius: 6px;">
                     <h4 style="font-size: 9px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع الموظف</h4>
                     <div style="min-height: 35px; display: flex; align-items: center; justify-content: center;">
-                        ${sigEmployee ? `<img src="${sigEmployee}" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
+                        ${sigEmployee ? `<img src="${sigEmployee}" crossorigin="anonymous" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
                     </div>
                 </div>
                 <div style="flex: 1; border: 1px dashed #ccc; padding: 8px; text-align: center; border-radius: 6px;">
                     <h4 style="font-size: 9px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع العميل</h4>
                     <div style="min-height: 35px; display: flex; align-items: center; justify-content: center;">
-                        ${sigClient ? `<img src="${sigClient}" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
+                        ${sigClient ? `<img src="${sigClient}" crossorigin="anonymous" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
                     </div>
                 </div>
             </div>
 
-            <!-- الفوتر -->
             <div style="margin-top: 12px; text-align: center; color: #999; font-size: 7px; border-top: 1px solid #eee; padding-top: 6px;">
                 تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
             </div>
@@ -686,8 +677,7 @@ function savePDF() {
                 scale: 2, 
                 useCORS: true,
                 letterRendering: true,
-                scrollY: 0,
-                windowHeight: printContainer.scrollHeight
+                scrollY: 0
             },
             jsPDF: { 
                 unit: 'mm', 
@@ -778,7 +768,6 @@ function loadQuotationData() {
     try { notes = JSON.parse(savedNotes) || [...defaultNotes]; } 
     catch { notes = [...defaultNotes]; }
     
-    // تحميل القيم من localStorage (شاملة حقول الشركة والمشروع)
     ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage','companyName','companyPhone','companyAddress','companyCommercial','companyTax','projectName'].forEach(id => {
         const val = localStorage.getItem('field_' + id);
         const el = document.getElementById(id);
