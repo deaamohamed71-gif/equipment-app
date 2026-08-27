@@ -33,7 +33,150 @@
                 <p class="page-subtitle">تخصيص مظهر وواجهة التطبيق</p>
             </div>
 
-            <!-- محتوى صفحة التصميم -->
+            <!-- قسم الألوان -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-paint-brush"></i> الألوان</h2>
+                    <button class="btn btn-danger" onclick="resetDesignColors()">
+                        <i class="fas fa-undo"></i> إعادة تعيين
+                    </button>
+                </div>
+                <div class="color-grid">
+                    <div class="color-item">
+                        <label><i class="fas fa-circle" style="color:#1a6b8a;"></i> اللون الأساسي</label>
+                        <input type="color" id="primaryColor" value="#1a6b8a" onchange="changeColor(this.value)" />
+                        <input type="text" id="primaryColorText" value="#1a6b8a" onchange="document.getElementById('primaryColor').value=this.value;changeColor(this.value)" />
+                    </div>
+                    <div class="color-item">
+                        <label><i class="fas fa-circle" style="color:#c9a84c;"></i> اللون الذهبي</label>
+                        <input type="color" id="goldColor" value="#c9a84c" onchange="changeGold(this.value)" />
+                        <input type="text" id="goldColorText" value="#c9a84c" onchange="document.getElementById('goldColor').value=this.value;changeGold(this.value)" />
+                    </div>
+                    <div class="color-item">
+                        <label><i class="fas fa-circle" style="color:#f0f4f8;"></i> لون الخلفية</label>
+                        <input type="color" id="bgColor" value="#f0f4f8" onchange="changeBgColor(this.value)" />
+                        <input type="text" id="bgColorText" value="#f0f4f8" onchange="document.getElementById('bgColor').value=this.value;changeBgColor(this.value)" />
+                    </div>
+                    <div class="color-item">
+                        <label><i class="fas fa-circle" style="color:#1a2a3a;"></i> لون النصوص</label>
+                        <input type="color" id="textColor" value="#1a2a3a" onchange="changeTextColor(this.value)" />
+                        <input type="text" id="textColorText" value="#1a2a3a" onchange="document.getElementById('textColor').value=this.value;changeTextColor(this.value)" />
+                    </div>
+                    <div class="color-item">
+                        <label><i class="fas fa-circle" style="color:#888888;"></i> لون الأيقونات</label>
+                        <input type="color" id="iconColor" value="#888888" onchange="changeIconColor(this.value)" />
+                        <input type="text" id="iconColorText" value="#888888" onchange="document.getElementById('iconColor').value=this.value;changeIconColor(this.value)" />
+                    </div>
+                </div>
+                <div class="color-preview">
+                    <div class="preview-box" style="background:var(--primary);">أساسي</div>
+                    <div class="preview-box" style="background:var(--gold);">ذهبي</div>
+                    <div class="preview-box" style="background:var(--body-bg);color:var(--text);">خلفية</div>
+                    <div class="preview-box" style="background:var(--text);">نص</div>
+                    <div class="preview-box" style="background:var(--icon-color);">أيقونة</div>
+                </div>
+            </div>
+
+            <!-- قسم الخطوط -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-font"></i> الخطوط</h2>
+                </div>
+                <div class="font-options">
+                    <div class="font-item">
+                        <label>نوع الخط الرئيسي</label>
+                        <select id="mainFont" onchange="changeFont(this.value)">
+                            <option value="Cairo">Cairo</option>
+                            <option value="Tajawal">Tajawal</option>
+                            <option value="Amiri">Amiri</option>
+                            <option value="Noto Kufi Arabic">Noto Kufi Arabic</option>
+                            <option value="IBM Plex Sans Arabic">IBM Plex Sans Arabic</option>
+                        </select>
+                    </div>
+                    <div class="font-item">
+                        <label>حجم الخط الأساسي</label>
+                        <div class="font-size-control">
+                            <input type="range" id="fontSize" min="14" max="22" value="16" oninput="changeFontSize(this.value)" />
+                            <span id="fontSizeDisplay">16px</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="font-preview">
+                    <p style="font-size:16px;">مرحباً، هذا مثال على شكل الخط في التطبيق</p>
+                    <p style="font-size:14px; opacity:0.6;">نظام عروض أسعار المعدات - تصميم عصري</p>
+                </div>
+            </div>
+
+            <!-- قسم الأيقونات -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-icons"></i> أيقونات المعدات</h2>
+                </div>
+                <div class="icon-grid">
+                    <div class="icon-item" onclick="selectIcon('fa-arrow-up')">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>رافعة مقصية</span>
+                        <input type="radio" name="iconSelect" value="fa-arrow-up" checked />
+                    </div>
+                    <div class="icon-item" onclick="selectIcon('fa-crane')">
+                        <i class="fas fa-crane"></i>
+                        <span>ونش أحمال</span>
+                        <input type="radio" name="iconSelect" value="fa-crane" />
+                    </div>
+                    <div class="icon-item" onclick="selectIcon('fa-truck')">
+                        <i class="fas fa-truck"></i>
+                        <span>فورك لفت</span>
+                        <input type="radio" name="iconSelect" value="fa-truck" />
+                    </div>
+                    <div class="icon-item" onclick="selectIcon('fa-hand-holding')">
+                        <i class="fas fa-hand-holding"></i>
+                        <span>مانليفت</span>
+                        <input type="radio" name="iconSelect" value="fa-hand-holding" />
+                    </div>
+                    <div class="icon-item" onclick="selectIcon('fa-helmet-safety')">
+                        <i class="fas fa-helmet-safety"></i>
+                        <span>معدات أمان</span>
+                        <input type="radio" name="iconSelect" value="fa-helmet-safety" />
+                    </div>
+                    <div class="icon-item" onclick="selectIcon('fa-compress-arrows-alt')">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <span>مكبس هيدروليكي</span>
+                        <input type="radio" name="iconSelect" value="fa-compress-arrows-alt" />
+                    </div>
+                </div>
+                <div class="icon-actions">
+                    <button class="btn btn-success" onclick="applyIconToSelected()">
+                        <i class="fas fa-check"></i> تطبيق على الصف المحدد
+                    </button>
+                    <button class="btn btn-primary" onclick="applyIconToAll()">
+                        <i class="fas fa-check-double"></i> تطبيق على الكل
+                    </button>
+                </div>
+            </div>
+
+            <!-- قسم المظهر -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-moon"></i> المظهر</h2>
+                </div>
+                <div class="theme-options">
+                    <div class="theme-item" onclick="setTheme('light')">
+                        <i class="fas fa-sun"></i>
+                        <span>وضع فاتح</span>
+                        <div class="theme-preview light-theme"></div>
+                    </div>
+                    <div class="theme-item" onclick="setTheme('dark')">
+                        <i class="fas fa-moon"></i>
+                        <span>وضع غامق</span>
+                        <div class="theme-preview dark-theme"></div>
+                    </div>
+                    <div class="theme-item" onclick="setTheme('auto')">
+                        <i class="fas fa-adjust"></i>
+                        <span>تلقائي</span>
+                        <div class="theme-preview auto-theme"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
