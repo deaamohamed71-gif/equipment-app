@@ -1,4 +1,4 @@
-// js/quotation.js - كود صفحة العرض كاملاً ومحدثاً
+// js/quotation.js - كود صفحة العرض كاملاً ومحدثاً بالطباعة الآمنة
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
@@ -492,7 +492,7 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF محسن مع العلامة المائية وقراءة القيم الحية ======
+// ====== تصدير PDF مضمون 100% عبر نافذة الطباعة المنظمة للمتصفح ======
 function savePDF() {
     let isFreeVersion = true;
     if (typeof licenseManager !== 'undefined') {
@@ -500,121 +500,125 @@ function savePDF() {
         isFreeVersion = !features.isPremium;
     }
     
-    const loadingToast = showToast('📄 جاري تجهيز ملف PDF...', 'success');
+    const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
+    const companyPhone = document.getElementById('companyPhone')?.value || '';
+    const companyAddress = document.getElementById('companyAddress')?.value || '';
+    const companyCommercial = document.getElementById('companyCommercial')?.value || '';
+    const companyTax = document.getElementById('companyTax')?.value || '';
+    const projectName = document.getElementById('projectName')?.value || '';
+    
+    const logo = localStorage.getItem('companyLogo') || '';
+    const quotationNumber = document.getElementById('quotationNumber')?.value || 'QT-2026-001';
+    const issueDate = document.getElementById('issueDate')?.value || new Date().toISOString().split('T')[0];
+    const validityDate = document.getElementById('validityDate')?.value || '';
+    
+    const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
+    const welcomeMessage = document.getElementById('welcomeMessage')?.value || 'نشكركم على ثقتكم';
+    
+    const transportGo = document.getElementById('transportGo')?.value || '0';
+    const transportBack = document.getElementById('transportBack')?.value || '0';
+    const transportFlatbed = document.getElementById('transportFlatbed')?.value || '0';
+    const roadCards = document.getElementById('roadCards')?.value || '0';
+    const fuelCost = document.getElementById('fuelCost')?.value || '0';
+    
+    const taxRate = document.getElementById('taxRate')?.value || '0';
+    const taxAmount = document.getElementById('taxAmount')?.textContent || '0';
+    const totalWithTax = document.getElementById('totalWithTax')?.textContent || '0';
+    const totalDisplay = document.getElementById('totalDisplay')?.innerHTML || '0 ج.م';
+    
+    const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
+    const sigClient = localStorage.getItem('sig_sigClient') || '';
+    const notesData = notes && notes.length > 0 ? notes : defaultNotes;
 
-    try {
-        const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
-        const companyPhone = document.getElementById('companyPhone')?.value || '';
-        const companyAddress = document.getElementById('companyAddress')?.value || '';
-        const companyCommercial = document.getElementById('companyCommercial')?.value || '';
-        const companyTax = document.getElementById('companyTax')?.value || '';
-        const projectName = document.getElementById('projectName')?.value || '';
-        
-        const logo = localStorage.getItem('companyLogo') || '';
-        const quotationNumber = document.getElementById('quotationNumber')?.value || 'QT-2026-001';
-        const issueDate = document.getElementById('issueDate')?.value || new Date().toISOString().split('T')[0];
-        const validityDate = document.getElementById('validityDate')?.value || '';
-        
-        const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
-        const welcomeMessage = document.getElementById('welcomeMessage')?.value || 'نشكركم على ثقتكم';
-        
-        const transportGo = document.getElementById('transportGo')?.value || '0';
-        const transportBack = document.getElementById('transportBack')?.value || '0';
-        const transportFlatbed = document.getElementById('transportFlatbed')?.value || '0';
-        const roadCards = document.getElementById('roadCards')?.value || '0';
-        const fuelCost = document.getElementById('fuelCost')?.value || '0';
-        
-        const taxRate = document.getElementById('taxRate')?.value || '0';
-        const taxAmount = document.getElementById('taxAmount')?.textContent || '0';
-        const totalWithTax = document.getElementById('totalWithTax')?.textContent || '0';
-        const totalDisplay = document.getElementById('totalDisplay')?.innerHTML || '0 ج.م';
-        
-        const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
-        const sigClient = localStorage.getItem('sig_sigClient') || '';
-        const notesData = notes && notes.length > 0 ? notes : defaultNotes;
-
-        let itemsHtml = '';
-        data.forEach((row, index) => {
-            const opTotal = getOperationTotal(row);
-            
-            itemsHtml += `
-                <tr style="background-color: ${index % 2 === 0 ? '#f8fafc' : '#ffffff'};">
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px; font-weight: bold;">
-                        ${row.name || 'غير محدد'}
-                    </td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.unit || '---'}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.value || 0}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.priceType || '---'}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.duration || '---'}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${row.count || 0}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px;">${Number(row.unitPrice || 0).toLocaleString('en-US')}</td>
-                    <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 9px; font-weight: bold; color: #1a6b8a;">${opTotal.toLocaleString('en-US')}</td>
-                </tr>
-            `;
-        });
-
-        const printContainer = document.createElement('div');
-        printContainer.dir = 'rtl';
-        printContainer.style.cssText = `
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 1122px;
-            background: #ffffff;
-            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-            color: #1a2a3a;
-            padding: 25px;
-            box-sizing: border-box;
-            z-index: -9999;
-            opacity: 0.01;
-            pointer-events: none;
+    let itemsHtml = '';
+    data.forEach((row, index) => {
+        const opTotal = getOperationTotal(row);
+        itemsHtml += `
+            <tr style="background-color: ${index % 2 === 0 ? '#f8fafc' : '#ffffff'};">
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px; font-weight: bold;">${row.name || 'غير محدد'}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${row.unit || '---'}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${row.value || 0}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${row.priceType || '---'}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${row.duration || '---'}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${row.count || 0}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px;">${Number(row.unitPrice || 0).toLocaleString('en-US')}</td>
+                <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 11px; font-weight: bold; color: #1a6b8a;">${opTotal.toLocaleString('en-US')}</td>
+            </tr>
         `;
+    });
 
-        let watermarkHtml = '';
-        if (isFreeVersion) {
-            watermarkHtml = `
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 70px; color: rgba(200, 200, 200, 0.25); font-weight: bold; z-index: 999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
-                    Graphic Studio 3D - Free Version
-                </div>
-            `;
-        }
+    let watermarkHtml = '';
+    if (isFreeVersion) {
+        watermarkHtml = `
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 70px; color: rgba(200, 200, 200, 0.22); font-weight: bold; z-index: 9999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
+                Graphic Studio 3D - Free Version
+            </div>
+        `;
+    }
 
-        printContainer.innerHTML = `
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        showToast('⚠️ يرجى السماح بفتح النوافذ المنتقلة (Popups) لتحميل الـ PDF', 'error');
+        return;
+    }
+
+    printWindow.document.write(`
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="UTF-8">
+            <title>عرض أسعار - ${quotationNumber}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+                body {
+                    font-family: 'Cairo', sans-serif;
+                    background: #ffffff;
+                    color: #1a2a3a;
+                    margin: 0;
+                    padding: 15px;
+                    box-sizing: border-box;
+                }
+                @page {
+                    size: A4 landscape;
+                    margin: 10mm;
+                }
+            </style>
+        </head>
+        <body>
             ${watermarkHtml}
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 3px solid #1a6b8a; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 3px solid #1a6b8a; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    ${logo ? `<img src="${logo}" crossorigin="anonymous" alt="شعار الشركة" style="max-height: 50px; max-width: 70px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
+                    ${logo ? `<img src="${logo}" style="max-height: 55px; max-width: 75px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
                     <div>
-                        <h2 style="font-size: 15px; color: #1a6b8a; margin: 0;">${companyName}</h2>
-                        <p style="font-size: 9px; color: #666; margin: 2px 0;">هاتف: ${companyPhone} | العنوان: ${companyAddress}</p>
-                        <p style="font-size: 9px; color: #666; margin: 0;">سجل تجاري: ${companyCommercial} | رقم ضريبي: ${companyTax} | المشروع: ${projectName}</p>
+                        <h2 style="font-size: 16px; color: #1a6b8a; margin: 0;">${companyName}</h2>
+                        <p style="font-size: 10px; color: #666; margin: 2px 0;">هاتف: ${companyPhone} | العنوان: ${companyAddress}</p>
+                        <p style="font-size: 10px; color: #666; margin: 0;">سجل تجاري: ${companyCommercial} | رقم ضريبي: ${companyTax} | المشروع: ${projectName}</p>
                     </div>
                 </div>
                 <div style="text-align: left;">
-                    <h1 style="font-size: 16px; color: #c9a84c; margin: 0;">عرض أسعار</h1>
-                    <p style="font-size: 9px; color: #666; margin: 2px 0;">رقم العرض: <strong>${quotationNumber}</strong></p>
-                    <p style="font-size: 9px; color: #666; margin: 0;">تاريخ الإصدار: ${issueDate} ${validityDate ? `| الصلاحية: ${validityDate}` : ''}</p>
+                    <h1 style="font-size: 18px; color: #c9a84c; margin: 0;">عرض أسعار</h1>
+                    <p style="font-size: 10px; color: #666; margin: 2px 0;">رقم العرض: <strong>${quotationNumber}</strong></p>
+                    <p style="font-size: 10px; color: #666; margin: 0;">تاريخ الإصدار: ${issueDate} ${validityDate ? `| الصلاحية: ${validityDate}` : ''}</p>
                 </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; font-size: 10px; border: 1px solid #e0e8ec;">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 11px; border: 1px solid #e0e8ec;">
                 <span style="font-weight: bold; color: #1a6b8a;">موجه إلى:</span>
                 <span><strong>${targetCompany}</strong></span>
                 <span style="opacity: 0.3;">|</span>
                 <span>${welcomeMessage}</span>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                 <thead>
                     <tr style="background: #1a6b8a; color: white;">
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 20%;">المعدة</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 8%;">الوحدة</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 8%;">القيمة</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 10%;">نوع السعر</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 10%;">المدة</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 8%;">العدد</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 15%;">سعر الوحدة</th>
-                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 9px; width: 21%;">الإجمالي</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 20%;">المعدة</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 8%;">الوحدة</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 8%;">القيمة</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 10%;">نوع السعر</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 10%;">المدة</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 8%;">العدد</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 15%;">سعر الوحدة</th>
+                        <th style="padding: 6px; border: 1px solid #1a6b8a; text-align: center; font-size: 10px; width: 21%;">الإجمالي</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -622,7 +626,7 @@ function savePDF() {
                 </tbody>
             </table>
 
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 6px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; font-size: 9px; border: 1px solid #e0e8ec; text-align: center;">
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 10px; border: 1px solid #e0e8ec; text-align: center;">
                 <div>نقل ذهاب: <strong>${Number(transportGo).toLocaleString('en-US')} ج.م</strong></div>
                 <div>نقل عودة: <strong>${Number(transportBack).toLocaleString('en-US')} ج.م</strong></div>
                 <div>مشال: <strong>${Number(transportFlatbed).toLocaleString('en-US')} ج.م</strong></div>
@@ -630,82 +634,55 @@ function savePDF() {
                 <div>سولار: <strong>${Number(fuelCost).toLocaleString('en-US')} ج.م</strong></div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e0e8ec;">
-                <div style="font-size: 9px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e0e8ec;">
+                <div style="font-size: 10px;">
                     <strong>VAT (${taxRate}%):</strong> قيمة الضريبة: <strong>${taxAmount} ج.م</strong> | الإجمالي شامل الضريبة: <strong>${totalWithTax} ج.م</strong>
                     ${taxRate == 0 ? '<span style="color: #c9a84c; background: #f5ecc0; padding: 2px 6px; border-radius: 4px; margin-right: 6px;">لا يشمل ضرائب</span>' : ''}
                 </div>
-                <div style="padding: 4px 14px; border-radius: 15px; font-weight: bold; font-size: 13px; background: #e8f4f8; border: 2px solid #1a6b8a; color: #1a6b8a;">
+                <div style="padding: 6px 16px; border-radius: 15px; font-weight: bold; font-size: 14px; background: #e8f4f8; border: 2px solid #1a6b8a; color: #1a6b8a;">
                     الإجمالي: ${totalDisplay.replace(/<[^>]*>/g, '').trim()}
                 </div>
             </div>
 
             ${notesData && notesData.length > 0 ? `
-                <div style="margin-top: 8px; padding: 8px 10px; background: #f8fafc; border: 1px solid #e0e8ec; border-right: 3px solid #c9a84c; border-radius: 6px;">
-                    <h3 style="font-size: 10px; color: #1a6b8a; margin: 0 0 4px 0;">ملاحظات وشروط:</h3>
-                    ${notesData.map(note => `<div style="font-size: 9px; padding: 1px 0; color: #444;">• ${note}</div>`).join('')}
+                <div style="margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e0e8ec; border-right: 3px solid #c9a84c; border-radius: 6px;">
+                    <h3 style="font-size: 11px; color: #1a6b8a; margin: 0 0 5px 0;">ملاحظات وشروط:</h3>
+                    ${notesData.map(note => `<div style="font-size: 10px; padding: 2px 0; color: #444;">• ${note}</div>`).join('')}
                 </div>
             ` : ''}
 
-            <div style="display: flex; gap: 20px; margin-top: 15px;">
-                <div style="flex: 1; border: 1px dashed #ccc; padding: 8px; text-align: center; border-radius: 6px;">
-                    <h4 style="font-size: 9px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع الموظف</h4>
-                    <div style="min-height: 35px; display: flex; align-items: center; justify-content: center;">
-                        ${sigEmployee ? `<img src="${sigEmployee}" crossorigin="anonymous" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
+            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                <div style="flex: 1; border: 1px dashed #ccc; padding: 10px; text-align: center; border-radius: 6px;">
+                    <h4 style="font-size: 10px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع الموظف</h4>
+                    <div style="min-height: 40px; display: flex; align-items: center; justify-content: center;">
+                        ${sigEmployee ? `<img src="${sigEmployee}" style="max-height: 40px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 9px;">لا يوجد توقيع</span>'}
                     </div>
                 </div>
-                <div style="flex: 1; border: 1px dashed #ccc; padding: 8px; text-align: center; border-radius: 6px;">
-                    <h4 style="font-size: 9px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع العميل</h4>
-                    <div style="min-height: 35px; display: flex; align-items: center; justify-content: center;">
-                        ${sigClient ? `<img src="${sigClient}" crossorigin="anonymous" style="max-height: 35px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 8px;">لا يوجد توقيع</span>'}
+                <div style="flex: 1; border: 1px dashed #ccc; padding: 10px; text-align: center; border-radius: 6px;">
+                    <h4 style="font-size: 10px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع العميل</h4>
+                    <div style="min-height: 40px; display: flex; align-items: center; justify-content: center;">
+                        ${sigClient ? `<img src="${sigClient}" style="max-height: 40px; max-width: 100%;" />` : '<span style="color: #aaa; font-size: 9px;">لا يوجد توقيع</span>'}
                     </div>
                 </div>
             </div>
 
-            <div style="margin-top: 12px; text-align: center; color: #999; font-size: 7px; border-top: 1px solid #eee; padding-top: 6px;">
+            <div style="margin-top: 15px; text-align: center; color: #999; font-size: 8px; border-top: 1px solid #eee; padding-top: 8px;">
                 تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
             </div>
-        `;
 
-        document.body.appendChild(printContainer);
-
-        const opt = {
-            margin: [6, 8, 6, 8],
-            filename: `Quotation_${quotationNumber}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2, 
-                useCORS: true,
-                letterRendering: true,
-                scrollY: 0
-            },
-            jsPDF: { 
-                unit: 'mm', 
-                format: 'a4', 
-                orientation: 'landscape'
-            }
-        };
-
-        html2pdf().set(opt).from(printContainer).save().then(() => {
-            if (document.body.contains(printContainer)) {
-                document.body.removeChild(printContainer);
-            }
-            if (loadingToast) loadingToast.remove();
-            showToast('✅ تم تصدير PDF بنجاح', 'success');
-        }).catch(err => {
-            if (document.body.contains(printContainer)) {
-                document.body.removeChild(printContainer);
-            }
-            if (loadingToast) loadingToast.remove();
-            showToast('❌ حدث خطأ أثناء تصدير PDF', 'error');
-            console.error('PDF Export Error:', err);
-        });
-
-    } catch (error) {
-        if (loadingToast) loadingToast.remove();
-        console.error('خطأ عام في تصدير الـ PDF:', error);
-        showToast('حدث خطأ أثناء معالجة ملف الـ PDF', 'error');
-    }
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                        window.close();
+                    }, 400);
+                };
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    showToast('✅ تم فتح نافذة الطباعة/الحفظ كـ PDF بنجاح', 'success');
 }
 
 // ====== تصدير Excel ======
