@@ -1,4 +1,4 @@
-// js/activation.js - كود صفحة التفعيل
+// js/activation.js - كود صفحة التفعيل مع Firebase
 
 // ====== تحميل بيانات الترخيص ======
 function loadActivationData() {
@@ -82,8 +82,8 @@ function updateFeatures(info) {
     });
 }
 
-// ====== تفعيل الترخيص ======
-function activateLicense() {
+// ====== تفعيل الترخيص (مع Firebase) ======
+async function activateLicense() {
     const input = document.getElementById('licenseKeyInput');
     const key = input.value.trim();
     const messageEl = document.getElementById('activationMessage');
@@ -93,7 +93,10 @@ function activateLicense() {
         return;
     }
     
-    const result = licenseManager.activateLicense(key);
+    // ✅ التحقق عبر Firebase
+    messageEl.innerHTML = '<span style="color: var(--primary);">⏳ جاري التحقق من المفتاح...</span>';
+    
+    const result = await licenseManager.activateLicense(key);
     messageEl.innerHTML = `<span style="color: ${result.success ? 'var(--success)' : 'var(--danger)'};">${result.message}</span>`;
     
     if (result.success) {

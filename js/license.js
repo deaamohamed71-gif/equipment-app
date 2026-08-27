@@ -1,4 +1,4 @@
-// js/license.js - نظام الترخيص والاشتراك
+// js/license.js - نظام الترخيص مع Firebase
 
 class LicenseManager {
     constructor() {
@@ -111,8 +111,45 @@ class LicenseManager {
         };
     }
 
-    // ====== تفعيل الترخيص ======
-    activateLicense(key) {
+    // ====== تفعيل الترخيص (مع Firebase) ======
+    async activateLicense(key) {
+        // 1. التحقق من Firebase
+        if (typeof window.verifyLicenseWithFirebase === 'function') {
+            try {
+                const result = await window.verifyLicenseWithFirebase(key);
+                
+                if (result.valid) {
+                    const premiumData = {
+                        type: 'premium',
+                        startDate: new Date().toISOString(),
+                        expiryDate: result.expiryDate || this.calculateExpiry(365),
+                        features: this.getPremiumFeatures(),
+                        status: 'active',
+                        licenseKey: key,
+                        isPremium: true
+                    };
+                    
+                    this.licenseData = premiumData;
+                    this.isValidated = true;
+                    this.saveLicense(premiumData);
+                    this.notifyListeners();
+                    return { success: true, message: result.message };
+                } else {
+                    return { success: false, message: result.message };
+                }
+            } catch (error) {
+                console.error("خطأ في الاتصال بخادم Firebase:", error);
+                // 2. في حالة فشل الاتصال، نستخدم النسخة المحلية الاحتياطية
+                return this.activateLicenseLocal(key);
+            }
+        } else {
+            // 3. إذا لم يتم تحميل Firebase، نستخدم النسخة المحلية
+            return this.activateLicenseLocal(key);
+        }
+    }
+
+    // ====== تفعيل الترخيص محلياً (احتياطي) ======
+    activateLicenseLocal(key) {
         const validKeys = [
             'EQ2026-X9F7-KL82-MN34',
             'EQ2026-W8E6-JK71-LM23',
@@ -135,10 +172,10 @@ class LicenseManager {
             this.isValidated = true;
             this.saveLicense(premiumData);
             this.notifyListeners();
-            return { success: true, message: '✅ تم تفعيل النسخة المدفوعة بنجاح!' };
+            return { success: true, message: '✅ تم تفعيل النسخة المدفوعة محلياً (وضع عدم الاتصال).' };
         }
         
-        return { success: false, message: '❌ مفتاح التفعيل غير صالح. يرجى المحاولة مرة أخرى.' };
+        return { success: false, message: '❌ مفتاح التفعيل غير صالح' };
     }
 
     // ====== حساب تاريخ الانتهاء ======
