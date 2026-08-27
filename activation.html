@@ -38,6 +38,7 @@
                 <p>قم بترقية حسابك للاستفادة من جميع الميزات</p>
             </div>
 
+            <!-- ====== حالة الترخيص الحالية ====== -->
             <div class="status-card" id="statusCard">
                 <div class="status-icon" id="statusIcon">
                     <i class="fas fa-crown"></i>
@@ -48,9 +49,11 @@
                     <div class="status-bar">
                         <div class="status-bar-fill" id="statusBarFill" style="width: 100%;"></div>
                     </div>
+                    <p id="planDetails" style="font-size:0.85rem; color:var(--text-light); margin-top:0.3rem;">📋 الخطة: تجريبية (90 يوم)</p>
                 </div>
             </div>
 
+            <!-- ====== الميزات ====== -->
             <div class="features-grid">
                 <div class="feature-card free">
                     <div class="feature-header">
@@ -88,9 +91,11 @@
                 </div>
             </div>
 
+            <!-- ====== خطط الاشتراك ====== -->
             <div class="plans-section">
                 <h2><i class="fas fa-rocket"></i> اختر الخطة المناسبة</h2>
                 <div class="plans-grid">
+                    <!-- الخطة الشهرية -->
                     <div class="plan-card">
                         <div class="plan-header">
                             <i class="fas fa-calendar-alt"></i>
@@ -108,19 +113,21 @@
                         </button>
                     </div>
 
+                    <!-- الخطة السنوية (خصم 50%) -->
                     <div class="plan-card popular">
-                        <div class="popular-badge">الأكثر طلباً</div>
+                        <div class="popular-badge">🔥 الأفضل قيمة</div>
                         <div class="plan-header">
                             <i class="fas fa-calendar-check"></i>
                             <h3>سنوي</h3>
-                            <div class="plan-price">999 <span>ج.م</span></div>
-                            <p>وفر 15%</p>
+                            <div class="plan-price">499 <span>ج.م</span></div>
+                            <p style="color: var(--danger); text-decoration: line-through; font-size: 0.8rem;">999 ج.م</p>
+                            <p style="color: var(--success); font-weight: 700;">وفر 50%</p>
                         </div>
                         <ul class="plan-features">
                             <li><i class="fas fa-check"></i> جميع الميزات المدفوعة</li>
                             <li><i class="fas fa-check"></i> دعم فني مميز</li>
                             <li><i class="fas fa-check"></i> تحديثات مستمرة</li>
-                            <li><i class="fas fa-check"></i> خصم 15%</li>
+                            <li><i class="fas fa-check"></i> خصم 50%</li>
                         </ul>
                         <button class="btn btn-gold" onclick="selectPlan('yearly')">
                             <i class="fas fa-shopping-cart"></i> اشتراك سنوي
@@ -129,6 +136,7 @@
                 </div>
             </div>
 
+            <!-- ====== إدخال مفتاح التفعيل ====== -->
             <div class="activation-form">
                 <h3><i class="fas fa-key"></i> لديك مفتاح تفعيل؟</h3>
                 <div class="activation-input">
