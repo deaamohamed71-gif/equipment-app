@@ -1,4 +1,4 @@
-const CACHE_NAME = 'equipment-quotation-v5';
+const CACHE_NAME = 'equipment-quotation-v7';
 const ASSETS_TO_CACHE = [
   'index.html',
   'quotation.html',
