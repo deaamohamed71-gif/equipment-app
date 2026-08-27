@@ -1,4 +1,4 @@
-// js/quotation.js - كود صفحة العرض كاملاً ومحدثاً بالطباعة الآمنة
+// js/quotation.js - كود صفحة العرض مع دالة PDF عبر الطباعة
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
@@ -270,7 +270,7 @@ function saveData() {
 }
 
 function autoSave() {
-    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage','companyName','companyPhone','companyAddress','companyCommercial','companyTax','projectName'].forEach(id => {
+    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage'].forEach(id => {
         const el = document.getElementById(id);
         if (el) localStorage.setItem('field_' + id, el.value);
     });
@@ -492,14 +492,19 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
-// ====== تصدير PDF مضمون 100% عبر نافذة الطباعة المنظمة للمتصفح ======
+// ====== تصدير PDF عبر نافذة الطباعة ======
 function savePDF() {
-    let isFreeVersion = true;
+    // التحقق من صلاحية الترخيص
     if (typeof licenseManager !== 'undefined') {
         const features = licenseManager.getFeatures();
-        isFreeVersion = !features.isPremium;
+        if (!features.canExportPDF) {
+            showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
     }
     
+    // جمع البيانات
     const companyName = document.getElementById('companyName')?.value || 'شركة المعدات الحديثة';
     const companyPhone = document.getElementById('companyPhone')?.value || '';
     const companyAddress = document.getElementById('companyAddress')?.value || '';
@@ -529,7 +534,15 @@ function savePDF() {
     const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
     const sigClient = localStorage.getItem('sig_sigClient') || '';
     const notesData = notes && notes.length > 0 ? notes : defaultNotes;
+    
+    // تحديد ما إذا كانت النسخة مجانية للعلامة المائية
+    let isFreeVersion = true;
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        isFreeVersion = !features.isPremium;
+    }
 
+    // بناء الجدول
     let itemsHtml = '';
     data.forEach((row, index) => {
         const opTotal = getOperationTotal(row);
@@ -547,18 +560,20 @@ function savePDF() {
         `;
     });
 
+    // العلامة المائية
     let watermarkHtml = '';
     if (isFreeVersion) {
         watermarkHtml = `
-            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 70px; color: rgba(200, 200, 200, 0.22); font-weight: bold; z-index: 9999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
-                Graphic Studio 3D - Free Version
+            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 70px; color: rgba(200, 200, 200, 0.2); font-weight: bold; z-index: 9999; pointer-events: none; white-space: nowrap; text-transform: uppercase;">
+                نسخة تجريبية
             </div>
         `;
     }
 
+    // فتح نافذة الطباعة
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-        showToast('⚠️ يرجى السماح بفتح النوافذ المنتقلة (Popups) لتحميل الـ PDF', 'error');
+        showToast('⚠️ يرجى السماح بفتح النوافذ المنبثقة (Popups) لتحميل الـ PDF', 'error');
         return;
     }
 
@@ -585,6 +600,8 @@ function savePDF() {
         </head>
         <body>
             ${watermarkHtml}
+            
+            <!-- الهيدر -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 3px solid #1a6b8a; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${logo ? `<img src="${logo}" style="max-height: 55px; max-width: 75px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
@@ -601,6 +618,7 @@ function savePDF() {
                 </div>
             </div>
 
+            <!-- العميل -->
             <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 11px; border: 1px solid #e0e8ec;">
                 <span style="font-weight: bold; color: #1a6b8a;">موجه إلى:</span>
                 <span><strong>${targetCompany}</strong></span>
@@ -608,6 +626,7 @@ function savePDF() {
                 <span>${welcomeMessage}</span>
             </div>
 
+            <!-- الجدول -->
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                 <thead>
                     <tr style="background: #1a6b8a; color: white;">
@@ -626,6 +645,7 @@ function savePDF() {
                 </tbody>
             </table>
 
+            <!-- الحقول الإضافية -->
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 10px; border: 1px solid #e0e8ec; text-align: center;">
                 <div>نقل ذهاب: <strong>${Number(transportGo).toLocaleString('en-US')} ج.م</strong></div>
                 <div>نقل عودة: <strong>${Number(transportBack).toLocaleString('en-US')} ج.م</strong></div>
@@ -634,6 +654,7 @@ function savePDF() {
                 <div>سولار: <strong>${Number(fuelCost).toLocaleString('en-US')} ج.م</strong></div>
             </div>
 
+            <!-- الضريبة والإجمالي -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e0e8ec;">
                 <div style="font-size: 10px;">
                     <strong>VAT (${taxRate}%):</strong> قيمة الضريبة: <strong>${taxAmount} ج.م</strong> | الإجمالي شامل الضريبة: <strong>${totalWithTax} ج.م</strong>
@@ -644,6 +665,7 @@ function savePDF() {
                 </div>
             </div>
 
+            <!-- الملاحظات -->
             ${notesData && notesData.length > 0 ? `
                 <div style="margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e0e8ec; border-right: 3px solid #c9a84c; border-radius: 6px;">
                     <h3 style="font-size: 11px; color: #1a6b8a; margin: 0 0 5px 0;">ملاحظات وشروط:</h3>
@@ -651,6 +673,7 @@ function savePDF() {
                 </div>
             ` : ''}
 
+            <!-- التوقيعات -->
             <div style="display: flex; gap: 20px; margin-top: 20px;">
                 <div style="flex: 1; border: 1px dashed #ccc; padding: 10px; text-align: center; border-radius: 6px;">
                     <h4 style="font-size: 10px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع الموظف</h4>
@@ -666,6 +689,7 @@ function savePDF() {
                 </div>
             </div>
 
+            <!-- الفوتر -->
             <div style="margin-top: 15px; text-align: center; color: #999; font-size: 8px; border-top: 1px solid #eee; padding-top: 8px;">
                 تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
             </div>
@@ -745,7 +769,7 @@ function loadQuotationData() {
     try { notes = JSON.parse(savedNotes) || [...defaultNotes]; } 
     catch { notes = [...defaultNotes]; }
     
-    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage','companyName','companyPhone','companyAddress','companyCommercial','companyTax','projectName'].forEach(id => {
+    ['quotationNumber','issueDate','validityDate','targetCompany','welcomeMessage'].forEach(id => {
         const val = localStorage.getItem('field_' + id);
         const el = document.getElementById(id);
         if (val !== null && el) el.value = val;
