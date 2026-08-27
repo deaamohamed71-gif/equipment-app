@@ -1,0 +1,406 @@
+/* css/activation.css - أنماط صفحة التفعيل */
+
+.activation-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.activation-header {
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+.activation-header i {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+}
+
+.activation-header h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    font-family: 'Cairo', sans-serif;
+}
+
+.activation-header p {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-top: 0.3rem;
+}
+
+/* ====== بطاقة الحالة ====== */
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+body.dark-mode .status-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.status-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-light);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+body.dark-mode .status-icon {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status-info {
+    flex: 1;
+}
+
+.status-info h3 {
+    font-size: 1.2rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+.status-info p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+}
+
+.status-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 10px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.status-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    background: var(--success);
+}
+
+/* ====== الميزات ====== */
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+body.dark-mode .feature-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.feature-card.premium {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+body.dark-mode .feature-card.premium {
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.premium-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--gold);
+    color: #fff;
+    padding: 0.2rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.feature-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.feature-header i {
+    font-size: 1.5rem;
+    color: var(--gold);
+}
+
+.feature-header h3 {
+    font-size: 1.1rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+body.dark-mode .feature-header h3 {
+    color: #d4c8a0;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.4rem 0;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+body.dark-mode .feature-list li {
+    color: #d4c8a0;
+}
+
+.feature-list li i {
+    width: 20px;
+    text-align: center;
+}
+
+.feature-list li .fa-check {
+    color: var(--success);
+}
+
+.feature-list li .fa-times {
+    color: var(--danger);
+}
+
+/* ====== خطط الاشتراك ====== */
+.plans-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+.plans-section h2 i {
+    color: var(--gold);
+    margin-left: 8px;
+}
+
+.plans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.plan-card {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid var(--border);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.plan-card.popular {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+body.dark-mode .plan-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .plan-card.popular {
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.popular-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #fff;
+    padding: 0.2rem 1.5rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.plan-header i {
+    font-size: 2rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+}
+
+.plan-header h3 {
+    font-size: 1.2rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0.5rem 0;
+}
+
+.plan-price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.plan-header p {
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.plan-features li {
+    padding: 0.3rem 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.plan-features li i {
+    color: var(--gold);
+}
+
+body.dark-mode .plan-features li {
+    color: #d4c8a0;
+}
+
+/* ====== نموذج التفعيل ====== */
+.activation-form {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+body.dark-mode .activation-form {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.activation-form h3 {
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 1rem;
+}
+
+.activation-form h3 i {
+    color: var(--gold);
+    margin-left: 8px;
+}
+
+.activation-input {
+    display: flex;
+    gap: 0.8rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.activation-input input {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Cairo', sans-serif;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.activation-input input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 107, 138, 0.1);
+}
+
+body.dark-mode .activation-input input {
+    background: rgba(0, 0, 0, 0.3);
+    color: #d4c8a0;
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+#activationMessage {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* ====== تحسينات الموبايل ====== */
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .activation-input {
+        flex-direction: column;
+    }
+    
+    .activation-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .plan-price {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 1rem;
+    }
+    
+    .activation-form {
+        padding: 1rem;
+    }
+}
