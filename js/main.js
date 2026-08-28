@@ -207,8 +207,7 @@ function initApp() {
                 const footer = document.getElementById('footer');
                 if (footer) {
                     const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
-                    footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status}</p>`;
-                }
+footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;                }
             }
         });
     }
