@@ -1,0 +1,161 @@
+/* css/help.css - أنماط صفحة التعليمات */
+
+.help-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.help-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.help-header h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    font-family: 'Cairo', sans-serif;
+}
+
+.help-header h1 i {
+    color: var(--gold);
+    margin-left: 10px;
+}
+
+.help-subtitle {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-top: 0.3rem;
+}
+
+/* شبكة البطاقات */
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.help-card {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.help-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .help-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.help-card .help-icon {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.help-card h3 {
+    font-size: 1.1rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 0.5rem;
+}
+
+.help-card p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.help-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-card ul li {
+    font-size: 0.85rem;
+    color: var(--text);
+    padding: 0.2rem 0;
+    font-family: 'Cairo', sans-serif;
+}
+
+.help-card ul li::before {
+    content: "• ";
+    color: var(--gold);
+    font-weight: bold;
+}
+
+body.dark-mode .help-card h3 {
+    color: #d4c8a0;
+}
+
+body.dark-mode .help-card ul li {
+    color: #d4c8a0;
+}
+
+/* بطاقة مميزة (الترقية) */
+.help-card.premium-card {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+body.dark-mode .help-card.premium-card {
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.help-card.premium-card .help-icon {
+    color: var(--gold);
+}
+
+/* بطاقة الاختصارات */
+.help-card.shortcuts-card kbd {
+    background: var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text);
+}
+
+body.dark-mode .help-card.shortcuts-card kbd {
+    background: rgba(255, 255, 255, 0.1);
+    color: #d4c8a0;
+}
+
+/* زر الرجوع */
+.help-back {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* تحسينات الموبايل */
+@media (max-width: 768px) {
+    .help-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .help-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .help-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .help-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .help-subtitle {
+        font-size: 0.85rem;
+    }
+}
