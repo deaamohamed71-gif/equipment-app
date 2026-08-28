@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع رابط التحديثات)
+// js/main.js - الكود الأساسي المشترك (محدث مع روابط سركات والتحديثات)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -84,9 +84,10 @@ function loadHeaderFooter() {
         const isOnboardingPage = currentPage === 'onboarding.html';
         const isSettingsPage = currentPage === 'settings.html';
         const isChangelogPage = currentPage === 'changelog.html';
+        const isSirkatPage = currentPage === 'sirkat.html';
         
         // إخفاء الهيدر في صفحات معينة
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage) {
             headerPlaceholder.style.display = 'none';
             return;
         }
@@ -113,6 +114,9 @@ function loadHeaderFooter() {
                     <i class="fas fa-palette"></i> التصميم
                 </a>
                 ${!isActivationPage ? `
+                    <a href="sirkat.html" class="btn btn-teal" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-clipboard-list"></i> سركات
+                    </a>
                     <a href="changelog.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-history"></i> التحديثات
                     </a>
@@ -148,8 +152,9 @@ function loadHeaderFooter() {
         const isHelpPage = currentPage === 'help.html';
         const isSettingsPage = currentPage === 'settings.html';
         const isChangelogPage = currentPage === 'changelog.html';
+        const isSirkatPage = currentPage === 'sirkat.html';
         
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage) {
             footerPlaceholder.style.display = 'none';
             return;
         }
