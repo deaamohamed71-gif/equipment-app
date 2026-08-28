@@ -82,9 +82,10 @@ function loadHeaderFooter() {
         const isActivationPage = currentPage === 'activation.html';
         const isHelpPage = currentPage === 'help.html';
         const isOnboardingPage = currentPage === 'onboarding.html';
+        const isSettingsPage = currentPage === 'settings.html';
         
-        // إخفاء الهيدر في صفحات الترحيب والتعليمات (لأن عندهم هيدر خاص)
-        if (isOnboardingPage || isHelpPage) {
+        // إخفاء الهيدر في صفحات الترحيب والتعليمات
+        if (isOnboardingPage || isHelpPage || isSettingsPage) {
             headerPlaceholder.style.display = 'none';
             return;
         }
@@ -114,6 +115,9 @@ function loadHeaderFooter() {
                     <a href="help.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-question-circle"></i> التعليمات
                     </a>
+                    <a href="settings.html" class="btn btn-purple" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-tools"></i> المطور
+                    </a>
                     <a href="activation.html" class="btn btn-gold" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-key"></i> التفعيل
                     </a>
@@ -138,9 +142,10 @@ function loadHeaderFooter() {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const isOnboardingPage = currentPage === 'onboarding.html';
         const isHelpPage = currentPage === 'help.html';
+        const isSettingsPage = currentPage === 'settings.html';
         
-        // إخفاء الفوتر في صفحات الترحيب والتعليمات
-        if (isOnboardingPage || isHelpPage) {
+        // إخفاء الفوتر في صفحات الترحيب والتعليمات والمطور
+        if (isOnboardingPage || isHelpPage || isSettingsPage) {
             footerPlaceholder.style.display = 'none';
             return;
         }
