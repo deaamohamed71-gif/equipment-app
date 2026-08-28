@@ -1,27 +1,26 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع رابط سركات)
+// js/main.js - الكود الأساسي المشترك (محدث مع روابط dashboard.html)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
+    let toast = document.getElementById('toast');
+    
     if (!toast) {
         const newToast = document.createElement('div');
         newToast.id = 'toast';
         newToast.className = 'toast';
         newToast.innerHTML = `<i class="fas fa-check-circle"></i> <span id="toastMessage">${message}</span>`;
         document.body.appendChild(newToast);
-        setTimeout(() => {
-            newToast.className = 'toast show' + (type === 'error' ? ' error' : '');
-            clearTimeout(newToast._timeout);
-            newToast._timeout = setTimeout(() => { newToast.className = 'toast'; }, 3000);
-        }, 100);
-        return;
+        toast = newToast;
     }
     
     const toastMsg = document.getElementById('toastMessage');
     if (toastMsg) toastMsg.textContent = message;
+    
     toast.className = 'toast show' + (type === 'error' ? ' error' : '');
     clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => { newToast.className = 'toast'; }, 3000);
+    toast._timeout = setTimeout(() => { 
+        toast.className = 'toast'; 
+    }, 3000);
 }
 
 // ====== الوضع الليلي/النهاري ======
@@ -77,7 +76,7 @@ function loadColors() {
 function loadHeaderFooter() {
     const headerPlaceholder = document.getElementById('header');
     if (headerPlaceholder) {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
         const isDark = document.body.classList.contains('dark-mode');
         const isActivationPage = currentPage === 'activation.html';
         const isHelpPage = currentPage === 'help.html';
@@ -85,9 +84,10 @@ function loadHeaderFooter() {
         const isSettingsPage = currentPage === 'settings.html';
         const isChangelogPage = currentPage === 'changelog.html';
         const isSirkatPage = currentPage === 'sirkat.html';
+        const isLandingPage = currentPage === 'index.html';
         
         // إخفاء الهيدر في صفحات معينة
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage) {
             headerPlaceholder.style.display = 'none';
             return;
         }
@@ -98,7 +98,7 @@ function loadHeaderFooter() {
                 <h1><i class="fas fa-crown" style="color:var(--gold);"></i> عروض المعدات</h1>
             </div>
             <nav class="header-nav">
-                <a href="index.html" ${currentPage === 'index.html' ? 'class="active"' : ''}>
+                <a href="dashboard.html" ${currentPage === 'dashboard.html' ? 'class="active"' : ''}>
                     <i class="fas fa-home"></i> الرئيسية
                 </a>
                 <a href="quotation.html" ${currentPage === 'quotation.html' ? 'class="active"' : ''}>
@@ -147,14 +147,15 @@ function loadHeaderFooter() {
     
     const footerPlaceholder = document.getElementById('footer');
     if (footerPlaceholder) {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
         const isOnboardingPage = currentPage === 'onboarding.html';
         const isHelpPage = currentPage === 'help.html';
         const isSettingsPage = currentPage === 'settings.html';
         const isChangelogPage = currentPage === 'changelog.html';
         const isSirkatPage = currentPage === 'sirkat.html';
+        const isLandingPage = currentPage === 'index.html';
         
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage) {
             footerPlaceholder.style.display = 'none';
             return;
         }
