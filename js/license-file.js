@@ -1,6 +1,6 @@
-// js/license-file.js - نظام الترخيص عبر ملفات ZLX (يدعم العربية)
+// js/license-file.js - نظام الترخيص عبر ملفات ZLX (يدعم العربية وإدخال Device ID)
 
-// ====== مفتاح التشفير (مشفر بـ Base64) ======
+// ====== مفتاح التشفير ======
 const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
 
 // ====== توليد معرف الجهاز ======
@@ -39,7 +39,6 @@ function generateDeviceId() {
 function encryptLicense(data) {
     try {
         const json = JSON.stringify(data);
-        // ✅ استخدام encodeURIComponent لدعم الحروف العربية
         const encoded = encodeURIComponent(json);
         const encrypted = btoa(encoded);
         const signature = btoa(ENCRYPTION_KEY.substring(0, 10));
@@ -316,13 +315,17 @@ function cancelActivation() {
     }
 }
 
-// ====== دالة للمطور: إنشاء ملف ترخيص ======
+// ====== 🚀 دالة المطور لإنشاء ملف ترخيص (محدثة) ======
+// تستخدم من Console أو من صفحة المطور
 window.generateLicense = function(deviceId, userName, plan, days) {
     try {
+        // ✅ استخدام المعرف المدخل (وليس المعرف المخزن)
+        const finalDeviceId = deviceId || localStorage.getItem('device_id') || 'UNKNOWN';
+        
         const data = {
-            deviceId: deviceId || localStorage.getItem('device_id') || prompt('معرف الجهاز:'),
-            userName: userName || prompt('👤 اسم المستخدم:'),
-            plan: plan || prompt('📋 الخطة (شهرية/سنوية):') || 'سنوية',
+            deviceId: finalDeviceId,
+            userName: userName || 'مستخدم',
+            plan: plan || 'سنوية',
             expiryDate: new Date(Date.now() + (days || 365) * 24 * 60 * 60 * 1000).toISOString()
         };
         return generateLicenseFile(data);
