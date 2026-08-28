@@ -1,19 +1,17 @@
-// js/license-file.js - نظام الترخيص عبر ملفات ZLX (معدل)
+// js/license-file.js - نظام الترخيص عبر ملفات ZLX (يدعم العربية)
 
-// ====== مفتاح التشفير (يجب أن يكون سرياً) ======
-const ENCRYPTION_KEY = 'EquipmentApp-2026-SecretKey-!@#$%';
+// ====== مفتاح التشفير (مشفر بـ Base64) ======
+const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
 
 // ====== توليد معرف الجهاز ======
 function generateDeviceId() {
     try {
-        // جمع معلومات الجهاز - استخدام أسماء متغيرات مختلفة
         const screenInfo = `${window.screen?.width || 'unknown'}x${window.screen?.height || 'unknown'}`;
         const userAgent = navigator.userAgent || 'unknown';
         const platform = navigator.platform || 'unknown';
         const language = navigator.language || 'ar';
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown';
         
-        // إنشاء معرف فريد
         const raw = `${screenInfo}|${userAgent}|${platform}|${language}|${timezone}`;
         let hash = 0;
         for (let i = 0; i < raw.length; i++) {
@@ -22,31 +20,28 @@ function generateDeviceId() {
             hash = hash & hash;
         }
         
-        // تنسيق المعرف
         const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
         const parts = [];
         for (let i = 0; i < 4; i++) {
             parts.push(hex.substring(i * 4, (i + 1) * 4));
         }
-        // إضافة بادئة عشوائية
         const prefixes = ['ASSAM', 'ACER', 'DELL', 'HP', 'LENO', 'MSI', 'ASUS'];
         const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
         return `${prefix}-${parts.join('-')}`;
     } catch (error) {
         console.error('Error generating device ID:', error);
-        // Fallback: استخدام timestamp عشوائي
         const fallback = Math.random().toString(36).substring(2, 10).toUpperCase();
         return `DEV-${fallback}`;
     }
 }
 
-// ====== تشفير البيانات ======
+// ====== تشفير البيانات (يدعم العربية) ======
 function encryptLicense(data) {
     try {
         const json = JSON.stringify(data);
-        // تشفير بسيط باستخدام Base64 + XOR (للتوضيح، يفضل استخدام CryptoJS في الإنتاج)
-        let encrypted = btoa(json);
-        // إضافة توقيع
+        // ✅ استخدام encodeURIComponent لدعم الحروف العربية
+        const encoded = encodeURIComponent(json);
+        const encrypted = btoa(encoded);
         const signature = btoa(ENCRYPTION_KEY.substring(0, 10));
         return `${encrypted}.${signature}`;
     } catch (error) {
@@ -55,7 +50,7 @@ function encryptLicense(data) {
     }
 }
 
-// ====== فك تشفير البيانات ======
+// ====== فك تشفير البيانات (يدعم العربية) ======
 function decryptLicense(encryptedData) {
     try {
         const parts = encryptedData.split('.');
@@ -64,12 +59,12 @@ function decryptLicense(encryptedData) {
         const [encrypted, signature] = parts;
         const expectedSignature = btoa(ENCRYPTION_KEY.substring(0, 10));
         
-        // التحقق من التوقيع
         if (signature !== expectedSignature) {
             return { valid: false, error: 'توقيع غير صالح' };
         }
         
-        const json = atob(encrypted);
+        const decoded = atob(encrypted);
+        const json = decodeURIComponent(decoded);
         const data = JSON.parse(json);
         return { valid: true, data };
     } catch (error) {
@@ -81,7 +76,6 @@ function decryptLicense(encryptedData) {
 // ====== إنشاء ملف ترخيص (للمطور) ======
 function generateLicenseFile(userData) {
     try {
-        // بيانات الترخيص
         const licenseData = {
             deviceId: userData.deviceId,
             userName: userData.userName || 'مستخدم مميز',
@@ -107,7 +101,6 @@ function generateLicenseFile(userData) {
         const encrypted = encryptLicense(licenseData);
         if (!encrypted) return null;
         
-        // إنشاء ملف للتحميل
         const blob = new Blob([encrypted], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -128,7 +121,6 @@ function generateLicenseFile(userData) {
 // ====== تهيئة الصفحة ======
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        // توليد وعرض معرف الجهاز
         let deviceId = localStorage.getItem('device_id');
         if (!deviceId) {
             deviceId = generateDeviceId();
@@ -139,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
             deviceIdEl.textContent = deviceId;
         }
         
-        // التحقق من وجود ترخيص محفوظ
         const savedLicense = localStorage.getItem('license_data');
         if (savedLicense) {
             try {
@@ -184,26 +175,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     const deviceIdEl = document.getElementById('deviceId');
                     const deviceId = deviceIdEl ? deviceIdEl.textContent : '';
                     
-                    // التحقق من تطابق معرف الجهاز
                     if (license.deviceId !== deviceId) {
                         showLicenseError('هذه الرخصة مخصصة لجهاز آخر ولا تطابق معرف جهازك!');
                         return;
                     }
                     
-                    // التحقق من الصلاحية
                     const expiry = new Date(license.expiryDate);
                     if (expiry < new Date()) {
                         showLicenseError('انتهت صلاحية الترخيص!');
                         return;
                     }
                     
-                    // ✅ كل شيء صحيح
                     showLicenseSuccess('✅ تم التحقق من الترخيص بنجاح!');
                     displayLicenseInfo(license);
                     const infoEl = document.getElementById('licenseInfo');
                     if (infoEl) infoEl.style.display = 'block';
                     
-                    // تخزين بيانات الترخيص
                     localStorage.setItem('license_data', JSON.stringify(license));
                     localStorage.setItem('license_file', content);
                 } catch (error) {
@@ -242,7 +229,7 @@ function displayLicenseInfo(license) {
     }
 }
 
-// ====== عرض رسالة خطأ ======
+// ====== عرض رسائل ======
 function showLicenseError(message) {
     const errorEl = document.getElementById('licenseError');
     const successEl = document.getElementById('licenseSuccess');
@@ -253,7 +240,6 @@ function showLicenseError(message) {
     if (errorMsg) errorMsg.textContent = message;
 }
 
-// ====== عرض رسالة نجاح ======
 function showLicenseSuccess(message) {
     const errorEl = document.getElementById('licenseError');
     const successEl = document.getElementById('licenseSuccess');
@@ -274,9 +260,7 @@ function activateLicense() {
         }
         
         const license = JSON.parse(savedLicense);
-        // تطبيق الترخيص على النظام
         if (typeof licenseManager !== 'undefined') {
-            // تحويل بيانات الترخيص إلى نظام الترخيص الحالي
             const premiumData = {
                 type: 'premium',
                 plan: license.plan || 'premium',
@@ -332,13 +316,13 @@ function cancelActivation() {
     }
 }
 
-// ====== دالة للمطور: إنشاء ملف ترخيص (تُستخدم من Console) ======
+// ====== دالة للمطور: إنشاء ملف ترخيص ======
 window.generateLicense = function(deviceId, userName, plan, days) {
     try {
         const data = {
-            deviceId: deviceId || prompt('معرف الجهاز:'),
-            userName: userName || prompt('اسم المستخدم:'),
-            plan: plan || prompt('الخطة (شهرية/سنوية):') || 'سنوية',
+            deviceId: deviceId || localStorage.getItem('device_id') || prompt('معرف الجهاز:'),
+            userName: userName || prompt('👤 اسم المستخدم:'),
+            plan: plan || prompt('📋 الخطة (شهرية/سنوية):') || 'سنوية',
             expiryDate: new Date(Date.now() + (days || 365) * 24 * 60 * 60 * 1000).toISOString()
         };
         return generateLicenseFile(data);
