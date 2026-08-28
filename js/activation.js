@@ -9,14 +9,38 @@ function loadActivationData() {
     const statusDays = document.getElementById('statusDays');
     const statusBarFill = document.getElementById('statusBarFill');
     const statusIcon = document.getElementById('statusIcon');
+    const planDetails = document.getElementById('planDetails');
     
     if (info.isPremium) {
-        statusTitle.textContent = '🎉 النسخة المدفوعة';
+        // أسماء الخطط
+        const planNames = {
+            'monthly': 'شهرية',
+            'yearly': 'سنوية',
+            'premium': 'مدفوعة'
+        };
+        
+        const planEmojis = {
+            'monthly': '📅',
+            'yearly': '📆',
+            'premium': '⭐'
+        };
+        
+        const planName = planNames[info.plan] || 'مدفوعة';
+        const planEmoji = planEmojis[info.plan] || '⭐';
+        
+        statusTitle.textContent = `🎉 النسخة المدفوعة (${planName})`;
         statusTitle.style.color = 'var(--gold)';
-        statusDays.textContent = '✅ تم التفعيل - غير محدود';
+        statusDays.textContent = `✅ ${planEmoji} متبقي ${info.daysLeft} يوماً`;
         statusBarFill.style.width = '100%';
         statusBarFill.style.background = 'var(--gold)';
         statusIcon.innerHTML = '<i class="fas fa-crown" style="color: var(--gold);"></i>';
+        
+        if (planDetails) {
+            planDetails.textContent = `📋 الخطة: ${planName} (${info.daysLeft} يوم متبقي)`;
+            planDetails.style.display = 'block';
+            planDetails.style.color = 'var(--gold)';
+            planDetails.style.fontWeight = '600';
+        }
     } else {
         statusTitle.textContent = '📋 النسخة المجانية';
         statusTitle.style.color = 'var(--primary)';
@@ -26,6 +50,13 @@ function loadActivationData() {
         statusBarFill.style.width = Math.min(100, percentage) + '%';
         statusBarFill.style.background = daysLeft > 30 ? 'var(--success)' : daysLeft > 10 ? 'var(--warning)' : 'var(--danger)';
         statusIcon.innerHTML = '<i class="fas fa-gift" style="color: var(--primary);"></i>';
+        
+        if (planDetails) {
+            planDetails.textContent = '📋 الخطة: تجريبية (90 يوم)';
+            planDetails.style.display = 'block';
+            planDetails.style.color = 'var(--text-light)';
+            planDetails.style.fontWeight = '400';
+        }
     }
     
     updateFeatures(info);
@@ -112,7 +143,7 @@ async function activateLicense() {
 function selectPlan(plan) {
     const message = plan === 'monthly' 
         ? 'سيتم توجيهك إلى صفحة الدفع للاشتراك الشهري (99 ج.م)'
-        : 'سيتم توجيهك إلى صفحة الدفع للاشتراك السنوي (999 ج.م - وفر 15%)';
+        : 'سيتم توجيهك إلى صفحة الدفع للاشتراك السنوي (499 ج.م - وفر 50%)';
     
     if (confirm(`📢 ${message}\n\nملاحظة: هذه واجهة توضيحية، سيتم ربطها ببوابة الدفع الفعلية لاحقاً.`)) {
         showToast('🔧 جارٍ التوجيه إلى بوابة الدفع...', 'success');
