@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <base href="/equipment-app/" />
+    <title>نظام عروض أسعار المعدات - الرئيسية</title>
+    
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
+    
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1a6b8a" />
+
+    <!-- ====== التحقق من صفحة الترحيب ====== -->
+    <script>
+        (function() {
+            if (localStorage.getItem('onboarding_completed') !== 'true') {
+                window.location.href = 'onboarding.html';
+            }
+        })();
+    </script>
+
+    <!-- ====== Firebase SDK ====== -->
+    <script src="js/firebase.js" type="module"></script>
+
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">تم الحفظ بنجاح</span>
+    </div>
+
+    <div id="header"></div>
+
+    <div class="dashboard">
+        <div class="main-content">
+            <div class="page-header">
+                <h1><i class="fas fa-home"></i> لوحة التحكم</h1>
+                <p class="page-subtitle">مرحباً بك في نظام إدارة عروض أسعار المعدات</p>
+            </div>
+
+            <!-- ====== حالة الترخيص ====== -->
+            <div id="licenseStatus" style="background:var(--bg-light); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:1.5rem; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <span id="licenseStatusText" style="font-family:'Cairo',sans-serif;">
+                    <i class="fas fa-info-circle"></i> جاري تحميل معلومات الترخيص...
+                </span>
+                <span id="planDetails" style="font-size:0.75rem; opacity:0.7; display:none;"></span>
+                <a href="activation.html" class="btn btn-gold btn-sm">
+                    <i class="fas fa-key"></i> إدارة التفعيل
+                </a>
+            </div>
+
+            <!-- ====== الإحصائيات ====== -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
+                    <div class="stat-number" id="totalOffers">0</div>
+                    <div class="stat-label">إجمالي العروض</div>
+                    <div class="stat-change positive">+12%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="totalClients">0</div>
+                    <div class="stat-label">إجمالي العملاء</div>
+                    <div class="stat-change positive">+5%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                    <div class="stat-number" id="totalEquipment">0</div>
+                    <div class="stat-label">إجمالي المعدات</div>
+                    <div class="stat-change positive">+8%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-number" id="totalRevenue">0</div>
+                    <div class="stat-label">إجمالي الإيرادات</div>
+                    <div class="stat-change positive">+15%</div>
+                </div>
+            </div>
+
+            <!-- ====== العروض الأخيرة ====== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> أحدث العروض</h2>
+                    <a href="quotation.html" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> عرض جديد
+                    </a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم العرض</th>
+                                <th>العميل</th>
+                                <th>التاريخ</th>
+                                <th>الإجمالي</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOffersList">
+                            <tr>
+                                <td colspan="5" style="text-align:center;color:var(--text-light);">
+                                    <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ====== الروابط السريعة ====== -->
+            <div class="quick-actions">
+                <a href="quotation.html" class="quick-action-card" style="--action-color: var(--primary);">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>عرض جديد</h3>
+                    <p>إنشاء عرض أسعار جديد</p>
+                </a>
+                <a href="company.html" class="quick-action-card" style="--action-color: var(--gold);">
+                    <i class="fas fa-building"></i>
+                    <h3>بيانات الشركة</h3>
+                    <p>تحديث معلومات الشركة</p>
+                </a>
+                <a href="reports.html" class="quick-action-card" style="--action-color: var(--success);">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>التقارير</h3>
+                    <p>عرض الإحصائيات والتقارير</p>
+                </a>
+                <a href="activation.html" class="quick-action-card" style="--action-color: var(--purple);">
+                    <i class="fas fa-key"></i>
+                    <h3>تفعيل التطبيق</h3>
+                    <p>ترقية حسابك للاستفادة من جميع الميزات</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="js/license.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/index.js"></script>
+
+    <!-- ====== Fullscreen API ====== -->
+    <script>
+        (function() {
+            function requestFullscreen() {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
+            }
+
+            const events = ['click', 'touchstart'];
+            function handleFirstInteraction() {
+                requestFullscreen();
+                events.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction);
+                });
+            }
+            events.forEach(event => {
+                document.addEventListener(event, handleFirstInteraction, { once: true });
+            });
+
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    window.scrollTo(0, 1);
+                }
+            });
+
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 300);
+            });
+
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 500);
+            });
+
+            console.log('✅ Fullscreen API تم تفعيلها');
+        })();
+    </script>
+</body>
+</html>

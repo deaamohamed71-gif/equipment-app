@@ -1,198 +1,451 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <base href="/equipment-app/" />
-    <title>نظام عروض أسعار المعدات - الرئيسية</title>
+    <title>نظام عروض أسعار المعدات - الحل المتكامل</title>
     
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/landing.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
     
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a6b8a" />
-
-    <!-- ====== التحقق من صفحة الترحيب ====== -->
-    <script>
-        (function() {
-            if (localStorage.getItem('onboarding_completed') !== 'true') {
-                window.location.href = 'onboarding.html';
-            }
-        })();
-    </script>
-
-    <!-- ====== Firebase SDK ====== -->
-    <script src="js/firebase.js" type="module"></script>
-
 </head>
 <body>
-    <div id="toast" class="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toastMessage">تم الحفظ بنجاح</span>
-    </div>
-
-    <div id="header"></div>
-
-    <div class="dashboard">
-        <div class="main-content">
-            <div class="page-header">
-                <h1><i class="fas fa-home"></i> لوحة التحكم</h1>
-                <p class="page-subtitle">مرحباً بك في نظام إدارة عروض أسعار المعدات</p>
+    
+    <!-- ====== الهيدر ====== -->
+    <header class="landing-header">
+        <div class="landing-header-container">
+            <div class="landing-logo">
+                <i class="fas fa-crown"></i>
+                <span>عروض المعدات</span>
             </div>
-
-            <!-- ====== حالة الترخيص ====== -->
-            <div id="licenseStatus" style="background:var(--bg-light); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:1.5rem; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <span id="licenseStatusText" style="font-family:'Cairo',sans-serif;">
-                    <i class="fas fa-info-circle"></i> جاري تحميل معلومات الترخيص...
-                </span>
-                <span id="planDetails" style="font-size:0.75rem; opacity:0.7; display:none;"></span>
+            <nav class="landing-nav">
+                <a href="#features">المميزات</a>
+                <a href="#pricing">الأسعار</a>
+                <a href="#testimonials">آراء العملاء</a>
                 <a href="activation.html" class="btn btn-gold btn-sm">
-                    <i class="fas fa-key"></i> إدارة التفعيل
+                    <i class="fas fa-key"></i> التفعيل
                 </a>
-            </div>
+                <a href="dashboard.html" class="btn btn-primary btn-sm">
+                    <i class="fas fa-rocket"></i> دخول
+                </a>
+            </nav>
+            <button class="landing-menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
 
-            <!-- ====== الإحصائيات ====== -->
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
-                    <div class="stat-number" id="totalOffers">0</div>
-                    <div class="stat-label">إجمالي العروض</div>
-                    <div class="stat-change positive">+12%</div>
+    <!-- ====== القسم الرئيسي (Hero) ====== -->
+    <section class="landing-hero">
+        <div class="landing-hero-container">
+            <div class="landing-hero-content">
+                <div class="landing-hero-badge">
+                    <i class="fas fa-crown"></i> نظام متكامل
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                    <div class="stat-number" id="totalClients">0</div>
-                    <div class="stat-label">إجمالي العملاء</div>
-                    <div class="stat-change positive">+5%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-tools"></i></div>
-                    <div class="stat-number" id="totalEquipment">0</div>
-                    <div class="stat-label">إجمالي المعدات</div>
-                    <div class="stat-change positive">+8%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
-                    <div class="stat-number" id="totalRevenue">0</div>
-                    <div class="stat-label">إجمالي الإيرادات</div>
-                    <div class="stat-change positive">+15%</div>
-                </div>
-            </div>
-
-            <!-- ====== العروض الأخيرة ====== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <h2><i class="fas fa-clock"></i> أحدث العروض</h2>
-                    <a href="quotation.html" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> عرض جديد
+                <h1>
+                    كل ما تحتاجه لإدارة<br />
+                    <span>عروض أسعار المعدات</span>
+                </h1>
+                <p>
+                    نظام متكامل يجمع بين <strong>عروض الأسعار</strong>، <strong>التقارير</strong>،
+                    <strong>الفوترة</strong>، و<strong>المطبوعات الاحترافية</strong> في مكان واحد.
+                    وفر وقتك وارتقِ بعملك.
+                </p>
+                <div class="landing-hero-buttons">
+                    <a href="dashboard.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i> ابدأ الآن مجاناً
+                    </a>
+                    <a href="#features" class="btn btn-outline btn-lg">
+                        <i class="fas fa-play-circle"></i> شاهد المميزات
                     </a>
                 </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم العرض</th>
-                                <th>العميل</th>
-                                <th>التاريخ</th>
-                                <th>الإجمالي</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentOffersList">
-                            <tr>
-                                <td colspan="5" style="text-align:center;color:var(--text-light);">
-                                    <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="landing-hero-stats">
+                    <div class="stat">
+                        <span class="number">500+</span>
+                        <span class="label">عرض تم إنشاؤه</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">100+</span>
+                        <span class="label">عميل نشط</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">98%</span>
+                        <span class="label">رضا العملاء</span>
+                    </div>
                 </div>
             </div>
-
-            <!-- ====== الروابط السريعة ====== -->
-            <div class="quick-actions">
-                <a href="quotation.html" class="quick-action-card" style="--action-color: var(--primary);">
-                    <i class="fas fa-file-invoice"></i>
-                    <h3>عرض جديد</h3>
-                    <p>إنشاء عرض أسعار جديد</p>
-                </a>
-                <a href="company.html" class="quick-action-card" style="--action-color: var(--gold);">
-                    <i class="fas fa-building"></i>
-                    <h3>بيانات الشركة</h3>
-                    <p>تحديث معلومات الشركة</p>
-                </a>
-                <a href="reports.html" class="quick-action-card" style="--action-color: var(--success);">
-                    <i class="fas fa-chart-bar"></i>
-                    <h3>التقارير</h3>
-                    <p>عرض الإحصائيات والتقارير</p>
-                </a>
-                <a href="activation.html" class="quick-action-card" style="--action-color: var(--purple);">
-                    <i class="fas fa-key"></i>
-                    <h3>تفعيل التطبيق</h3>
-                    <p>ترقية حسابك للاستفادة من جميع الميزات</p>
-                </a>
+            <div class="landing-hero-image">
+                <div class="hero-illustration">
+                    <div class="illustration-icon"><i class="fas fa-file-invoice"></i></div>
+                    <div class="illustration-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="illustration-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="illustration-icon"><i class="fas fa-print"></i></div>
+                    <div class="illustration-ring"></div>
+                    <div class="illustration-ring"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div id="footer"></div>
+    <!-- ====== قسم المميزات ====== -->
+    <section class="landing-features" id="features">
+        <div class="landing-features-container">
+            <div class="landing-section-header">
+                <span class="section-tag">المميزات</span>
+                <h2>كل ما تحتاجه في مكان واحد</h2>
+                <p>نظام متكامل يغطي جميع احتياجاتك من إنشاء العروض إلى طباعة التقارير</p>
+            </div>
+            <div class="landing-features-grid">
+                <!-- 1. عروض الأسعار -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
+                    <h3>عروض الأسعار</h3>
+                    <p>إنشاء عروض احترافية بسهولة، مع إضافة المعدات وتحديد الأسعار والمدة</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> إضافة بنود غير محدودة</li>
+                        <li><i class="fas fa-check"></i> حساب الإجمالي تلقائياً</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF و Excel</li>
+                    </ul>
+                </div>
 
-    <script src="js/license.js"></script>
+                <!-- 2. التقارير -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>التقارير والإحصائيات</h3>
+                    <p>تحليل أداء عروضك وإيراداتك من خلال رسوم بيانية وتقارير مفصلة</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> إحصائيات العروض</li>
+                        <li><i class="fas fa-check"></i> رسوم بيانية تفاعلية</li>
+                        <li><i class="fas fa-check"></i> فلترة وتصدير التقارير</li>
+                    </ul>
+                </div>
+
+                <!-- 3. الفوترة -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-receipt"></i></div>
+                    <h3>إدارة الفوترة</h3>
+                    <p>إدارة العملاء والمدفوعات بكل سهولة، مع تتبع تاريخ المعاملات</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> إدارة العملاء</li>
+                        <li><i class="fas fa-check"></i> تتبع المدفوعات</li>
+                        <li><i class="fas fa-check"></i> تقارير مالية</li>
+                    </ul>
+                </div>
+
+                <!-- 4. المطبوعات (سركات) -->
+                <div class="feature-card highlight">
+                    <div class="feature-icon"><i class="fas fa-print"></i></div>
+                    <h3>المطبوعات الاحترافية</h3>
+                    <p>تحويل بياناتك إلى مطبوعات جذابة مثل "سركات" لتشغيل المعدات اليومية</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> طباعة مباشرة</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF</li>
+                        <li><i class="fas fa-check"></i> تنسيق احترافي</li>
+                    </ul>
+                </div>
+
+                <!-- 5. إدارة العملاء -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3>إدارة العملاء</h3>
+                    <p>حفظ بيانات العملاء وتتبع عروضهم ومدفوعاتهم في مكان واحد</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> قاعدة بيانات العملاء</li>
+                        <li><i class="fas fa-check"></i> تاريخ العروض</li>
+                        <li><i class="fas fa-check"></i> سهولة البحث والفلترة</li>
+                    </ul>
+                </div>
+
+                <!-- 6. التخصيص -->
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                    <h3>تخصيص كامل</h3>
+                    <p>غيّر الألوان والخطوط حسب ذوقك، واجعل التطبيق يعكس هويتك</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> ألوان مخصصة</li>
+                        <li><i class="fas fa-check"></i> خطوط متنوعة</li>
+                        <li><i class="fas fa-check"></i> وضع ليلي ونهاري</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== قسم "كل شيء في مكان واحد" ====== -->
+    <section class="landing-unified">
+        <div class="landing-unified-container">
+            <div class="landing-unified-content">
+                <span class="section-tag">🔥 كل شيء في مكان واحد</span>
+                <h2>نظام متكامل بلا منافس</h2>
+                <p>
+                    من إنشاء عروض الأسعار إلى إدارة العملاء والفوترة، مروراً بالتقارير
+                    والمطبوعات الاحترافية. كل هذا في تطبيق واحد سهل الاستخدام.
+                </p>
+                <div class="unified-features">
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>عروض أسعار احترافية</span>
+                    </div>
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>تقارير وإحصائيات</span>
+                    </div>
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>إدارة الفوترة والعملاء</span>
+                    </div>
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>مطبوعات جذابة (سركات)</span>
+                    </div>
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>تصدير PDF و Excel</span>
+                    </div>
+                    <div class="unified-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>تخصيص كامل للواجهة</span>
+                    </div>
+                </div>
+                <a href="dashboard.html" class="btn btn-gold btn-lg">
+                    <i class="fas fa-rocket"></i> جرب التطبيق الآن
+                </a>
+            </div>
+            <div class="landing-unified-image">
+                <div class="unified-dashboard-preview">
+                    <div class="preview-header">
+                        <span class="preview-dot red"></span>
+                        <span class="preview-dot yellow"></span>
+                        <span class="preview-dot green"></span>
+                        <span class="preview-title">لوحة التحكم</span>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-stat">
+                            <span class="num">12</span>
+                            <span class="lbl">عروض</span>
+                        </div>
+                        <div class="preview-stat">
+                            <span class="num">8</span>
+                            <span class="lbl">عملاء</span>
+                        </div>
+                        <div class="preview-stat">
+                            <span class="num">45k</span>
+                            <span class="lbl">إيرادات</span>
+                        </div>
+                    </div>
+                    <div class="preview-footer">
+                        <span class="preview-badge">🏗️ عرض جديد</span>
+                        <span class="preview-badge">📊 تقرير</span>
+                        <span class="preview-badge">🖨️ طباعة</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== قسم الأسعار ====== -->
+    <section class="landing-pricing" id="pricing">
+        <div class="landing-pricing-container">
+            <div class="landing-section-header">
+                <span class="section-tag">💰 الأسعار</span>
+                <h2>اختر الخطة المناسبة لك</h2>
+                <p>خطط مرنة تناسب جميع الاحتياجات، مع خصومات مميزة للخطط السنوية</p>
+            </div>
+            <div class="landing-pricing-grid">
+                <!-- الخطة المجانية -->
+                <div class="pricing-card free">
+                    <div class="pricing-header">
+                        <span class="pricing-name">مجاني</span>
+                        <div class="pricing-price">0 <span>ج.م</span></div>
+                        <p>للبدء والتجربة</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> 3 بنود في العرض</li>
+                        <li><i class="fas fa-check"></i> حفظ 5 عروض</li>
+                        <li><i class="fas fa-check"></i> 5 عملاء كحد أقصى</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF</li>
+                        <li><i class="fas fa-times"></i> التقارير والإحصائيات</li>
+                        <li><i class="fas fa-times"></i> التوقيع الإلكتروني</li>
+                        <li><i class="fas fa-times"></i> تخصيص كامل</li>
+                    </ul>
+                    <a href="dashboard.html" class="btn btn-outline btn-block">
+                        <i class="fas fa-rocket"></i> ابدأ مجاناً
+                    </a>
+                </div>
+
+                <!-- الخطة المدفوعة (شهري) -->
+                <div class="pricing-card premium">
+                    <div class="pricing-badge">🔥 الأكثر طلباً</div>
+                    <div class="pricing-header">
+                        <span class="pricing-name">مدفوع</span>
+                        <div class="pricing-price">99 <span>ج.م</span></div>
+                        <p>شهرياً</p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> بنود غير محدودة</li>
+                        <li><i class="fas fa-check"></i> عروض غير محدودة</li>
+                        <li><i class="fas fa-check"></i> عملاء غير محدودين</li>
+                        <li><i class="fas fa-check"></i> تصدير PDF بدون علامة مائية</li>
+                        <li><i class="fas fa-check"></i> التقارير والإحصائيات</li>
+                        <li><i class="fas fa-check"></i> التوقيع الإلكتروني</li>
+                        <li><i class="fas fa-check"></i> تخصيص كامل</li>
+                        <li><i class="fas fa-check"></i> تصدير Excel</li>
+                    </ul>
+                    <a href="activation.html" class="btn btn-gold btn-block">
+                        <i class="fas fa-shopping-cart"></i> اشتراك شهري
+                    </a>
+                    <span class="pricing-note">* يمكنك الإلغاء في أي وقت</span>
+                </div>
+
+                <!-- الخطة السنوية -->
+                <div class="pricing-card premium yearly">
+                    <div class="pricing-badge">⭐ أفضل قيمة</div>
+                    <div class="pricing-header">
+                        <span class="pricing-name">سنوي</span>
+                        <div class="pricing-price">499 <span>ج.م</span></div>
+                        <p>سنوياً <span class="old-price">999 ج.م</span> <span class="discount">وفر 50%</span></p>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> جميع ميزات الخطة المدفوعة</li>
+                        <li><i class="fas fa-check"></i> دعم فني مميز</li>
+                        <li><i class="fas fa-check"></i> تحديثات مستمرة</li>
+                        <li><i class="fas fa-check"></i> خصم 50%</li>
+                    </ul>
+                    <a href="activation.html" class="btn btn-gold btn-block">
+                        <i class="fas fa-shopping-cart"></i> اشتراك سنوي
+                    </a>
+                    <span class="pricing-note">* وفر 50% مقارنة بالشهري</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== قسم آراء العملاء ====== -->
+    <section class="landing-testimonials" id="testimonials">
+        <div class="landing-testimonials-container">
+            <div class="landing-section-header">
+                <span class="section-tag">📢 آراء العملاء</span>
+                <h2>ماذا يقولون عنا</h2>
+            </div>
+            <div class="landing-testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"التطبيق غير طريقة شغلي في إدارة العروض. كل حاجة في مكان واحد، وفر عليا وقت وجهد كبيرين."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">أ</div>
+                        <div>
+                            <span class="author-name">أحمد محمد</span>
+                            <span class="author-title">مهندس معدات ثقيلة</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"السركات والمطبوعات الاحترافية كانت أفضل ميزة. بقدر أطلع تقارير وطباعة بشكل احترافي في دقائق."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">م</div>
+                        <div>
+                            <span class="author-name">محمد سعيد</span>
+                            <span class="author-title">مدير مشاريع</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"التقارير والإحصائيات ساعدتني أفهم أداء شركتي بشكل أفضل. واجهة بسيطة وسهلة الاستخدام."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">خ</div>
+                        <div>
+                            <span class="author-name">خالد العمري</span>
+                            <span class="author-title">رئيس قسم المعدات</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== قسم الدعوة للعمل (CTA) ====== -->
+    <section class="landing-cta">
+        <div class="landing-cta-container">
+            <div class="landing-cta-content">
+                <span class="section-tag">🚀 جاهز للانطلاق</span>
+                <h2>ابدأ رحلتك الآن</h2>
+                <p>انضم إلى أكثر من 100 عميل يستخدمون نظام عروض المعدات لإدارة أعمالهم</p>
+                <div class="landing-cta-buttons">
+                    <a href="dashboard.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i> ابدأ مجاناً
+                    </a>
+                    <a href="activation.html" class="btn btn-gold btn-lg">
+                        <i class="fas fa-crown"></i> ترقية الآن
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== الفوتر ====== -->
+    <footer class="landing-footer">
+        <div class="landing-footer-container">
+            <div class="landing-footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-crown"></i>
+                    <span>عروض المعدات</span>
+                    <p>نظام متكامل لإدارة عروض أسعار المعدات الثقيلة</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>التطبيق</h4>
+                        <a href="dashboard.html">الرئيسية</a>
+                        <a href="quotation.html">العروض</a>
+                        <a href="reports.html">التقارير</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>الدعم</h4>
+                        <a href="help.html">التعليمات</a>
+                        <a href="activation.html">التفعيل</a>
+                        <a href="changelog.html">التحديثات</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>التواصل</h4>
+                        <a href="#"><i class="fas fa-envelope"></i> info@equipment.com</a>
+                        <a href="#"><i class="fas fa-phone"></i> +20 123 456 789</a>
+                    </div>
+                </div>
+            </div>
+            <div class="landing-footer-bottom">
+                <p>© 2026 نظام عروض أسعار المعدات. جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+    </footer>
+
     <script src="js/main.js"></script>
-    <script src="js/index.js"></script>
-
-    <!-- ====== Fullscreen API ====== -->
-    <script>
-        (function() {
-            function requestFullscreen() {
-                const el = document.documentElement;
-                if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(() => {});
-                } else if (el.webkitRequestFullscreen) {
-                    el.webkitRequestFullscreen();
-                } else if (el.msRequestFullscreen) {
-                    el.msRequestFullscreen();
-                }
-            }
-
-            const events = ['click', 'touchstart'];
-            function handleFirstInteraction() {
-                requestFullscreen();
-                events.forEach(event => {
-                    document.removeEventListener(event, handleFirstInteraction);
-                });
-            }
-            events.forEach(event => {
-                document.addEventListener(event, handleFirstInteraction, { once: true });
-            });
-
-            document.addEventListener('fullscreenchange', function() {
-                if (document.fullscreenElement) {
-                    window.scrollTo(0, 1);
-                }
-            });
-
-            window.addEventListener('load', function() {
-                setTimeout(function() {
-                    window.scrollTo(0, 1);
-                }, 300);
-            });
-
-            window.addEventListener('orientationchange', function() {
-                setTimeout(function() {
-                    window.scrollTo(0, 1);
-                }, 500);
-            });
-
-            console.log('✅ Fullscreen API تم تفعيلها');
-        })();
-    </script>
+    <script src="js/landing.js"></script>
 </body>
 </html>
