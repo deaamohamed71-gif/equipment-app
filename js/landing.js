@@ -1,4 +1,4 @@
-// js/landing.js - كود صفحة الهبوط (محدث)
+// js/landing.js - كود صفحة الهبوط (محدث بالكامل)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ====== تأثير تمرير سلس - مع تجنب الأخطاء ======
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        // ❌ تجاهل الروابط اللي فيها href="#" فقط
-        if (anchor.getAttribute('href') === '#') return;
+        // ✅ تجاهل الروابط اللي فيها href="#" فقط
+        if (anchor.getAttribute('href') === '#') {
+            return;
+        }
         
         anchor.addEventListener('click', function(e) {
             const targetId = this.getAttribute('href');
