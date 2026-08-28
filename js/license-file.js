@@ -1,5 +1,4 @@
-// js/license-file.js - نظام الترخيص عبر ملفات ZLX (يدعم العربية وإدخال Device ID)
-
+// js/license-file.js - نظام الترخيص عبر ملفات ZLX (كامل محدث)
 // ====== مفتاح التشفير ======
 const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
 
@@ -316,10 +315,8 @@ function cancelActivation() {
 }
 
 // ====== 🚀 دالة المطور لإنشاء ملف ترخيص (محدثة) ======
-// تستخدم من Console أو من صفحة المطور
 window.generateLicense = function(deviceId, userName, plan, days) {
     try {
-        // ✅ استخدام المعرف المدخل (وليس المعرف المخزن)
         const finalDeviceId = deviceId || localStorage.getItem('device_id') || 'UNKNOWN';
         
         const data = {
@@ -335,5 +332,58 @@ window.generateLicense = function(deviceId, userName, plan, days) {
         return null;
     }
 };
+
+// ====== نسخ معرف الجهاز ======
+function copyDeviceId() {
+    const deviceIdEl = document.getElementById('deviceId');
+    if (!deviceIdEl) return;
+    
+    const deviceId = deviceIdEl.textContent;
+    if (!deviceId || deviceId === 'جاري التحميل...') {
+        showToast('⚠️ المعرف غير جاهز بعد، يرجى الانتظار', 'error');
+        return;
+    }
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(deviceId)
+            .then(() => {
+                showToast('✅ تم نسخ معرف الجهاز بنجاح!', 'success');
+                const btn = document.querySelector('.device-id-box .btn');
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                    btn.style.background = 'var(--success)';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
+                        btn.style.background = '';
+                    }, 2000);
+                }
+            })
+            .catch(() => {
+                fallbackCopy(deviceId);
+            });
+    } else {
+        fallbackCopy(deviceId);
+    }
+}
+
+// ====== طريقة بديلة للنسخ ======
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        showToast('✅ تم نسخ معرف الجهاز بنجاح!', 'success');
+    } catch (err) {
+        showToast('❌ فشل النسخ، يرجى نسخه يدوياً', 'error');
+    }
+    document.body.removeChild(textarea);
+}
+
+window.copyDeviceId = copyDeviceId;
 
 console.log('✅ نظام الترخيص بالملفات (ZLX) تم تهيئته بنجاح');
