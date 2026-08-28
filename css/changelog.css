@@ -179,3 +179,42 @@ body.dark-mode .changelog-content ul li {
         font-size: 0.8rem;
     }
 }
+/* ====== شارة التحديث الجديد ====== */
+.version-new-badge {
+    background: var(--gold);
+    color: #fff;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+/* ====== إشعار التحديثات ====== */
+#newUpdateBadge {
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ====== تأثير عند ظهور تحديث جديد ====== */
+.changelog-item.new {
+    border-right-color: var(--gold);
+    animation: highlight-new 1s ease;
+}
+
+@keyframes highlight-new {
+    0% { background: rgba(201, 168, 76, 0.3); }
+    100% { background: var(--bg-light); }
+}
+
+body.dark-mode .changelog-item.new {
+    animation: highlight-new-dark 1s ease;
+}
+
+@keyframes highlight-new-dark {
+    0% { background: rgba(201, 168, 76, 0.2); }
+    100% { background: rgba(255,255,255,0.03); }
+}
