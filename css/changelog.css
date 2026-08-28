@@ -1,0 +1,181 @@
+/* css/changelog.css - أنماط صفحة سجل التحديثات */
+
+.changelog-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.changelog-header {
+    text-align: center;
+    padding: 1rem 0 1.5rem;
+    border-bottom: 3px solid var(--gold);
+    margin-bottom: 2rem;
+}
+
+.changelog-header h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    font-family: 'Cairo', sans-serif;
+}
+
+.changelog-header h1 i {
+    color: var(--gold);
+    margin-left: 10px;
+}
+
+.changelog-subtitle {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+}
+
+/* ====== عناصر التحديثات ====== */
+.changelog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.changelog-item {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    border-right: 4px solid var(--primary);
+}
+
+.changelog-item:hover {
+    transform: translateX(-4px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.changelog-item.new {
+    border-right-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+body.dark-mode .changelog-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .changelog-item.new {
+    background: rgba(201, 168, 76, 0.05);
+}
+
+/* ====== رأس التحديث ====== */
+.changelog-version {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+}
+
+.version-badge {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.2rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.changelog-item.new .version-badge {
+    background: var(--gold);
+}
+
+.version-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.version-status {
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ====== محتوى التحديث ====== */
+.changelog-content h3 {
+    font-size: 0.95rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    margin: 0.5rem 0 0.2rem;
+}
+
+.changelog-content h3:first-of-type {
+    margin-top: 0;
+}
+
+.changelog-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.2rem 0 0.5rem;
+}
+
+.changelog-content ul li {
+    padding: 0.15rem 0;
+    font-size: 0.85rem;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+.changelog-content ul li::before {
+    content: "• ";
+    color: var(--gold);
+    font-weight: bold;
+}
+
+body.dark-mode .changelog-content h3 {
+    color: #d4c8a0;
+}
+
+body.dark-mode .changelog-content ul li {
+    color: #d4c8a0;
+}
+
+/* ====== زر الرجوع ====== */
+.changelog-back {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+}
+
+/* ====== تحسينات الموبايل ====== */
+@media (max-width: 768px) {
+    .changelog-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .changelog-item {
+        padding: 1rem;
+    }
+    
+    .changelog-version {
+        gap: 0.5rem;
+    }
+    
+    .version-badge {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.6rem;
+    }
+    
+    .version-date {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .changelog-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .changelog-subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .changelog-content ul li {
+        font-size: 0.8rem;
+    }
+}
