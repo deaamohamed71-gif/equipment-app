@@ -1,4 +1,4 @@
-/* css/company.css - أنماط صفحة الشركة */
+/* css/company.css - أنماط صفحة الشركة مع تحسينات الموبايل */
 
 .company-container .page-header {
     margin-bottom: 1.5rem;
@@ -21,7 +21,7 @@
     margin-top: 0.3rem;
 }
 
-/* قسم الشعار */
+/* ====== قسم الشعار ====== */
 .logo-upload-area {
     display: flex;
     gap: 2rem;
@@ -93,7 +93,7 @@
     opacity: 0.7;
 }
 
-/* نموذج الشركة */
+/* ====== نموذج الشركة ====== */
 .company-form {
     margin-top: 0.5rem;
 }
@@ -151,7 +151,7 @@ body.dark-mode .form-group label {
     color: #d4c8a0;
 }
 
-/* التوقيع الإلكتروني */
+/* ====== التوقيع الإلكتروني ====== */
 .signature-area {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -264,7 +264,7 @@ body.dark-mode .sig-preview {
     margin-top: 0.5rem;
 }
 
-/* تحسينات الموبايل */
+/* ====== تحسينات الموبايل ====== */
 @media (max-width: 768px) {
     .logo-upload-area {
         flex-direction: column;
@@ -294,5 +294,16 @@ body.dark-mode .sig-preview {
     .logo-preview {
         width: 100px;
         height: 100px;
+    }
+    
+    .sig-preview {
+        min-height: 80px;
+        max-height: 140px;
+    }
+    
+    .sig-actions .btn {
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.5rem !important;
+        min-height: 28px !important;
     }
 }

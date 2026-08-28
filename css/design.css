@@ -1,4 +1,4 @@
-/* css/design.css - أنماط صفحة التصميم */
+/* css/design.css - أنماط صفحة التصميم مع تحسينات الموبايل */
 
 .design-container .page-header {
     margin-bottom: 1.5rem;
@@ -15,7 +15,7 @@
     margin-left: 10px;
 }
 
-/* قسم الألوان */
+/* ====== قسم الألوان ====== */
 .color-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -93,7 +93,7 @@ body.dark-mode .color-item label {
     color: #d4c8a0;
 }
 
-/* معاينة الألوان */
+/* ====== معاينة الألوان ====== */
 .color-preview {
     display: flex;
     gap: 0.5rem;
@@ -109,7 +109,7 @@ body.dark-mode .color-item label {
     border: 1px solid var(--border);
 }
 
-/* قسم الخطوط */
+/* ====== قسم الخطوط ====== */
 .font-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -188,7 +188,7 @@ body.dark-mode .font-preview {
     border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* قسم الأيقونات */
+/* ====== قسم الأيقونات ====== */
 .icon-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -254,7 +254,13 @@ body.dark-mode .icon-item span {
     flex-wrap: wrap;
 }
 
-/* قسم المظهر */
+.icon-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+}
+
+/* ====== قسم المظهر ====== */
 .theme-options {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -328,15 +334,32 @@ body.dark-mode .theme-item span {
     background: linear-gradient(to right, #ffffff 50%, #1a1410 50%);
 }
 
-/* تحسينات الموبايل */
+/* ====== تحسينات الموبايل ====== */
 @media (max-width: 768px) {
     .color-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
     }
     
     .color-item {
         flex-wrap: wrap;
         justify-content: center;
+        padding: 0.5rem;
+    }
+    
+    .color-item label {
+        min-width: 60px;
+        font-size: 0.7rem;
+    }
+    
+    .color-item input[type="color"] {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .color-item input[type="text"] {
+        width: 60px;
+        font-size: 0.6rem;
     }
     
     .font-options {
@@ -345,15 +368,54 @@ body.dark-mode .theme-item span {
     
     .icon-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .icon-item {
+        padding: 0.5rem;
+    }
+    
+    .icon-item i {
+        font-size: 1.5rem;
+    }
+    
+    .icon-item span {
+        font-size: 0.6rem;
+    }
+    
+    .icon-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .icon-actions .btn {
+        min-width: auto;
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.8rem !important;
+        min-height: 36px !important;
+    }
+    
+    .theme-options {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .color-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .icon-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .theme-options {
         grid-template-columns: 1fr;
     }
-}
-
-@media (max-width: 480px) {
-    .icon-grid {
-        grid-template-columns: repeat(2, 1fr);
+    
+    .icon-actions .btn {
+        font-size: 0.7rem !important;
+        padding: 0.3rem 0.6rem !important;
+        min-height: 32px !important;
     }
 }
