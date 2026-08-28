@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع روابط dashboard.html)
+// js/main.js - الكود الأساسي المشترك (محدث مع روابط dashboard.html ورقم التليفون 01096597825)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -163,9 +163,7 @@ function loadHeaderFooter() {
         const features = licenseManager ? licenseManager.getFeatures() : { isPremium: false };
         const status = features.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
         
-        footerPlaceholder.innerHTML = `
-            <p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status}</p>
-        `;
+        footerPlaceholder.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
     }
 }
 
@@ -185,7 +183,7 @@ async function checkLicenseOnStart() {
                         showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة التجريبية.', 'error');
                         const footer = document.getElementById('footer');
                         if (footer) {
-                            footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية</p>`;
+                            footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية | 📞 01096597825</p>`;
                         }
                         setTimeout(() => window.location.reload(), 1500);
                     }
@@ -207,7 +205,8 @@ function initApp() {
                 const footer = document.getElementById('footer');
                 if (footer) {
                     const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
-footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;                }
+                    footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
+                }
             }
         });
     }
