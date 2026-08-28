@@ -80,6 +80,14 @@ function loadHeaderFooter() {
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const isDark = document.body.classList.contains('dark-mode');
         const isActivationPage = currentPage === 'activation.html';
+        const isHelpPage = currentPage === 'help.html';
+        const isOnboardingPage = currentPage === 'onboarding.html';
+        
+        // إخفاء الهيدر في صفحات الترحيب والتعليمات (لأن عندهم هيدر خاص)
+        if (isOnboardingPage || isHelpPage) {
+            headerPlaceholder.style.display = 'none';
+            return;
+        }
         
         headerPlaceholder.innerHTML = `
             <div class="header-logo">
@@ -103,6 +111,9 @@ function loadHeaderFooter() {
                     <i class="fas fa-palette"></i> التصميم
                 </a>
                 ${!isActivationPage ? `
+                    <a href="help.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-question-circle"></i> التعليمات
+                    </a>
                     <a href="activation.html" class="btn btn-gold" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-key"></i> التفعيل
                     </a>
@@ -124,6 +135,16 @@ function loadHeaderFooter() {
     
     const footerPlaceholder = document.getElementById('footer');
     if (footerPlaceholder) {
+        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        const isOnboardingPage = currentPage === 'onboarding.html';
+        const isHelpPage = currentPage === 'help.html';
+        
+        // إخفاء الفوتر في صفحات الترحيب والتعليمات
+        if (isOnboardingPage || isHelpPage) {
+            footerPlaceholder.style.display = 'none';
+            return;
+        }
+        
         const features = licenseManager ? licenseManager.getFeatures() : { isPremium: false };
         const status = features.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
         
@@ -147,7 +168,6 @@ async function checkLicenseOnStart() {
                         licenseManager.startTrial();
                         licenseManager.notifyListeners();
                         showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة التجريبية.', 'error');
-                        // تحديث الفوتر
                         const footer = document.getElementById('footer');
                         if (footer) {
                             footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية</p>`;
