@@ -1,4 +1,6 @@
-const CACHE_NAME = 'equipment-quotation-v8';
+// sw.js - Service Worker محدث بالكامل
+
+const CACHE_NAME = 'equipment-quotation-v10';  // ⬅️ إصدار جديد
 const ASSETS_TO_CACHE = [
   'index.html',
   'quotation.html',
@@ -6,6 +8,11 @@ const ASSETS_TO_CACHE = [
   'design.html',
   'reports.html',
   'activation.html',
+  'onboarding.html',
+  'help.html',
+  'settings.html',
+  'changelog.html',
+  'sirkat.html',
   'manifest.json',
   'css/main.css',
   'css/index.css',
@@ -14,6 +21,10 @@ const ASSETS_TO_CACHE = [
   'css/design.css',
   'css/reports.css',
   'css/activation.css',
+  'css/onboarding.css',
+  'css/help.css',
+  'css/sirkat.css',
+  'css/changelog.css',
   'js/main.js',
   'js/index.js',
   'js/quotation.js',
@@ -21,18 +32,16 @@ const ASSETS_TO_CACHE = [
   'js/design.js',
   'js/reports.js',
   'js/activation.js',
-  'js/license.js'
+  'js/onboarding.js',
+  'js/help.js',
+  'js/settings.js',
+  'js/changelog.js',
+  'js/sirkat.js',
+  'js/license.js',
+  'js/firebase.js'
 ];
 
-const EXTERNAL_ASSETS = [
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
-  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
-];
-
-// التثبيت
+// ====== التثبيت ======
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -51,7 +60,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// التنشيط
+// ====== التنشيط ======
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
@@ -66,28 +75,32 @@ self.addEventListener('activate', event => {
   );
 });
 
-// الاستراتيجية: Network First مع Fallback
+// ====== التعامل مع الطلبات ======
 self.addEventListener('fetch', event => {
   const request = event.request;
   
+  // ❌ تجاهل طلبات POST (مش بنخزنها)
+  if (request.method === 'POST') {
+    return;
+  }
+  
+  // ❌ تجاهل طلبات التحليلات
   if (request.url.includes('analytics') || request.url.includes('tracking')) {
     return;
   }
+  
+  // ❌ تجاهل طلبات Firebase (لتجنب الأخطاء)
+  if (request.url.includes('firebase') || request.url.includes('googleapis')) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
-  // الموارد الخارجية
-  if (request.url.includes('cdnjs') || request.url.includes('googleapis') || request.url.includes('cdn.jsdelivr')) {
+  // ✅ الموارد الخارجية (CDN)
+  if (request.url.includes('cdnjs') || request.url.includes('cdn.jsdelivr')) {
     event.respondWith(
       caches.match(request)
         .then(cachedResponse => {
           if (cachedResponse) {
-            fetch(request)
-              .then(response => {
-                if (response.ok) {
-                  caches.open(CACHE_NAME)
-                    .then(cache => cache.put(request, response));
-                }
-              })
-              .catch(() => {});
             return cachedResponse;
           }
           return fetch(request)
@@ -98,20 +111,17 @@ self.addEventListener('fetch', event => {
                   .then(cache => cache.put(request, responseClone));
               }
               return response;
-            })
-            .catch(() => {
-              return new Response('Resource unavailable', { status: 503 });
             });
         })
     );
     return;
   }
 
-  // الملفات الرئيسية
+  // ✅ الملفات الرئيسية - Network First
   event.respondWith(
     fetch(request)
       .then(response => {
-        if (response.ok) {
+        if (response.ok && request.method === 'GET') {
           const responseClone = response.clone();
           caches.open(CACHE_NAME)
             .then(cache => cache.put(request, responseClone));
@@ -124,6 +134,7 @@ self.addEventListener('fetch', event => {
             if (cachedResponse) {
               return cachedResponse;
             }
+            // صفحة الخطأ عند عدم الاتصال
             return new Response(`
               <!DOCTYPE html>
               <html dir="rtl" lang="ar">
@@ -156,9 +167,11 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// الاستماع لرسائل التحديث
+// ====== الاستماع لرسائل التحديث ======
 self.addEventListener('message', event => {
   if (event.data === 'skipWaiting') {
     self.skipWaiting();
   }
 });
+
+console.log('✅ Service Worker v10 تم تفعيله');
