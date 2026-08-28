@@ -1,4 +1,4 @@
-/* css/sirkat.css - أنماط صفحة سركات (محدث) */
+/* css/sirkat.css - أنماط صفحة سركات (محدث بالكامل) */
 
 .sirkat-container {
     max-width: 1200px;
@@ -69,6 +69,7 @@
 
 .sirkat-header-bottom h2 i {
     margin-left: 6px;
+    color: var(--gold);
 }
 
 .sirkat-header-bottom p {
@@ -225,6 +226,7 @@ body.dark-mode .sirkat-table td input {
     padding: 0.6rem 0.4rem;
     border-top: 2px solid var(--primary);
     background: var(--bg-light);
+    color: var(--text);
 }
 
 body.dark-mode .sirkat-table tfoot td {
@@ -289,7 +291,7 @@ body.dark-mode .sirkat-supervisor input {
     padding: 1.5rem 0 0.5rem;
 }
 
-/* ====== إخفاء العناصر في الطباعة ====== */
+/* ====== الطباعة التقليدية (Ctrl+P) ====== */
 @media print {
     .no-print {
         display: none !important;
@@ -310,40 +312,6 @@ body.dark-mode .sirkat-supervisor input {
         print-color-adjust: exact !important;
     }
     
-    .sirkat-header-top {
-        flex-direction: row !important;
-        gap: 0.2rem !important;
-    }
-    
-    .sirkat-header-bottom {
-        margin-top: 0.2rem !important;
-        padding-top: 0.2rem !important;
-    }
-    
-    .sirkat-header-bottom h2 {
-        font-size: 0.8rem !important;
-    }
-    
-    .sirkat-header-bottom p {
-        font-size: 0.7rem !important;
-    }
-    
-    .sirkat-logo h1 {
-        font-size: 0.9rem !important;
-    }
-    
-    .sirkat-logo img {
-        max-height: 30px !important;
-    }
-    
-    .sirkat-date {
-        font-size: 0.7rem !important;
-        padding: 0.1rem 0.5rem !important;
-        background: rgba(255,255,255,0.15) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
     .sirkat-table-wrap {
         border: 1px solid #ddd !important;
         border-radius: 4px !important;
@@ -355,7 +323,6 @@ body.dark-mode .sirkat-supervisor input {
         font-size: 0.6rem !important;
         width: 100% !important;
         min-width: auto !important;
-        page-break-inside: avoid !important;
     }
     
     .sirkat-table th {
@@ -420,35 +387,8 @@ body.dark-mode .sirkat-supervisor input {
         color: var(--text) !important;
     }
     
-    .sirkat-table tbody tr:nth-child(even) td {
-        background: var(--bg-light) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    /* منع تقسيم الجدول */
-    .sirkat-table tbody tr {
-        page-break-inside: avoid !important;
-    }
-    
-    .sirkat-table tfoot {
-        page-break-inside: avoid !important;
-    }
-    
     #footer, #header, .dashboard {
         display: none !important;
-    }
-    
-    .dashboard {
-        padding: 0 !important;
-        box-shadow: none !important;
-        background: #fff !important;
-    }
-    
-    body {
-        background: #fff !important;
-        padding: 0 !important;
-        margin: 0 !important;
     }
 }
 
@@ -519,35 +459,5 @@ body.dark-mode .sirkat-supervisor input {
     
     .sirkat-supervisor input {
         min-width: auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .sirkat-header-top {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .sirkat-logo {
-        flex-direction: column;
-    }
-    
-    .sirkat-table {
-        font-size: 0.6rem;
-        min-width: 400px;
-    }
-    
-    .sirkat-table th {
-        font-size: 0.6rem;
-        padding: 0.3rem 0.15rem;
-    }
-    
-    .sirkat-table td {
-        font-size: 0.6rem;
-        padding: 0.2rem 0.15rem;
-    }
-    
-    .sirkat-table td input {
-        font-size: 0.6rem;
     }
 }
