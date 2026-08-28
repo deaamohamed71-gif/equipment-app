@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
     <style>
-        /* ... كل الأنماط كما هي ... */
         .dev-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -298,7 +297,7 @@
                     <!-- 4. تصدير البيانات -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-download"></i></div>
-                        <h3>تصدير البيانات</h3>
+                        <h3>تصدير 데이터</h3>
                         <p>تصدير جميع بيانات التطبيق كملف JSON</p>
                         <button class="dev-btn dev-btn-success" onclick="exportAllData()">
                             <i class="fas fa-file-export"></i> تصدير JSON
@@ -352,16 +351,16 @@
                         </button>
                     </div>
 
-                    <!-- ⭐ 9. إدارة الترخيص بالملفات (ZLX) - جديد -->
+                    <!-- ⭐ 9. إدارة الترخيص بالملفات (ZLX) - محدث -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
                         <h3>ترخيص الملفات (ZLX)</h3>
-                        <p>إدارة الترخيص عبر ملفات .zlx</p>
+                        <p>إنشاء ترخيص لأي جهاز باستخدام معرف الجهاز</p>
                         <div style="font-size:0.85rem; color:var(--text-light); margin-bottom:0.5rem;">
                             <span id="zlxStatus">📋 الحالة: <span style="color:var(--text-light);">غير مفعل</span></span>
                         </div>
                         <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                            <button class="dev-btn dev-btn-primary" onclick="generateLicenseForUser()">
+                            <button class="dev-btn dev-btn-gold" onclick="generateLicenseForUser()">
                                 <i class="fas fa-plus"></i> إنشاء ترخيص
                             </button>
                             <button class="dev-btn dev-btn-danger" onclick="revokeZLXLicense()">
@@ -523,7 +522,6 @@
             if (!statusEl) return;
             
             const licenseData = localStorage.getItem('license_data');
-            const deviceId = localStorage.getItem('device_id') || 'غير معروف';
             
             if (licenseData) {
                 try {
@@ -551,19 +549,29 @@
             }
         }
 
+        // ====== إنشاء ترخيص لمستخدم جديد (مع إدخال معرف الجهاز يدوياً) ======
         function generateLicenseForUser() {
-            const deviceId = localStorage.getItem('device_id') || 'ASSAM-XXXX-XXXX-XXXX-XXXX';
+            // 1. طلب معرف الجهاز
+            const deviceId = prompt('📱 أدخل معرف الجهاز (Device ID) الخاص بالعميل:', '');
+            if (!deviceId || deviceId.trim() === '') {
+                showToast('⚠️ يرجى إدخال معرف الجهاز', 'error');
+                return;
+            }
             
-            const userName = prompt('👤 اسم المستخدم:', 'مستخدم جديد');
+            // 2. طلب اسم المستخدم
+            const userName = prompt('👤 اسم المستخدم:', '');
             if (!userName) return;
             
+            // 3. طلب الخطة
             const plan = prompt('📋 الخطة (شهري/سنوي):', 'سنوي');
             if (!plan) return;
             
+            // 4. طلب عدد الأيام
             const days = parseInt(prompt('📅 عدد الأيام:', '365')) || 365;
             
+            // 5. إنشاء الترخيص
             if (typeof generateLicense === 'function') {
-                const result = generateLicense(deviceId, userName, plan, days);
+                const result = generateLicense(deviceId.trim(), userName, plan, days);
                 if (result) {
                     showToast('✅ تم إنشاء ملف الترخيص بنجاح!', 'success');
                     refreshZLXStatus();
@@ -571,9 +579,9 @@
                     showToast('❌ حدث خطأ أثناء إنشاء الترخيص', 'error');
                 }
             } else {
-                // طريقة بديلة
+                // طريقة بديلة (في حالة عدم وجود generateLicense)
                 const licenseData = {
-                    deviceId: deviceId,
+                    deviceId: deviceId.trim(),
                     userName: userName,
                     plan: plan,
                     expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
@@ -594,16 +602,19 @@
                     }
                 };
                 
+                // تشفير البيانات
                 const json = JSON.stringify(licenseData);
-                const encrypted = btoa(json);
+                const encoded = encodeURIComponent(json);
+                const encrypted = btoa(encoded);
                 const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
                 const fileContent = `${encrypted}.${signature}`;
                 
+                // تحميل الملف
                 const blob = new Blob([fileContent], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `license_${deviceId.substring(0, 8)}.zlx`;
+                a.download = `license_${deviceId.trim().substring(0, 8)}.zlx`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -646,7 +657,6 @@
             document.getElementById('devTotalRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
             document.getElementById('devDate').textContent = new Date().toLocaleDateString('ar-EG');
             
-            // تحديث حالة الترخيص
             refreshZLXStatus();
         }
 
