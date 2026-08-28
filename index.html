@@ -221,5 +221,59 @@
     <script src="js/license.js"></script>
     <script src="js/main.js"></script>
     <script src="js/index.js"></script>
+
+    <!-- ====== Fullscreen API - إخفاء شريط العنوان في الموبايل ====== -->
+    <script>
+        (function() {
+            // 1. محاولة الدخول في وضع الشاشة الكاملة عند التفاعل
+            function requestFullscreen() {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) { // Safari
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) { // IE/Edge القديم
+                    el.msRequestFullscreen();
+                }
+            }
+
+            // 2. عند أول نقرة أو لمسة، نحاول تفعيل الشاشة الكاملة
+            const events = ['click', 'touchstart'];
+            function handleFirstInteraction() {
+                requestFullscreen();
+                events.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction);
+                });
+            }
+            events.forEach(event => {
+                document.addEventListener(event, handleFirstInteraction, { once: true });
+            });
+
+            // 3. إذا دخلنا الشاشة الكاملة، نخفي شريط العنوان بالتمرير
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    // نزل الصفحة 1 بكسل عشان يختفي شريط العنوان
+                    window.scrollTo(0, 1);
+                }
+            });
+
+            // 4. محاولة إخفاء شريط العنوان بالتمرير حتى لو مش في fullscreen
+            // (ده بيشتغل في Chrome على Android)
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 300);
+            });
+
+            // 5. عند تغيير اتجاه الشاشة (portrait/landscape)
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 500);
+            });
+
+            console.log('✅ Fullscreen API تم تفعيلها');
+        })();
+    </script>
 </body>
 </html>
