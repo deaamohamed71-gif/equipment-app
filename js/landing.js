@@ -1,4 +1,4 @@
-// js/landing.js - كود صفحة الهبوط
+// js/landing.js - كود صفحة الهبوط (محدث)
 
 document.addEventListener('DOMContentLoaded', function() {
     
@@ -19,16 +19,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // ====== تأثير تمرير سلس ======
+    // ====== تأثير تمرير سلس - مع تجنب الأخطاء ======
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        // ❌ تجاهل الروابط اللي فيها href="#" فقط
+        if (anchor.getAttribute('href') === '#') return;
+        
         anchor.addEventListener('click', function(e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            const targetId = this.getAttribute('href');
+            if (targetId && targetId !== '#') {
+                const target = document.querySelector(targetId);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
@@ -55,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
     
-    // ====== إضافة كلاس fade-in ======
+    // ====== تأثير الظهور عند التمرير ======
     document.addEventListener('scroll', function() {
         document.querySelectorAll('.feature-card, .pricing-card, .testimonial-card').forEach(el => {
             const rect = el.getBoundingClientRect();
