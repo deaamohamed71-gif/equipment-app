@@ -1,4 +1,4 @@
-/* css/sirkat.css - أنماط صفحة سركات */
+/* css/sirkat.css - أنماط صفحة سركات (محدث) */
 
 .sirkat-container {
     max-width: 1200px;
@@ -298,109 +298,144 @@ body.dark-mode .sirkat-supervisor input {
     .sirkat-container {
         padding: 0 !important;
         margin: 0 !important;
+        max-width: 100% !important;
     }
     
     .sirkat-header {
         border-radius: 0 !important;
-        padding: 0.8rem 1rem !important;
-        margin-bottom: 0.5rem !important;
+        padding: 0.4rem 0.8rem !important;
+        margin-bottom: 0.3rem !important;
+        background: var(--primary) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
     .sirkat-header-top {
         flex-direction: row !important;
+        gap: 0.2rem !important;
+    }
+    
+    .sirkat-header-bottom {
+        margin-top: 0.2rem !important;
+        padding-top: 0.2rem !important;
     }
     
     .sirkat-header-bottom h2 {
+        font-size: 0.8rem !important;
+    }
+    
+    .sirkat-header-bottom p {
+        font-size: 0.7rem !important;
+    }
+    
+    .sirkat-logo h1 {
         font-size: 0.9rem !important;
+    }
+    
+    .sirkat-logo img {
+        max-height: 30px !important;
+    }
+    
+    .sirkat-date {
+        font-size: 0.7rem !important;
+        padding: 0.1rem 0.5rem !important;
+        background: rgba(255,255,255,0.15) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
     
     .sirkat-table-wrap {
         border: 1px solid #ddd !important;
-        border-radius: 0 !important;
-        overflow: visible !important;
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        page-break-inside: avoid !important;
     }
     
     .sirkat-table {
-        font-size: 0.7rem !important;
-        min-width: auto !important;
+        font-size: 0.6rem !important;
         width: 100% !important;
+        min-width: auto !important;
         page-break-inside: avoid !important;
     }
     
     .sirkat-table th {
-        font-size: 0.65rem !important;
-        padding: 0.3rem 0.2rem !important;
-        background: #1a6b8a !important;
+        font-size: 0.55rem !important;
+        padding: 0.15rem 0.1rem !important;
+        background: var(--primary) !important;
         color: #fff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
     .sirkat-table td {
-        font-size: 0.65rem !important;
-        padding: 0.2rem 0.15rem !important;
+        font-size: 0.55rem !important;
+        padding: 0.1rem 0.08rem !important;
         border-bottom: 1px solid #ddd !important;
+        color: var(--text) !important;
     }
     
     .sirkat-table td input {
-        font-size: 0.65rem !important;
+        font-size: 0.55rem !important;
+        padding: 0.05rem !important;
         border: none !important;
         background: transparent !important;
-        padding: 0.1rem !important;
+        color: var(--text) !important;
+    }
+    
+    .sirkat-table td input[type="time"] {
+        width: 40px !important;
     }
     
     .sirkat-table td .total-hours {
         font-weight: 700 !important;
-        color: #1a6b8a !important;
+        color: var(--primary) !important;
     }
     
     .sirkat-table tfoot td {
-        font-size: 0.7rem !important;
-        padding: 0.3rem 0.2rem !important;
-        border-top: 2px solid #1a6b8a !important;
+        font-size: 0.6rem !important;
+        padding: 0.15rem 0.1rem !important;
+        border-top: 2px solid var(--primary) !important;
+        color: var(--text) !important;
     }
     
-    .sirkat-date {
-        font-size: 0.8rem !important;
-        padding: 0.2rem 0.6rem !important;
-        background: rgba(255,255,255,0.15) !important;
+    .sirkat-supervisor {
+        padding: 0.3rem 0.5rem !important;
+        margin-top: 0.3rem !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    .sirkat-supervisor label {
+        font-size: 0.7rem !important;
+        color: var(--text) !important;
+    }
+    
+    .sirkat-supervisor input {
+        font-size: 0.7rem !important;
+        padding: 0.1rem 0.3rem !important;
+        min-width: 100px !important;
+        border: none !important;
+        border-bottom: 1px solid var(--primary) !important;
+        background: transparent !important;
+        color: var(--text) !important;
+    }
+    
+    .sirkat-table tbody tr:nth-child(even) td {
+        background: var(--bg-light) !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
-    .sirkat-logo h1 {
-        font-size: 1rem !important;
+    /* منع تقسيم الجدول */
+    .sirkat-table tbody tr {
+        page-break-inside: avoid !important;
     }
     
-    .sirkat-logo img {
-        max-height: 35px !important;
+    .sirkat-table tfoot {
+        page-break-inside: avoid !important;
     }
     
-    .sirkat-supervisor {
-        border: none !important;
-        background: transparent !important;
-        padding: 0.5rem 0 !important;
-        margin-top: 0.5rem !important;
-    }
-    
-    .sirkat-supervisor input {
-        border: none !important;
-        border-bottom: 1px solid #000 !important;
-        background: transparent !important;
-        padding: 0.2rem 0.4rem !important;
-        font-size: 0.8rem !important;
-        min-width: 150px !important;
-    }
-    
-    .sirkat-supervisor label {
-        font-size: 0.8rem !important;
-    }
-    
-    #footer {
-        display: none !important;
-    }
-    
-    #header {
+    #footer, #header, .dashboard {
         display: none !important;
     }
     
@@ -413,20 +448,7 @@ body.dark-mode .sirkat-supervisor input {
     body {
         background: #fff !important;
         padding: 0 !important;
-    }
-    
-    /* منع تقسيم الجدول بين الصفحات */
-    .sirkat-table-wrap {
-        page-break-inside: avoid !important;
-    }
-    
-    .sirkat-table tbody tr {
-        page-break-inside: avoid !important;
-    }
-    
-    /* إجمالي الصفحة في صفحة واحدة */
-    .sirkat-table tfoot {
-        page-break-inside: avoid !important;
+        margin: 0 !important;
     }
 }
 
