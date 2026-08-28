@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك مع التحقق من الترخيص
+// js/main.js - الكود الأساسي المشترك (محدث مع رابط التحديثات)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -21,7 +21,7 @@ function showToast(message, type = 'success') {
     if (toastMsg) toastMsg.textContent = message;
     toast.className = 'toast show' + (type === 'error' ? ' error' : '');
     clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => { toast.className = 'toast'; }, 3000);
+    toast._timeout = setTimeout(() => { newToast.className = 'toast'; }, 3000);
 }
 
 // ====== الوضع الليلي/النهاري ======
@@ -83,9 +83,10 @@ function loadHeaderFooter() {
         const isHelpPage = currentPage === 'help.html';
         const isOnboardingPage = currentPage === 'onboarding.html';
         const isSettingsPage = currentPage === 'settings.html';
+        const isChangelogPage = currentPage === 'changelog.html';
         
-        // إخفاء الهيدر في صفحات الترحيب والتعليمات
-        if (isOnboardingPage || isHelpPage || isSettingsPage) {
+        // إخفاء الهيدر في صفحات معينة
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage) {
             headerPlaceholder.style.display = 'none';
             return;
         }
@@ -112,6 +113,9 @@ function loadHeaderFooter() {
                     <i class="fas fa-palette"></i> التصميم
                 </a>
                 ${!isActivationPage ? `
+                    <a href="changelog.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-history"></i> التحديثات
+                    </a>
                     <a href="help.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-question-circle"></i> التعليمات
                     </a>
@@ -143,9 +147,9 @@ function loadHeaderFooter() {
         const isOnboardingPage = currentPage === 'onboarding.html';
         const isHelpPage = currentPage === 'help.html';
         const isSettingsPage = currentPage === 'settings.html';
+        const isChangelogPage = currentPage === 'changelog.html';
         
-        // إخفاء الفوتر في صفحات الترحيب والتعليمات والمطور
-        if (isOnboardingPage || isHelpPage || isSettingsPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage) {
             footerPlaceholder.style.display = 'none';
             return;
         }
@@ -189,7 +193,6 @@ async function checkLicenseOnStart() {
 
 // ====== التهيئة العامة ======
 function initApp() {
-    // تهيئة مدير الترخيص
     if (typeof licenseManager !== 'undefined') {
         licenseManager.initialize();
         
@@ -208,9 +211,7 @@ function initApp() {
     loadColors();
     loadHeaderFooter();
     
-    // التحقق من الترخيص بعد ثانية
     setTimeout(checkLicenseOnStart, 1500);
 }
 
-// تشغيل التهيئة عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', initApp);
