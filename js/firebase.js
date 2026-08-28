@@ -1,13 +1,13 @@
-// js/firebase.js - دوال Firebase المشتركة
+// js/firebase.js - دوال Firebase المشتركة (بالمفتاح الجديد)
 
 // ====== Firebase SDK ======
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 🔑 إعدادات Firebase
+// 🔑 إعدادات Firebase - بالمفتاح الجديد
 const firebaseConfig = {
-    apiKey: "AIzaSyCz-71iDf1_DDbFFzc67oRMHDDLczIcoac",
+    apiKey: "AIzaSyCZ-7iiOf1-_DObFFzc67oRMMDDCLzCoac",
     authDomain: "equipment-license-system.firebaseapp.com",
     projectId: "equipment-license-system",
     storageBucket: "equipment-license-system.firebasestorage.app",
