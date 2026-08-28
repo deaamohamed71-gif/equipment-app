@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع روابط dashboard.html ورقم التليفون 01096597825)
+// js/main.js - الكود الأساسي المشترك (محدث مع رابط الترخيص الجديد)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -85,9 +85,10 @@ function loadHeaderFooter() {
         const isChangelogPage = currentPage === 'changelog.html';
         const isSirkatPage = currentPage === 'sirkat.html';
         const isLandingPage = currentPage === 'index.html';
+        const isLicenseActivationPage = currentPage === 'activation-license.html';
         
         // إخفاء الهيدر في صفحات معينة
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage || isLicenseActivationPage) {
             headerPlaceholder.style.display = 'none';
             return;
         }
@@ -126,6 +127,9 @@ function loadHeaderFooter() {
                     <a href="settings.html" class="btn btn-purple" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-tools"></i> المطور
                     </a>
+                    <a href="activation-license.html" class="btn btn-purple" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                        <i class="fas fa-file-certificate"></i> ترخيص الملفات
+                    </a>
                     <a href="activation.html" class="btn btn-gold" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
                         <i class="fas fa-key"></i> التفعيل
                     </a>
@@ -154,8 +158,9 @@ function loadHeaderFooter() {
         const isChangelogPage = currentPage === 'changelog.html';
         const isSirkatPage = currentPage === 'sirkat.html';
         const isLandingPage = currentPage === 'index.html';
+        const isLicenseActivationPage = currentPage === 'activation-license.html';
         
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage) {
+        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage || isLicenseActivationPage) {
             footerPlaceholder.style.display = 'none';
             return;
         }
