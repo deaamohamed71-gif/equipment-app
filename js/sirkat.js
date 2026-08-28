@@ -1,4 +1,4 @@
-// js/sirkat.js - كود صفحة سركات
+// js/sirkat.js - كود صفحة سركات (محدث)
 
 // ====== المتغيرات ======
 let sirkatData = {};
@@ -9,10 +9,8 @@ const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'م�
 
 // ====== تهيئة الصفحة ======
 function initSirkat() {
-    // تحميل بيانات الشركة
     loadCompanyData();
     
-    // تحميل الشهر والسنة من localStorage
     const savedMonth = localStorage.getItem('sirkat_month');
     const savedYear = localStorage.getItem('sirkat_year');
     
@@ -25,20 +23,13 @@ function initSirkat() {
         document.getElementById('sirkatYear').value = currentYear;
     }
     
-    // تحميل بيانات سركات
     loadSirkatData();
     
-    // تحميل اسم المشرف
     const supervisor = localStorage.getItem('sirkat_supervisor') || '';
     document.getElementById('sirkatSupervisor').value = supervisor;
     
-    // تحديث عرض الشهر
     updateMonthYearDisplay();
-    
-    // تعبئة الجدول
     renderSirkatTable();
-    
-    // تطبيق الألوان
     applySirkatColors();
 }
 
@@ -83,7 +74,6 @@ function loadSirkatData() {
 
 // ====== حفظ بيانات سركات ======
 function saveSirkatData() {
-    // جمع البيانات من الجدول
     const rows = document.querySelectorAll('#sirkatTableBody tr');
     rows.forEach((row, index) => {
         const inputs = row.querySelectorAll('input');
@@ -124,7 +114,6 @@ function renderSirkatTable() {
     const month = parseInt(document.getElementById('sirkatMonth').value);
     const year = parseInt(document.getElementById('sirkatYear').value);
     
-    // عدد أيام الشهر
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
     let html = '';
@@ -143,7 +132,6 @@ function renderSirkatTable() {
         const driver = data.driver || '';
         const engineer = data.engineer || '';
         
-        // حساب الإجمالي
         let total = 0;
         if (from && to) {
             const fromParts = from.split(':');
@@ -154,7 +142,7 @@ function renderSirkatTable() {
                 const toHours = parseInt(toParts[0]) || 0;
                 const toMinutes = parseInt(toParts[1]) || 0;
                 total = (toHours * 60 + toMinutes) - (fromHours * 60 + fromMinutes);
-                total = Math.round(total / 60 * 10) / 10; // تقريب لأقرب 0.1
+                total = Math.round(total / 60 * 10) / 10;
                 if (total < 0) total = 0;
             }
         }
@@ -178,7 +166,6 @@ function renderSirkatTable() {
     
     tbody.innerHTML = html;
     
-    // تحديث الإجمالي
     document.getElementById('sirkatTotalHours').textContent = totalHours.toFixed(1);
     document.getElementById('sirkatTotalDays').textContent = workingDays;
 }
@@ -186,16 +173,10 @@ function renderSirkatTable() {
 // ====== تحديث صف عند تغيير قيمة ======
 function updateSirkatRow(input) {
     const row = input.closest('tr');
-    const cells = row.querySelectorAll('td');
     const fromInput = row.querySelector('.sirkat-from');
     const toInput = row.querySelector('.sirkat-to');
     const totalCell = row.querySelector('.total-hours');
-    const dayCell = row.querySelector('.day-cell');
-    const dateCell = row.querySelector('.date-cell');
-    const driverInput = row.querySelector('.sirkat-driver');
-    const engineerInput = row.querySelector('.sirkat-engineer');
     
-    // حساب الإجمالي
     const from = fromInput.value;
     const to = toInput.value;
     let total = 0;
@@ -215,8 +196,6 @@ function updateSirkatRow(input) {
     }
     
     totalCell.textContent = total > 0 ? total.toFixed(1) : 0;
-    
-    // تحديث الإجمالي الكلي
     updateTotalSummary();
 }
 
@@ -236,7 +215,7 @@ function updateTotalSummary() {
     document.getElementById('sirkatTotalDays').textContent = workingDays;
 }
 
-// ====== تحديث الجدول عند تغيير الشهر أو السنة ======
+// ====== تحديث الجدول ======
 function updateSirkat() {
     const month = parseInt(document.getElementById('sirkatMonth').value);
     const year = parseInt(document.getElementById('sirkatYear').value);
@@ -257,9 +236,86 @@ function printSirkat() {
 // ====== تصدير PDF ======
 function saveSirkatPDF() {
     saveSirkatData();
+    
+    // إظهار رسالة التحميل
+    showToast('📄 جاري تجهيز ملف PDF...', 'success');
+    
+    // إخفاء العناصر غير المرغوب فيها مؤقتاً للتصدير
+    const controls = document.querySelector('.sirkat-controls');
+    const backBtn = document.querySelector('.sirkat-back');
+    const supervisor = document.querySelector('.sirkat-supervisor');
+    
+    if (controls) controls.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'none';
+    if (supervisor) supervisor.style.display = 'none';
+    
+    // إضافة تنسيق إضافي للـ PDF
+    const style = document.createElement('style');
+    style.id = 'pdf-print-style';
+    style.textContent = `
+        .sirkat-table th {
+            background: #1a6b8a !important;
+            color: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .sirkat-header {
+            background: #1a6b8a !important;
+            color: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .sirkat-date {
+            background: rgba(255,255,255,0.15) !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .sirkat-table td .total-hours {
+            font-weight: 700 !important;
+            color: #1a6b8a !important;
+        }
+        .sirkat-table tfoot td {
+            border-top: 2px solid #1a6b8a !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
     const element = document.getElementById('sirkatContainer');
-    html2pdf().from(element).save(`سركات_${monthNames[currentMonth]}_${currentYear}.pdf`);
-    showToast('📄 جاري تصدير PDF', 'success');
+    
+    const opt = {
+        margin:        [5, 5, 5, 5],
+        filename:     `سركات_${monthNames[currentMonth]}_${currentYear}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true,
+            letterRendering: true,
+            scrollY: 0,
+            windowHeight: element.scrollHeight
+        },
+        jsPDF:        { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'landscape' 
+        },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+        // إعادة إظهار العناصر
+        if (controls) controls.style.display = '';
+        if (backBtn) backBtn.style.display = '';
+        if (supervisor) supervisor.style.display = '';
+        document.getElementById('pdf-print-style')?.remove();
+        showToast('✅ تم تصدير PDF بنجاح', 'success');
+    }).catch(err => {
+        console.error('PDF Error:', err);
+        if (controls) controls.style.display = '';
+        if (backBtn) backBtn.style.display = '';
+        if (supervisor) supervisor.style.display = '';
+        document.getElementById('pdf-print-style')?.remove();
+        showToast('❌ حدث خطأ أثناء تصدير PDF', 'error');
+    });
 }
 
 // ====== إعادة تعيين البيانات ======
@@ -274,26 +330,21 @@ function clearSirkatData() {
     }
 }
 
-// ====== تطبيق الألوان من إعدادات التصميم ======
+// ====== تطبيق الألوان ======
 function applySirkatColors() {
     const primary = localStorage.getItem('primaryColor') || '#1a6b8a';
     const gold = localStorage.getItem('goldColor') || '#c9a84c';
-    const bg = localStorage.getItem('bgColor') || '#f0f4f8';
-    const text = localStorage.getItem('textColor') || '#1a2a3a';
     
-    // تطبيق الألوان على الهيدر
     const header = document.getElementById('sirkatHeader');
     if (header) {
         header.style.background = primary;
     }
     
-    // تطبيق الألوان على رأس الجدول
     const thElements = document.querySelectorAll('.sirkat-table th');
     thElements.forEach(th => {
         th.style.background = primary;
     });
     
-    // تطبيق الألوان على الإجمالي
     const totalEl = document.getElementById('sirkatTotalHours');
     if (totalEl) {
         totalEl.style.color = primary;
@@ -302,12 +353,12 @@ function applySirkatColors() {
 
 // ====== الاستماع لتغييرات الألوان ======
 window.addEventListener('storage', function(e) {
-    if (e.key === 'primaryColor' || e.key === 'goldColor' || e.key === 'bgColor' || e.key === 'textColor') {
+    if (e.key === 'primaryColor' || e.key === 'goldColor') {
         applySirkatColors();
     }
 });
 
-// ====== التهيئة عند تحميل الصفحة ======
+// ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(initSirkat, 100);
 });
