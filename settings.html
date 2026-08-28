@@ -12,226 +12,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
     <style>
-        /* ====== أنماط صفحة المطور ====== */
-        .dev-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .dev-header {
-            text-align: center;
-            padding: 1rem 0 2rem;
-            border-bottom: 3px solid var(--gold);
-            margin-bottom: 2rem;
-        }
-        
-        .dev-header h1 {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-        
-        .dev-header h1 i {
-            color: var(--gold);
-            margin-left: 10px;
-        }
-        
-        .dev-header .badge {
-            display: inline-block;
-            background: var(--gold);
-            color: #fff;
-            padding: 0.2rem 1rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-top: 0.3rem;
-        }
-        
-        /* شبكة البطاقات */
-        .dev-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .dev-card {
-            background: var(--bg-light);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-        
-        .dev-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-        }
-        
-        body.dark-mode .dev-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.06);
-        }
-        
-        .dev-card .card-icon {
-            font-size: 2rem;
-            color: var(--gold);
-            margin-bottom: 0.5rem;
-        }
-        
-        .dev-card h3 {
-            font-size: 1.1rem;
-            color: var(--text);
-            margin-bottom: 0.5rem;
-        }
-        
-        .dev-card p {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 1rem;
-        }
-        
-        body.dark-mode .dev-card h3 {
-            color: #d4c8a0;
-        }
-        
-        body.dark-mode .dev-card p {
-            color: #a09880;
-        }
-        
-        .dev-card .dev-btn {
-            padding: 0.4rem 1.2rem;
-            border-radius: 20px;
-            border: none;
-            font-weight: 600;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Cairo', sans-serif;
-        }
-        
-        .dev-card .dev-btn-primary {
-            background: var(--primary);
-            color: #fff;
-        }
-        
-        .dev-card .dev-btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        
-        .dev-card .dev-btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-        
-        .dev-card .dev-btn-danger:hover {
-            background: #a93226;
-        }
-        
-        .dev-card .dev-btn-success {
-            background: var(--success);
-            color: #fff;
-        }
-        
-        .dev-card .dev-btn-success:hover {
-            background: #1e7a3a;
-        }
-        
-        .dev-card .dev-btn-gold {
-            background: var(--gold);
-            color: #fff;
-        }
-        
-        .dev-card .dev-btn-gold:hover {
-            background: #b8953a;
-        }
-        
-        .dev-card .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-        
-        .dev-card .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-        
-        body.dark-mode .dev-card .stat-value {
-            color: var(--gold);
-        }
-        
-        /* قسم الحماية */
-        .dev-protection {
-            background: rgba(192, 57, 43, 0.05);
-            border: 2px solid var(--danger);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        body.dark-mode .dev-protection {
-            background: rgba(192, 57, 43, 0.1);
-        }
-        
-        .dev-protection h3 {
-            color: var(--danger);
-            font-family: 'Cairo', sans-serif;
-        }
-        
-        .dev-protection p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-        
-        /* صندوق الكود */
-        .dev-code-box {
-            background: #1a1a2e;
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            overflow-x: auto;
-            color: #00ff88;
-            font-family: monospace;
-            font-size: 0.8rem;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        body.light-mode .dev-code-box {
-            background: #f0f0f0;
-            color: #1a1a2e;
-        }
-        
-        /* تحسينات الموبايل */
-        @media (max-width: 768px) {
-            .dev-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .dev-header h1 {
-                font-size: 1.5rem;
-            }
-        }
+        .dev-container { max-width: 1200px; margin: 0 auto; }
+        .dev-header { text-align: center; padding: 1rem 0 2rem; border-bottom: 3px solid var(--gold); margin-bottom: 2rem; }
+        .dev-header h1 { font-size: 2rem; color: var(--primary); }
+        .dev-header h1 i { color: var(--gold); margin-left: 10px; }
+        .dev-header .badge { display: inline-block; background: var(--gold); color: #fff; padding: 0.2rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-top: 0.3rem; }
+        .dev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .dev-card { background: var(--bg-light); border-radius: 16px; padding: 1.5rem; border: 1px solid var(--border); transition: all 0.3s ease; }
+        .dev-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+        body.dark-mode .dev-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+        .dev-card .card-icon { font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; }
+        .dev-card h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+        .dev-card p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem; }
+        body.dark-mode .dev-card h3 { color: #d4c8a0; }
+        body.dark-mode .dev-card p { color: #a09880; }
+        .dev-card .dev-btn { padding: 0.4rem 1.2rem; border-radius: 20px; border: none; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; font-family: 'Cairo', sans-serif; }
+        .dev-card .dev-btn-primary { background: var(--primary); color: #fff; }
+        .dev-card .dev-btn-primary:hover { background: var(--primary-dark); }
+        .dev-card .dev-btn-danger { background: var(--danger); color: #fff; }
+        .dev-card .dev-btn-danger:hover { background: #a93226; }
+        .dev-card .dev-btn-success { background: var(--success); color: #fff; }
+        .dev-card .dev-btn-success:hover { background: #1e7a3a; }
+        .dev-card .dev-btn-gold { background: var(--gold); color: #fff; }
+        .dev-card .dev-btn-gold:hover { background: #b8953a; }
+        .dev-card .stat-value { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        .dev-card .stat-label { font-size: 0.8rem; color: var(--text-light); }
+        body.dark-mode .dev-card .stat-value { color: var(--gold); }
+        .dev-protection { background: rgba(192,57,43,0.05); border: 2px solid var(--danger); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; }
+        body.dark-mode .dev-protection { background: rgba(192,57,43,0.1); }
+        .dev-protection h3 { color: var(--danger); font-family: 'Cairo', sans-serif; }
+        .dev-protection p { color: var(--text-light); font-size: 0.9rem; }
+        .dev-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; padding: 1rem 0; }
+        .login-container { max-width: 400px; margin: 2rem auto; padding: 2rem; background: var(--bg-light); border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+        .login-container h2 { margin-bottom: 1rem; }
+        .login-container input { width: 100%; padding: 0.8rem; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem; font-family: 'Cairo', sans-serif; }
+        .login-container .btn { width: 100%; justify-content: center; }
+        @media (max-width: 768px) { .dev-grid { grid-template-columns: 1fr; } .dev-header h1 { font-size: 1.5rem; } .dev-actions { flex-direction: column; align-items: center; } .dev-actions .btn { width: 100%; max-width: 250px; justify-content: center; } }
     </style>
-
-    <!-- ====== حماية صفحة المطور ====== -->
-    <script>
-        (function() {
-            // كلمة المرور (غيرها حسب رغبتك)
-            const PASSWORD = 'admin123';
-            
-            // التحقق من وجود جلسة
-            if (sessionStorage.getItem('dev_auth') !== 'true') {
-                const userPass = prompt('🔒 الرجاء إدخال كلمة المرور للوصول إلى لوحة المطور:');
-                if (userPass === PASSWORD) {
-                    sessionStorage.setItem('dev_auth', 'true');
-                } else {
-                    alert('❌ كلمة المرور غير صحيحة! سيتم تحويلك للصفحة الرئيسية.');
-                    window.location.href = 'index.html';
-                }
-            }
-        })();
-    </script>
 </head>
 <body>
     <div id="toast" class="toast">
@@ -242,125 +59,130 @@
     <div id="header"></div>
 
     <div class="dashboard">
-        <div class="dev-container">
+        <div class="dev-container" id="devContainer">
             
-            <!-- ====== رأس الصفحة ====== -->
-            <div class="dev-header">
-                <h1><i class="fas fa-tools"></i> لوحة التحكم - المطور</h1>
-                <p style="color: var(--text-light);">إدارة وإعدادات التطبيق المتقدمة</p>
-                <span class="badge">🔒 محمية بكلمة مرور</span>
+            <!-- ====== شاشة تسجيل الدخول (تظهر لو مش مسجل) ====== -->
+            <div id="loginScreen" style="display:none;">
+                <div class="login-container">
+                    <h2><i class="fas fa-shield-alt"></i> 🔒 دخول المطور</h2>
+                    <p style="color: var(--text-light);">سجل دخول بحسابك للوصول للوحة التحكم</p>
+                    <input type="email" id="devEmail" placeholder="البريد الإلكتروني" />
+                    <input type="password" id="devPassword" placeholder="كلمة المرور" />
+                    <button class="btn btn-primary" onclick="loginDeveloper()">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                    <div id="loginError" style="color: var(--danger); margin-top: 0.5rem; font-size: 0.85rem;"></div>
+                </div>
             </div>
 
-            <!-- ====== بطاقة الحماية ====== -->
-            <div class="dev-protection">
-                <h3><i class="fas fa-shield-alt"></i> 🔒 هذه الصفحة محمية</h3>
-                <p>هذه الصفحة مخصصة للمطور فقط. أي تعديل فيها لا يؤثر على التطبيق الأساسي.</p>
-                <p style="font-size:0.8rem; margin-top:0.3rem;">💡 نصيحة: يمكنك إضافة كلمة مرور لحماية هذه الصفحة</p>
-            </div>
+            <!-- ====== محتوى صفحة المطور (يظهر بعد تسجيل الدخول) ====== -->
+            <div id="devContent" style="display:none;">
+                
+                <div class="dev-header">
+                    <h1><i class="fas fa-tools"></i> لوحة التحكم - المطور</h1>
+                    <p style="color: var(--text-light);">إدارة وإعدادات التطبيق المتقدمة</p>
+                    <span class="badge">🔒 محمي بتسجيل الدخول</span>
+                </div>
 
-            <!-- ====== الشبكة ====== -->
-            <div class="dev-grid">
+                <div class="dev-protection">
+                    <h3><i class="fas fa-shield-alt"></i> 🔒 هذه الصفحة محمية</h3>
+                    <p>هذه الصفحة مخصصة للمطورين فقط. أي تعديل فيها لا يؤثر على التطبيق الأساسي.</p>
+                    <p style="font-size:0.8rem; margin-top:0.3rem;">👤 <span id="devUserEmail">المستخدم</span></p>
+                </div>
 
-                <!-- 1. حالة الترخيص -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-key"></i></div>
-                    <h3>نظام الترخيص</h3>
-                    <p>حالة الترخيص الحالية والتحكم فيه</p>
-                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                        <button class="dev-btn dev-btn-primary" onclick="showLicenseStatus()">
-                            <i class="fas fa-eye"></i> عرض الحالة
+                <div class="dev-grid">
+                    <!-- 1. حالة الترخيص -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-key"></i></div>
+                        <h3>نظام الترخيص</h3>
+                        <p>حالة الترخيص الحالية والتحكم فيه</p>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-primary" onclick="showLicenseStatus()">
+                                <i class="fas fa-eye"></i> عرض الحالة
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="clearLicense()">
+                                <i class="fas fa-trash"></i> مسح الترخيص
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. إحصائيات التطبيق -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+                        <h3>إحصائيات التطبيق</h3>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                            <div><div class="stat-value" id="devTotalOffers">0</div><div class="stat-label">إجمالي العروض</div></div>
+                            <div><div class="stat-value" id="devTotalClients">0</div><div class="stat-label">إجمالي العملاء</div></div>
+                            <div><div class="stat-value" id="devTotalEquipment">0</div><div class="stat-label">إجمالي المعدات</div></div>
+                            <div><div class="stat-value" id="devTotalRevenue">0</div><div class="stat-label">إجمالي الإيرادات</div></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. تنظيف البيانات -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-broom"></i></div>
+                        <h3>تنظيف البيانات</h3>
+                        <p>حذف جميع البيانات المخزنة في المتصفح</p>
+                        <button class="dev-btn dev-btn-danger" onclick="clearAllData()">
+                            <i class="fas fa-trash-alt"></i> مسح جميع البيانات
                         </button>
-                        <button class="dev-btn dev-btn-danger" onclick="clearLicense()">
-                            <i class="fas fa-trash"></i> مسح الترخيص
+                    </div>
+
+                    <!-- 4. تصدير البيانات -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-download"></i></div>
+                        <h3>تصدير البيانات</h3>
+                        <p>تصدير جميع بيانات التطبيق كملف JSON</p>
+                        <button class="dev-btn dev-btn-success" onclick="exportAllData()">
+                            <i class="fas fa-file-export"></i> تصدير JSON
                         </button>
                     </div>
-                </div>
 
-                <!-- 2. إحصائيات التطبيق -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
-                    <h3>إحصائيات التطبيق</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
-                        <div>
-                            <div class="stat-value" id="devTotalOffers">0</div>
-                            <div class="stat-label">إجمالي العروض</div>
+                    <!-- 5. استيراد البيانات -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-upload"></i></div>
+                        <h3>استيراد البيانات</h3>
+                        <p>استيراد بيانات من ملف JSON</p>
+                        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importAllData(event)" />
+                        <button class="dev-btn dev-btn-gold" onclick="document.getElementById('importFile').click()">
+                            <i class="fas fa-file-import"></i> استيراد JSON
+                        </button>
+                    </div>
+
+                    <!-- 6. معلومات التطبيق -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-info-circle"></i></div>
+                        <h3>معلومات التطبيق</h3>
+                        <div style="font-size:0.85rem; color:var(--text-light);">
+                            <p><strong>الإصدار:</strong> v1.0.0</p>
+                            <p><strong>التاريخ:</strong> <span id="devDate"></span></p>
+                            <p><strong>الحالة:</strong> <span style="color:var(--success);">🟢 شغال</span></p>
                         </div>
-                        <div>
-                            <div class="stat-value" id="devTotalClients">0</div>
-                            <div class="stat-label">إجمالي العملاء</div>
-                        </div>
-                        <div>
-                            <div class="stat-value" id="devTotalEquipment">0</div>
-                            <div class="stat-label">إجمالي المعدات</div>
-                        </div>
-                        <div>
-                            <div class="stat-value" id="devTotalRevenue">0</div>
-                            <div class="stat-label">إجمالي الإيرادات</div>
+                    </div>
+
+                    <!-- 7. سجل التحديثات -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-history"></i></div>
+                        <h3>سجل التحديثات</h3>
+                        <div style="font-size:0.8rem; color:var(--text-light); max-height:150px; overflow-y:auto;">
+                            <p>✅ 2026-08-28: إضافة نظام الترخيص</p>
+                            <p>✅ 2026-08-27: تحسينات الموبايل</p>
+                            <p>✅ 2026-08-26: إضافة صفحة الترحيب</p>
+                            <p>✅ 2026-08-25: إطلاق الإصدار الأول</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. تنظيف البيانات -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-broom"></i></div>
-                    <h3>تنظيف البيانات</h3>
-                    <p>حذف جميع البيانات المخزنة في المتصفح</p>
-                    <button class="dev-btn dev-btn-danger" onclick="clearAllData()">
-                        <i class="fas fa-trash-alt"></i> مسح جميع البيانات
+                <!-- ====== أزرار الإجراءات ====== -->
+                <div class="dev-actions">
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                    </a>
+                    <button class="btn btn-danger" onclick="logoutDev()">
+                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
                     </button>
                 </div>
 
-                <!-- 4. تصدير البيانات -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-download"></i></div>
-                    <h3>تصدير البيانات</h3>
-                    <p>تصدير جميع بيانات التطبيق كملف JSON</p>
-                    <button class="dev-btn dev-btn-success" onclick="exportAllData()">
-                        <i class="fas fa-file-export"></i> تصدير JSON
-                    </button>
-                </div>
-
-                <!-- 5. استيراد البيانات -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-upload"></i></div>
-                    <h3>استيراد البيانات</h3>
-                    <p>استيراد بيانات من ملف JSON</p>
-                    <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importAllData(event)" />
-                    <button class="dev-btn dev-btn-gold" onclick="document.getElementById('importFile').click()">
-                        <i class="fas fa-file-import"></i> استيراد JSON
-                    </button>
-                </div>
-
-                <!-- 6. معلومات التطبيق -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-info-circle"></i></div>
-                    <h3>معلومات التطبيق</h3>
-                    <div style="font-size:0.85rem; color:var(--text-light);">
-                        <p><strong>الإصدار:</strong> v1.0.0</p>
-                        <p><strong>التاريخ:</strong> <span id="devDate"></span></p>
-                        <p><strong>الحالة:</strong> <span style="color:var(--success);">🟢 شغال</span></p>
-                    </div>
-                </div>
-
-                <!-- 7. سجل التحديثات -->
-                <div class="dev-card">
-                    <div class="card-icon"><i class="fas fa-history"></i></div>
-                    <h3>سجل التحديثات</h3>
-                    <div style="font-size:0.8rem; color:var(--text-light); max-height:150px; overflow-y:auto;">
-                        <p>✅ 2026-08-28: إضافة نظام الترخيص</p>
-                        <p>✅ 2026-08-27: تحسينات الموبايل</p>
-                        <p>✅ 2026-08-26: إضافة صفحة الترحيب</p>
-                        <p>✅ 2026-08-25: إطلاق الإصدار الأول</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ====== زر الرجوع ====== -->
-            <div style="text-align:center; padding:1rem 0;">
-                <a href="index.html" class="btn btn-primary">
-                    <i class="fas fa-arrow-right"></i> العودة للرئيسية
-                </a>
             </div>
 
         </div>
@@ -370,25 +192,76 @@
 
     <script src="js/main.js"></script>
     <script>
-        // ====== دوال صفحة المطور ======
-        
-        // عرض حالة الترخيص
+        // ====== التحقق من حالة تسجيل الدخول ======
+        (function() {
+            // التحقق من وجود جلسة تسجيل دخول صالحة
+            if (sessionStorage.getItem('dev_logged_in') === 'true') {
+                // مستخدم مسجل دخول → إظهار المحتوى
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('devContent').style.display = 'block';
+                document.getElementById('devUserEmail').textContent = sessionStorage.getItem('dev_user_email') || 'المطور';
+            } else {
+                // غير مسجل دخول → إظهار شاشة تسجيل الدخول
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('devContent').style.display = 'none';
+            }
+        })();
+
+        // ====== تسجيل الدخول عبر Firebase ======
+        async function loginDeveloper() {
+            const email = document.getElementById('devEmail').value.trim();
+            const password = document.getElementById('devPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+            
+            if (!email || !password) {
+                errorEl.textContent = '⚠️ الرجاء إدخال البريد الإلكتروني وكلمة المرور';
+                return;
+            }
+            
+            try {
+                // استخدام Firebase Authentication
+                const result = await window.loginUser(email, password);
+                
+                if (result.success) {
+                    // ✅ تسجيل الدخول ناجح
+                    sessionStorage.setItem('dev_logged_in', 'true');
+                    sessionStorage.setItem('dev_user_email', result.user.email);
+                    errorEl.textContent = '';
+                    showToast('✅ تم تسجيل الدخول بنجاح', 'success');
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    errorEl.textContent = '❌ ' + (result.error || 'فشل تسجيل الدخول، تأكد من البيانات');
+                }
+            } catch (error) {
+                errorEl.textContent = '❌ حدث خطأ، تأكد من اتصالك بالإنترنت';
+                console.error('Login error:', error);
+            }
+        }
+
+        // ====== تسجيل الخروج ======
+        function logoutDev() {
+            if (confirm('⚠️ هل أنت متأكد من تسجيل الخروج؟')) {
+                sessionStorage.removeItem('dev_logged_in');
+                sessionStorage.removeItem('dev_user_email');
+                showToast('👋 تم تسجيل الخروج بنجاح', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            }
+        }
+
+        // ====== باقي الدوال ======
         function showLicenseStatus() {
             const info = licenseManager ? licenseManager.getLicenseInfo() : null;
             if (info) {
-                alert(
-                    `📋 حالة الترخيص:\n\n` +
-                    `النوع: ${info.type}\n` +
-                    `الخطة: ${info.planName || 'غير محدد'}\n` +
-                    `المتبقي: ${info.daysLeft} يوم\n` +
-                    `الصلاحية: ${info.isPremium ? '✅ مفعل' : '❌ غير مفعل'}`
-                );
+                alert('📋 حالة الترخيص:\n\n' +
+                    'النوع: ' + info.type + '\n' +
+                    'الخطة: ' + (info.planName || 'غير محدد') + '\n' +
+                    'المتبقي: ' + info.daysLeft + ' يوم\n' +
+                    'الصلاحية: ' + (info.isPremium ? '✅ مفعل' : '❌ غير مفعل'));
             } else {
                 showToast('⚠️ لا توجد بيانات ترخيص', 'error');
             }
         }
-        
-        // مسح الترخيص
+
         function clearLicense() {
             if (confirm('⚠️ هل أنت متأكد من مسح الترخيص؟')) {
                 localStorage.removeItem('app_license_data');
@@ -396,8 +269,7 @@
                 setTimeout(() => window.location.reload(), 1000);
             }
         }
-        
-        // مسح جميع البيانات
+
         function clearAllData() {
             if (confirm('⚠️ هذا الإجراء سيمسح جميع بيانات التطبيق! هل أنت متأكد؟')) {
                 if (confirm('⚠️ تأكيد نهائي: هل تريد مسح كل شيء؟')) {
@@ -407,8 +279,7 @@
                 }
             }
         }
-        
-        // تصدير البيانات
+
         function exportAllData() {
             const data = {};
             for (let i = 0; i < localStorage.length; i++) {
@@ -424,8 +295,7 @@
             URL.revokeObjectURL(url);
             showToast('✅ تم تصدير البيانات', 'success');
         }
-        
-        // استيراد البيانات
+
         function importAllData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -447,8 +317,7 @@
             reader.readAsText(file);
             event.target.value = '';
         }
-        
-        // ====== تحميل الإحصائيات ======
+
         function loadDevStats() {
             const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
             const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
@@ -469,11 +338,10 @@
                 }
             });
             document.getElementById('devTotalRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
-            
             document.getElementById('devDate').textContent = new Date().toLocaleDateString('ar-EG');
         }
-        
-        // ====== التهيئة ======
+
+        // تهيئة الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(loadDevStats, 200);
         });
