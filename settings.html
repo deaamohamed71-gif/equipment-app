@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
     <style>
+        /* ... كل الأنماط كما هي ... */
         .dev-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -227,7 +228,7 @@
     <div class="dashboard">
         <div class="dev-container" id="devContainer">
             
-            <!-- ====== شاشة تسجيل الدخول (تظهر لو مش مسجل) ====== -->
+            <!-- ====== شاشة تسجيل الدخول ====== -->
             <div id="loginScreen" style="display:none;">
                 <div class="login-container">
                     <h2><i class="fas fa-shield-alt"></i> 🔒 دخول المطور</h2>
@@ -241,7 +242,7 @@
                 </div>
             </div>
 
-            <!-- ====== محتوى صفحة المطور (يظهر بعد تسجيل الدخول) ====== -->
+            <!-- ====== محتوى صفحة المطور ====== -->
             <div id="devContent" style="display:none;">
                 
                 <div class="dev-header">
@@ -338,7 +339,7 @@
                         </div>
                     </div>
 
-                    <!-- 8. إدارة التحديثات (جديد) -->
+                    <!-- 8. إدارة التحديثات -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-edit"></i></div>
                         <h3>إدارة التحديثات</h3>
@@ -349,6 +350,27 @@
                         <button class="dev-btn dev-btn-primary" onclick="window.open('changelog.html', '_blank')" style="margin-top:0.5rem;">
                             <i class="fas fa-eye"></i> عرض سجل التحديثات
                         </button>
+                    </div>
+
+                    <!-- ⭐ 9. إدارة الترخيص بالملفات (ZLX) - جديد -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
+                        <h3>ترخيص الملفات (ZLX)</h3>
+                        <p>إدارة الترخيص عبر ملفات .zlx</p>
+                        <div style="font-size:0.85rem; color:var(--text-light); margin-bottom:0.5rem;">
+                            <span id="zlxStatus">📋 الحالة: <span style="color:var(--text-light);">غير مفعل</span></span>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-primary" onclick="generateLicenseForUser()">
+                                <i class="fas fa-plus"></i> إنشاء ترخيص
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="revokeZLXLicense()">
+                                <i class="fas fa-trash"></i> إلغاء الترخيص
+                            </button>
+                            <button class="dev-btn dev-btn-success" onclick="refreshZLXStatus()">
+                                <i class="fas fa-sync"></i> تحديث الحالة
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -369,9 +391,9 @@
 
     <div id="footer"></div>
 
-    <!-- ====== Firebase SDK ====== -->
     <script src="js/firebase.js" type="module"></script>
     <script src="js/main.js"></script>
+    <script src="js/license-file.js"></script>
     
     <script>
         // ====== التحقق من حالة تسجيل الدخول ======
@@ -425,7 +447,7 @@
             }
         }
 
-        // ====== دوال صفحة المطور ======
+        // ====== دوال صفحة المطور الأساسية ======
         function showLicenseStatus() {
             const info = licenseManager ? licenseManager.getLicenseInfo() : null;
             if (info) {
@@ -495,6 +517,113 @@
             event.target.value = '';
         }
 
+        // ====== إدارة الترخيص بالملفات (ZLX) ======
+        function refreshZLXStatus() {
+            const statusEl = document.getElementById('zlxStatus');
+            if (!statusEl) return;
+            
+            const licenseData = localStorage.getItem('license_data');
+            const deviceId = localStorage.getItem('device_id') || 'غير معروف';
+            
+            if (licenseData) {
+                try {
+                    const license = JSON.parse(licenseData);
+                    const expiry = new Date(license.expiryDate);
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    const isExpired = daysLeft <= 0;
+                    
+                    statusEl.innerHTML = `
+                        📋 الحالة: <span style="color:${isExpired ? 'var(--danger)' : 'var(--success)'};">
+                            ${isExpired ? '❌ منتهي' : '✅ مفعل'}
+                        </span>
+                        <br />
+                        <span style="font-size:0.75rem; opacity:0.7;">
+                            المستخدم: ${license.userName || 'غير محدد'} | 
+                            الخطة: ${license.plan || 'سنوية'} | 
+                            المتبقي: ${isExpired ? '0' : daysLeft} يوم
+                        </span>
+                    `;
+                } catch (e) {
+                    statusEl.innerHTML = `📋 الحالة: <span style="color:var(--danger);">❌ بيانات تالفة</span>`;
+                }
+            } else {
+                statusEl.innerHTML = `📋 الحالة: <span style="color:var(--text-light);">غير مفعل</span>`;
+            }
+        }
+
+        function generateLicenseForUser() {
+            const deviceId = localStorage.getItem('device_id') || 'ASSAM-XXXX-XXXX-XXXX-XXXX';
+            
+            const userName = prompt('👤 اسم المستخدم:', 'مستخدم جديد');
+            if (!userName) return;
+            
+            const plan = prompt('📋 الخطة (شهري/سنوي):', 'سنوي');
+            if (!plan) return;
+            
+            const days = parseInt(prompt('📅 عدد الأيام:', '365')) || 365;
+            
+            if (typeof generateLicense === 'function') {
+                const result = generateLicense(deviceId, userName, plan, days);
+                if (result) {
+                    showToast('✅ تم إنشاء ملف الترخيص بنجاح!', 'success');
+                    refreshZLXStatus();
+                } else {
+                    showToast('❌ حدث خطأ أثناء إنشاء الترخيص', 'error');
+                }
+            } else {
+                // طريقة بديلة
+                const licenseData = {
+                    deviceId: deviceId,
+                    userName: userName,
+                    plan: plan,
+                    expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    version: '1.0',
+                    features: {
+                        maxItems: Infinity,
+                        maxOffers: Infinity,
+                        maxClients: Infinity,
+                        canExportPDF: true,
+                        canExportExcel: true,
+                        canReports: true,
+                        canSignatures: true,
+                        canFullDesign: true,
+                        canCharts: true,
+                        showWatermark: false,
+                        isPremium: true
+                    }
+                };
+                
+                const json = JSON.stringify(licenseData);
+                const encrypted = btoa(json);
+                const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
+                const fileContent = `${encrypted}.${signature}`;
+                
+                const blob = new Blob([fileContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `license_${deviceId.substring(0, 8)}.zlx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('✅ تم إنشاء ملف الترخيص بنجاح!', 'success');
+            }
+        }
+
+        function revokeZLXLicense() {
+            if (confirm('⚠️ هل أنت متأكد من إلغاء الترخيص الحالي؟')) {
+                localStorage.removeItem('license_data');
+                localStorage.removeItem('license_file');
+                showToast('✅ تم إلغاء الترخيص', 'success');
+                refreshZLXStatus();
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        }
+
+        // ====== تحميل الإحصائيات ======
         function loadDevStats() {
             const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
             const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
@@ -516,8 +645,12 @@
             });
             document.getElementById('devTotalRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
             document.getElementById('devDate').textContent = new Date().toLocaleDateString('ar-EG');
+            
+            // تحديث حالة الترخيص
+            refreshZLXStatus();
         }
 
+        // ====== التهيئة ======
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(loadDevStats, 200);
         });
