@@ -161,6 +161,26 @@
             font-size: 1.2rem;
         }
         
+        .btn-free-trial {
+            background: #6c5ce7;
+            color: #fff;
+            border-color: #6c5ce7;
+            width: 100%;
+            justify-content: center;
+            padding: 0.8rem;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+        .btn-free-trial:hover {
+            background: #5a4bd1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108,92,231,0.3);
+        }
+        .btn-free-trial i {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        
         .btn-upload {
             width: 100%;
             justify-content: center;
@@ -283,6 +303,17 @@
         .divider-text::before { left: 0; }
         .divider-text::after { right: 0; }
         
+        .trial-badge {
+            display: inline-block;
+            background: var(--purple);
+            color: #fff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+        
         @media (max-width: 480px) {
             .license-activation-container {
                 padding: 1rem;
@@ -298,27 +329,6 @@
             }
         }
     </style>
-    
-    <!-- ====== استقبال الخطة المختارة من الرابط ====== -->
-    <script>
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const plan = urlParams.get('plan');
-            
-            if (plan) {
-                setTimeout(() => {
-                    const planSelect = document.getElementById('userPlan');
-                    if (planSelect) {
-                        if (plan === 'monthly' || plan === 'شهرية') {
-                            planSelect.value = 'شهرية';
-                        } else if (plan === 'yearly' || plan === 'سنوية') {
-                            planSelect.value = 'سنوية';
-                        }
-                    }
-                }, 500);
-            }
-        })();
-    </script>
 </head>
 <body>
     <div id="toast" class="toast">
@@ -335,7 +345,7 @@
                 <i class="fas fa-crown"></i> تفعيل النسخة الاحترافية
             </div>
             <p class="license-subtitle">
-                اختر الخطة المناسبة وأرسل بياناتك للمطور لاستلام ملف الترخيص
+                اختر الخطة المناسبة أو ابدأ النسخة المجانية
             </p>
 
             <!-- معرف الجهاز مع زر نسخ -->
@@ -366,12 +376,20 @@
                 <label><i class="fas fa-calendar-alt"></i> الخطة <span class="required">*</span></label>
                 <select id="userPlan" required>
                     <option value="">-- اختر الخطة --</option>
+                    <option value="مجانية">🆓 مجانية - 90 يوم تجريبي</option>
                     <option value="شهرية">📅 شهرية - 99 ج.م</option>
                     <option value="سنوية">📆 سنوية - 499 ج.م (وفر 50%)</option>
                 </select>
             </div>
 
-            <!-- زر إرسال للمطور -->
+            <!-- زر بدء النسخة المجانية -->
+            <button class="btn btn-free-trial" onclick="startFreeTrialFromUI()">
+                <i class="fas fa-gift"></i> 🆓 بدء النسخة المجانية (90 يوم)
+            </button>
+
+            <div class="divider-text">أو</div>
+
+            <!-- زر إرسال للمطور (للخطط المدفوعة) -->
             <button class="btn btn-whatsapp" onclick="sendToWhatsApp()">
                 <i class="fab fa-whatsapp"></i> إرسال للمطور لإتمام التفعيل
             </button>
