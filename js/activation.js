@@ -1,4 +1,4 @@
-// js/activation.js - كود صفحة التفعيل مع Firebase
+// js/activation.js - كود صفحة التفعيل (محدث لربط الخطط بترخيص الملفات)
 
 // ====== تحميل بيانات الترخيص ======
 function loadActivationData() {
@@ -12,7 +12,6 @@ function loadActivationData() {
     const planDetails = document.getElementById('planDetails');
     
     if (info.isPremium) {
-        // أسماء الخطط
         const planNames = {
             'monthly': 'شهرية',
             'yearly': 'سنوية',
@@ -139,15 +138,11 @@ async function activateLicense() {
     input.value = '';
 }
 
-// ====== اختيار خطة ======
+// ====== اختيار خطة (محدث - توجيه لصفحة ترخيص الملفات) ======
 function selectPlan(plan) {
-    const message = plan === 'monthly' 
-        ? 'سيتم توجيهك إلى صفحة الدفع للاشتراك الشهري (99 ج.م)'
-        : 'سيتم توجيهك إلى صفحة الدفع للاشتراك السنوي (499 ج.م - وفر 50%)';
-    
-    if (confirm(`📢 ${message}\n\nملاحظة: هذه واجهة توضيحية، سيتم ربطها ببوابة الدفع الفعلية لاحقاً.`)) {
-        showToast('🔧 جارٍ التوجيه إلى بوابة الدفع...', 'success');
-    }
+    // ✅ توجيه المستخدم مباشرة إلى صفحة ترخيص الملفات
+    // مع تمرير الخطة المختارة كمعامل في الرابط
+    window.location.href = `activation-license.html?plan=${plan}`;
 }
 
 // ====== التحقق من الترخيص من Firebase عند تحميل صفحة التفعيل ======
@@ -190,5 +185,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ====== دالة للرجوع إلى الصفحة الرئيسية ======
 function goHome() {
-    window.location.href = 'index.html';
+    window.location.href = 'dashboard.html';
 }
