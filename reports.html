@@ -1,3 +1,4 @@
+<!-- reports.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -32,7 +33,43 @@
         <span id="toastMessage">تم التحميل بنجاح</span>
     </div>
 
-    <div id="header"></div>
+    <!-- ====== زر العودة للرئيسية ====== -->
+    <div class="back-home-btn">
+        <a href="dashboard.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-arrow-right"></i> العودة للرئيسية
+        </a>
+    </div>
+
+    <!-- ====== الهيدر الجديد (هامبورجر) ====== -->
+    <header class="header-hamburger" id="headerHamburger">
+        <div class="logo" onclick="goHome()">
+            <img id="headerLogo" src="" alt="الشعار" style="display:none;" />
+            <h1><i class="fas fa-crown"></i> عروض المعدات</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleMode()" id="modeToggle" title="تبديل الوضع">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="hamburger-btn" id="hamburgerBtn" title="القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== السايدبار ====== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text"><i class="fas fa-crown"></i> عروض المعدات</span>
+            <button class="close-btn" id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-links" id="sidebarLinks">
+            <!-- سيتم تعبئته بواسطة JavaScript -->
+        </div>
+        <div class="sidebar-footer">
+            <span class="license-status" id="sidebarLicenseStatus">📋 النسخة المجانية</span>
+        </div>
+    </div>
 
     <div class="dashboard">
         <div class="reports-container">
@@ -165,6 +202,112 @@
     </div>
 
     <div id="footer"></div>
+
+    <!-- ====== كود السايدبار ====== -->
+    <script>
+        (function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('closeSidebar');
+            const sidebarLinks = document.getElementById('sidebarLinks');
+
+            const links = [
+                { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
+                { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
+                { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
+                { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
+                { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
+                { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
+                { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
+                { href: 'settings.html', icon: 'fa-tools', text: 'المطور' },
+                { href: 'activation-license.html', icon: 'fa-file-certificate', text: 'ترخيص الملفات' },
+                { href: 'activation.html', icon: 'fa-key', text: 'التفعيل' }
+            ];
+
+            const currentPage = window.location.pathname.split('/').pop() || 'reports.html';
+            sidebarLinks.innerHTML = links.map(link => `
+                <a href="${link.href}" class="${link.href === currentPage ? 'active' : ''}">
+                    <i class="fas ${link.icon}"></i>
+                    ${link.text}
+                </a>
+            `).join('');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            hamburgerBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            document.querySelectorAll('.sidebar-links a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            console.log('✅ قائمة الهامبورجر في reports.html تم تهيئتها بنجاح');
+        })();
+    </script>
+
+    <!-- ====== Fullscreen API ====== -->
+    <script>
+        (function() {
+            function requestFullscreen() {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
+            }
+            
+            const events = ['click', 'touchstart'];
+            function handleFirstInteraction() {
+                requestFullscreen();
+                events.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction);
+                });
+            }
+            events.forEach(event => {
+                document.addEventListener(event, handleFirstInteraction, { once: true });
+            });
+            
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    window.scrollTo(0, 1);
+                }
+            });
+            
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 300);
+            });
+            
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 500);
+            });
+            
+            console.log('✅ Fullscreen API تم تفعيلها');
+        })();
+    </script>
 
     <!-- ⚠️ الترتيب الصحيح: license.js أولاً، ثم main.js، ثم reports.js -->
     <script src="js/license.js"></script>
