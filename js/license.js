@@ -1,4 +1,4 @@
-// js/license.js - نظام الترخيص الأساسي (محدث)
+// js/license.js - نظام الترخيص الأساسي (محدث للتحقق من Firestore)
 
 class LicenseManager {
     constructor() {
@@ -20,14 +20,16 @@ class LicenseManager {
 
     // ====== التهيئة ======
     initialize() {
-        // ✅ التحقق من وجود ترخيص مدفوع أولاً
+        // ✅ أولاً: التحقق من الترخيص في Firestore
+        this.checkFirestoreLicense();
+
+        // ✅ ثانياً: التحقق من ترخيص الملفات المحلي
         const fileLicense = localStorage.getItem('license_data');
         if (fileLicense) {
             try {
                 const license = JSON.parse(fileLicense);
                 const expiry = new Date(license.expiryDate);
                 if (expiry > new Date()) {
-                    // تطبيق الترخيص المدفوع
                     const premiumData = this.buildPremiumData(license);
                     this.licenseData = premiumData;
                     this.isValidated = true;
@@ -41,14 +43,13 @@ class LicenseManager {
             }
         }
 
-        // ✅ التحقق من وجود ترخيص مجاني (تجريبي)
+        // ✅ ثالثاً: التحقق من الترخيص المخزن محلياً (app_license_data)
         const saved = localStorage.getItem(this.STORAGE_KEY);
         if (saved) {
             try {
                 this.licenseData = JSON.parse(saved);
                 this.isValidated = this.isLicenseValid(this.licenseData);
                 
-                // إذا كان ترخيصاً مجانياً ولم ينتهِ، نستمر
                 if (this.isValidated && !this.licenseData.isPremium) {
                     this.notifyListeners();
                     this.startPeriodicVerification();
@@ -59,7 +60,7 @@ class LicenseManager {
             }
         }
         
-        // ✅ لا يوجد ترخيص صالح → نبدأ النسخة المجانية
+        // ✅ رابعاً: لا يوجد ترخيص صالح → نبدأ النسخة المجانية
         if (!this.isValidated || !this.licenseData) {
             this.startFreeTrial();
         }
@@ -67,6 +68,87 @@ class LicenseManager {
         this.notifyListeners();
         this.startPeriodicVerification();
         return this.isValidated;
+    }
+
+    // ====== التحقق من الترخيص في Firestore ======
+    async checkFirestoreLicense() {
+        try {
+            const deviceId = localStorage.getItem('device_id') || '';
+            const activeLicenseId = localStorage.getItem('active_license_id');
+            
+            if (!deviceId || !activeLicenseId) return false;
+            
+            if (typeof window.verifyLicenseFromFirestore === 'function') {
+                const result = await window.verifyLicenseFromFirestore(activeLicenseId);
+                
+                if (result.valid && result.data) {
+                    const license = result.licenseData || {
+                        deviceId: result.data.deviceId,
+                        userName: result.data.userName,
+                        userPhone: result.data.userPhone,
+                        plan: result.data.plan,
+                        expiryDate: result.data.expiryDate
+                    };
+                    
+                    if (typeof window.applyLicenseToSystem === 'function') {
+                        window.applyLicenseToSystem(license);
+                    } else {
+                        this.applyLicenseToSystem(license);
+                    }
+                    
+                    console.log('✅ تم تفعيل الترخيص من Firestore');
+                    return true;
+                } else {
+                    localStorage.removeItem('active_license_id');
+                    console.log('❌ الترخيص غير صالح، تم إلغاؤه');
+                    return false;
+                }
+            }
+        } catch (error) {
+            console.warn('فشل التحقق من Firestore:', error);
+            return false;
+        }
+        return false;
+    }
+
+    // ====== تطبيق الترخيص على النظام ======
+    applyLicenseToSystem(license) {
+        try {
+            const expiry = new Date(license.expiryDate);
+            const now = new Date();
+            const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+            
+            const premiumData = {
+                type: 'premium',
+                plan: license.plan || 'سنوية',
+                startDate: license.createdAt || new Date().toISOString(),
+                expiryDate: license.expiryDate,
+                features: this.getPremiumFeatures(),
+                status: 'active',
+                licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
+                isPremium: true,
+                userName: license.userName || 'مستخدم',
+                userPhone: license.userPhone || '',
+                daysLeft: daysLeft,
+                isExpired: daysLeft <= 0
+            };
+            
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(premiumData));
+            this.licenseData = premiumData;
+            this.isValidated = true;
+            this.notifyListeners();
+            
+            // تحديث الفوتر
+            const footer = document.getElementById('footer');
+            if (footer) {
+                footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
+            }
+            
+            return premiumData;
+        } catch (error) {
+            console.error('Apply license error:', error);
+            return null;
+        }
     }
 
     // ====== بدء النسخة المجانية (90 يوم) ======
@@ -129,7 +211,6 @@ class LicenseManager {
             return false;
         }
         
-        // تحديث الأيام المتبقية في البيانات
         if (license.daysLeft !== undefined) {
             license.daysLeft = this.getDaysLeft(license.expiryDate);
         }
@@ -154,9 +235,7 @@ class LicenseManager {
         const key = license.licenseKey;
         if (!key) return true;
         
-        // التحقق من أنه ليس ترخيص ملفات (يبدأ بـ FILE-)
         if (key && key.startsWith('FILE-')) {
-            // ترخيص الملفات يتم التحقق منه بشكل منفصل
             return true;
         }
         
@@ -183,7 +262,6 @@ class LicenseManager {
 
     // ====== تفعيل الترخيص مع الخطة ======
     async activateLicense(key) {
-        // التحقق من أنه ليس ترخيص ملفات
         if (key && key.startsWith('FILE-')) {
             return { success: false, message: '⚠️ هذا ترخيص ملفات، يرجى استخدام صفحة التفعيل بالملفات' };
         }
@@ -363,7 +441,6 @@ class LicenseManager {
     // ====== حفظ الترخيص ======
     saveLicense(data) {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-        // تحديث الأيام المتبقية في localStorage
         if (data && data.expiryDate) {
             const daysLeft = this.getDaysLeft(data.expiryDate);
             data.daysLeft = daysLeft;
@@ -419,17 +496,18 @@ class LicenseManager {
         }
         
         this.verificationInterval = setInterval(() => {
-            // التحقق من ترخيص الملفات
+            // التحقق من الترخيص في Firestore
+            this.checkFirestoreLicense();
+            
+            // التحقق من ترخيص الملفات المحلي
             const fileLicense = localStorage.getItem('license_data');
             if (fileLicense) {
                 try {
                     const license = JSON.parse(fileLicense);
                     const expiry = new Date(license.expiryDate);
                     if (expiry > new Date()) {
-                        // الترخيص ساري
                         return;
                     } else {
-                        // الترخيص منتهي
                         localStorage.removeItem('license_data');
                         localStorage.removeItem('license_file');
                         if (this.licenseData && this.licenseData.isPremium) {
@@ -485,11 +563,9 @@ function checkFileLicenseOnStart() {
             const now = new Date();
             
             if (expiry > now) {
-                // الترخيص ساري → تطبيقه
-                if (typeof applyLicenseToSystem === 'function') {
-                    applyLicenseToSystem(license);
+                if (typeof window.applyLicenseToSystem === 'function') {
+                    window.applyLicenseToSystem(license);
                 } else {
-                    // طريقة بديلة
                     const premiumData = {
                         type: 'premium',
                         plan: license.plan || 'سنوية',
@@ -524,7 +600,6 @@ function checkFileLicenseOnStart() {
                         licenseManager.notifyListeners();
                     }
                     
-                    // تحديث الفوتر
                     const footer = document.getElementById('footer');
                     if (footer) {
                         footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
@@ -532,7 +607,6 @@ function checkFileLicenseOnStart() {
                 }
                 return true;
             } else {
-                // الترخيص منتهي → حذفه والعودة للمجاني
                 localStorage.removeItem('license_data');
                 localStorage.removeItem('license_file');
                 if (typeof showToast === 'function') {
