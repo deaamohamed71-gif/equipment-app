@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث للتحقق من الترخيص عند بدء التشغيل)
+// js/main.js - الكود الأساسي المشترك (محدث مع قائمة الهامبورجر)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -28,19 +28,30 @@ function toggleMode() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('themeModeV2', isDark ? 'dark' : 'light');
     
-    document.querySelectorAll('.mode-toggle').forEach(btn => {
-        btn.innerHTML = isDark ? 
-            '<i class="fas fa-sun"></i> فاتح' : 
-            '<i class="fas fa-moon"></i> غامق';
-    });
+    // تحديث أيقونة الوضع في الهيدر
+    const modeToggle = document.getElementById('modeToggle');
+    if (modeToggle) {
+        modeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        modeToggle.title = isDark ? 'الوضع الفاتح' : 'الوضع الغامق';
+    }
 }
 
 function loadMode() {
     const mode = localStorage.getItem('themeModeV2');
     if (mode === 'dark') {
         document.body.classList.add('dark-mode');
+        const modeToggle = document.getElementById('modeToggle');
+        if (modeToggle) {
+            modeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            modeToggle.title = 'الوضع الفاتح';
+        }
     } else {
         document.body.classList.remove('dark-mode');
+        const modeToggle = document.getElementById('modeToggle');
+        if (modeToggle) {
+            modeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            modeToggle.title = 'الوضع الغامق';
+        }
     }
 }
 
@@ -72,82 +83,20 @@ function loadColors() {
     }
 }
 
+// ====== الذهاب للصفحة الرئيسية ======
+function goHome() {
+    window.location.href = 'dashboard.html';
+}
+
 // ====== تحميل الهيدر والفوتر ======
 function loadHeaderFooter() {
+    // ✅ الهيدر القديم يتم إخفاؤه (لأن الهيدر الجديد موجود في كل صفحة)
     const headerPlaceholder = document.getElementById('header');
     if (headerPlaceholder) {
-        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-        const isDark = document.body.classList.contains('dark-mode');
-        const isActivationPage = currentPage === 'activation.html';
-        const isHelpPage = currentPage === 'help.html';
-        const isOnboardingPage = currentPage === 'onboarding.html';
-        const isSettingsPage = currentPage === 'settings.html';
-        const isChangelogPage = currentPage === 'changelog.html';
-        const isSirkatPage = currentPage === 'sirkat.html';
-        const isLandingPage = currentPage === 'index.html';
-        const isLicenseActivationPage = currentPage === 'activation-license.html';
-        
-        if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage || isLicenseActivationPage) {
-            headerPlaceholder.style.display = 'none';
-            return;
-        }
-        
-        headerPlaceholder.innerHTML = `
-            <div class="header-logo">
-                <img id="headerLogo" src="" alt="الشعار" style="display:none;" />
-                <h1><i class="fas fa-crown" style="color:var(--gold);"></i> عروض المعدات</h1>
-            </div>
-            <nav class="header-nav">
-                <a href="dashboard.html" ${currentPage === 'dashboard.html' ? 'class="active"' : ''}>
-                    <i class="fas fa-home"></i> الرئيسية
-                </a>
-                <a href="quotation.html" ${currentPage === 'quotation.html' ? 'class="active"' : ''}>
-                    <i class="fas fa-file-invoice"></i> العرض
-                </a>
-                <a href="company.html" ${currentPage === 'company.html' ? 'class="active"' : ''}>
-                    <i class="fas fa-building"></i> الشركة
-                </a>
-                <a href="reports.html" ${currentPage === 'reports.html' ? 'class="active"' : ''}>
-                    <i class="fas fa-chart-bar"></i> التقارير
-                </a>
-                <a href="design.html" ${currentPage === 'design.html' ? 'class="active"' : ''}>
-                    <i class="fas fa-palette"></i> التصميم
-                </a>
-                ${!isActivationPage ? `
-                    <a href="sirkat.html" class="btn btn-teal" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-clipboard-list"></i> سركات
-                    </a>
-                    <a href="changelog.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-history"></i> التحديثات
-                    </a>
-                    <a href="help.html" class="btn btn-info" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-question-circle"></i> التعليمات
-                    </a>
-                    <a href="settings.html" class="btn btn-purple" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-tools"></i> المطور
-                    </a>
-                    <a href="activation-license.html" class="btn btn-purple" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-file-certificate"></i> ترخيص الملفات
-                    </a>
-                    <a href="activation.html" class="btn btn-gold" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
-                        <i class="fas fa-key"></i> التفعيل
-                    </a>
-                ` : ''}
-                <button class="btn mode-toggle" onclick="toggleMode()">
-                    <i class="fas ${isDark ? 'fa-sun' : 'fa-moon'}"></i> 
-                    ${isDark ? 'فاتح' : 'غامق'}
-                </button>
-            </nav>
-        `;
-        
-        const logo = localStorage.getItem('companyLogo');
-        if (logo && logo.startsWith('data:image')) {
-            const img = document.getElementById('headerLogo');
-            img.src = logo;
-            img.style.display = 'block';
-        }
+        headerPlaceholder.style.display = 'none';
     }
     
+    // ✅ الفوتر
     const footerPlaceholder = document.getElementById('footer');
     if (footerPlaceholder) {
         const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
@@ -166,15 +115,20 @@ function loadHeaderFooter() {
         
         // ✅ التحقق من حالة الترخيص لتحديث الفوتر
         let isPremium = false;
+        let planName = 'مجانية';
+        let daysLeft = 0;
+        
         const appLicense = localStorage.getItem('app_license_data');
         if (appLicense) {
             try {
                 const data = JSON.parse(appLicense);
                 isPremium = data.isPremium || false;
+                planName = data.plan || 'مجانية';
+                daysLeft = data.daysLeft || 0;
             } catch (e) {}
         }
         
-        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        const status = isPremium ? `⭐ النسخة المدفوعة (${planName} - ${daysLeft} يوم)` : '📋 النسخة المجانية';
         footerPlaceholder.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
     }
 }
@@ -190,6 +144,8 @@ async function checkLicenseOnStart() {
             if (footer) {
                 footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
             }
+            // تحديث حالة الترخيص في السايدبار
+            updateSidebarLicenseStatus();
             return true;
         }
     }
@@ -211,6 +167,7 @@ async function checkLicenseOnStart() {
                         if (footer) {
                             footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية | 📞 01096597825</p>`;
                         }
+                        updateSidebarLicenseStatus();
                         setTimeout(() => window.location.reload(), 1500);
                     }
                 } catch (error) {
@@ -219,6 +176,27 @@ async function checkLicenseOnStart() {
             }
         }
     }
+    updateSidebarLicenseStatus();
+}
+
+// ====== تحديث حالة الترخيص في السايدبار ======
+function updateSidebarLicenseStatus() {
+    const statusEl = document.getElementById('sidebarLicenseStatus');
+    if (!statusEl) return;
+    
+    const appLicense = localStorage.getItem('app_license_data');
+    if (appLicense) {
+        try {
+            const data = JSON.parse(appLicense);
+            if (data.isPremium) {
+                statusEl.innerHTML = `⭐ ${data.plan || 'مدفوعة'} (${data.daysLeft || 0} يوم)`;
+                statusEl.style.color = 'var(--gold)';
+                return;
+            }
+        } catch (e) {}
+    }
+    statusEl.innerHTML = '📋 النسخة المجانية';
+    statusEl.style.color = '';
 }
 
 // ====== التهيئة العامة ======
@@ -238,6 +216,7 @@ function initApp() {
                     const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
                     footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
                 }
+                updateSidebarLicenseStatus();
             }
         });
     }
@@ -246,7 +225,24 @@ function initApp() {
     loadColors();
     loadHeaderFooter();
     
+    // تحميل الشعار في الهيدر الجديد
+    const logo = localStorage.getItem('companyLogo');
+    if (logo && logo.startsWith('data:image')) {
+        const img = document.getElementById('headerLogo');
+        if (img) {
+            img.src = logo;
+            img.style.display = 'block';
+        }
+    }
+    
     setTimeout(checkLicenseOnStart, 1500);
 }
+
+// ====== الاستماع لتغييرات الترخيص ======
+window.addEventListener('storage', function(e) {
+    if (e.key === 'app_license_data' || e.key === 'license_data') {
+        updateSidebarLicenseStatus();
+    }
+});
 
 document.addEventListener('DOMContentLoaded', initApp);
