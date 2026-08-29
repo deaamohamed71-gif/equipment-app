@@ -1,4 +1,4 @@
-// js/index.js - كود الصفحة الرئيسية (محدث للتحقق من حالة الترخيص)
+// js/index.js - كود الصفحة الرئيسية (محدث للتحقق من حالة الترخيص + الإشعارات)
 
 // ====== تحميل بيانات الترخيص ======
 function loadLicenseStatus() {
@@ -67,6 +67,87 @@ function loadLicenseStatus() {
     }
     
     return false;
+}
+
+// ====== تحميل الإشعارات ======
+function loadNotifications() {
+    const container = document.getElementById('notificationsList');
+    const countEl = document.getElementById('notifCount');
+    
+    if (!container) return;
+    
+    // جلب الإشعارات من localStorage
+    let notifications = [];
+    try {
+        notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    } catch (e) {
+        notifications = [];
+    }
+    
+    // تحديث العدد
+    if (countEl) {
+        countEl.textContent = notifications.length;
+        countEl.style.display = notifications.length > 0 ? 'inline-block' : 'none';
+    }
+    
+    if (notifications.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;color:var(--text-light);padding:1.5rem;">
+                <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                لا توجد إشعارات جديدة
+            </div>
+        `;
+        return;
+    }
+    
+    // عرض أحدث 10 إشعارات (الأحدث أولاً)
+    const recent = [...notifications].reverse().slice(0, 10);
+    
+    container.innerHTML = recent.map((notif, index) => {
+        const isNew = notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000));
+        return `
+            <div class="notification-item" style="padding:0.6rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.05)' : 'transparent'};border-radius:8px;transition:all 0.3s;">
+                <i class="fas fa-bell" style="color:var(--gold);font-size:1.1rem;margin-top:0.2rem;"></i>
+                <div style="flex:1;">
+                    <strong style="font-size:0.9rem;color:var(--text);display:block;">${notif.title || 'إشعار'}</strong>
+                    <p style="font-size:0.8rem;color:var(--text-light);margin:0.2rem 0;">${notif.message || ''}</p>
+                    <span style="font-size:0.6rem;color:var(--text-light);opacity:0.6;">
+                        ${notif.timestamp ? new Date(notif.timestamp).toLocaleString('ar-EG') : ''}
+                        ${isNew ? '🆕 جديد' : ''}
+                    </span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // تحديث آخر ظهور للإشعارات
+    if (notifications.length > 0) {
+        localStorage.setItem('last_notification_view', new Date().toISOString());
+    }
+}
+
+// ====== عرض إشعار منبثق (Toast) عند وجود إشعارات جديدة ======
+function showNotificationToast() {
+    try {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const lastShown = localStorage.getItem('last_notification_shown') || '1970-01-01';
+        
+        // الإشعارات الجديدة فقط
+        const newNotifs = notifications.filter(n => n.timestamp && n.timestamp > lastShown);
+        
+        if (newNotifs.length > 0) {
+            // عرض أحدث إشعار جديد
+            const latest = newNotifs[newNotifs.length - 1];
+            if (typeof showToast === 'function') {
+                showToast(`🔔 ${latest.title || 'إشعار جديد'}: ${latest.message || ''}`, 'success');
+            } else {
+                alert(`🔔 ${latest.title || 'إشعار جديد'}\n\n${latest.message || ''}`);
+            }
+            localStorage.setItem('last_notification_shown', new Date().toISOString());
+        }
+    } catch (e) {
+        console.warn('Error showing notification toast:', e);
+    }
 }
 
 // ====== تحميل البيانات ======
@@ -148,6 +229,32 @@ function getOfferStatus(offer) {
     return 'نشط';
 }
 
+// ====== إضافة إشعار تجريبي (للتجربة) ======
+function addTestNotification() {
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    notifications.push({
+        title: '📢 تحديث جديد',
+        message: 'تم إضافة نظام الإشعارات في لوحة التحكم',
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+    loadNotifications();
+    showNotificationToast();
+    if (typeof showToast === 'function') {
+        showToast('✅ تم إضافة إشعار تجريبي', 'success');
+    }
+}
+
+// ====== الاستماع لتغييرات الإشعارات (من localStorage) ======
+window.addEventListener('storage', function(e) {
+    if (e.key === 'notifications') {
+        loadNotifications();
+    }
+    if (e.key === 'app_license_data' || e.key === 'license_data') {
+        loadLicenseStatus();
+    }
+});
+
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
     // تهيئة الترخيص
@@ -155,21 +262,29 @@ document.addEventListener('DOMContentLoaded', function() {
         licenseManager.initialize();
     }
     
-    licenseManager.addListener(function(info) {
-        if (info) {
-            loadLicenseStatus();
-        }
-    });
+    if (typeof licenseManager !== 'undefined') {
+        licenseManager.addListener(function(info) {
+            if (info) {
+                loadLicenseStatus();
+            }
+        });
+    }
     
     setTimeout(function() {
         loadLicenseStatus();
         loadDashboardData();
+        loadNotifications();
+        
+        // عرض الإشعارات الجديدة بعد ثانية
+        setTimeout(function() {
+            showNotificationToast();
+        }, 1000);
     }, 150);
     
-    // ✅ الاستماع لتغييرات الترخيص من localStorage
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'app_license_data' || e.key === 'license_data') {
-            loadLicenseStatus();
-        }
-    });
+    // ✅ إضافة زر تجريبي للإشعارات (في Console)
+    console.log('📢 لإضافة إشعار تجريبي، اكتب: addTestNotification()');
 });
+
+// جعل الدوال متاحة عالمياً
+window.addTestNotification = addTestNotification;
+window.loadNotifications = loadNotifications;
