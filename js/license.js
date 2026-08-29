@@ -1,4 +1,4 @@
-// js/license.js - نظام الترخيص مع Firebase والتحقق التلقائي
+// js/license.js - نظام الترخيص الأساسي (محدث للربط مع ترخيص الملفات)
 
 class LicenseManager {
     constructor() {
@@ -11,17 +11,32 @@ class LicenseManager {
         this.isValidated = false;
         this.callbacks = [];
         this.verificationInterval = null;
+        this.PLAN_DURATIONS = {
+            'monthly': 30,
+            'yearly': 365,
+            'trial': 90
+        };
     }
 
     // ====== التهيئة ======
     initialize() {
+        // ✅ التحقق من ترخيص الملفات أولاً
+        if (typeof checkFileLicenseOnStart === 'function') {
+            const fileLicenseValid = checkFileLicenseOnStart();
+            if (fileLicenseValid) {
+                // الترخيص بالملفات موجود وصالح
+                this.notifyListeners();
+                this.startPeriodicVerification();
+                return true;
+            }
+        }
+
         const saved = localStorage.getItem(this.STORAGE_KEY);
         if (saved) {
             try {
                 this.licenseData = JSON.parse(saved);
                 this.isValidated = this.isLicenseValid(this.licenseData);
                 
-                // ✅ التحقق من Firebase بعد التهيئة (غير متزامن)
                 this.verifyLicenseWithFirebase().then(valid => {
                     if (!valid) {
                         this.notifyListeners();
@@ -38,8 +53,6 @@ class LicenseManager {
         }
         
         this.notifyListeners();
-        
-        // بدء التحقق الدوري كل 5 دقائق
         this.startPeriodicVerification();
         
         return this.isValidated;
@@ -49,6 +62,7 @@ class LicenseManager {
     startTrial() {
         const trialData = {
             type: 'trial',
+            plan: 'trial',
             startDate: new Date().toISOString(),
             expiryDate: this.calculateExpiry(this.TRIAL_DAYS),
             features: this.getTrialFeatures(),
@@ -61,6 +75,11 @@ class LicenseManager {
         this.saveLicense(trialData);
         this.notifyListeners();
         return trialData;
+    }
+
+    // ====== حساب مدة الخطة ======
+    getPlanDuration(plan) {
+        return this.PLAN_DURATIONS[plan] || 30;
     }
 
     // ====== التحقق من صلاحية الترخيص ======
@@ -93,19 +112,21 @@ class LicenseManager {
             return true;
         }
         
-        // لو الترخيص مش مدفوع (مجاني)، مش هنتأكد منه
         if (!license.isPremium) return true;
         
-        // لو فيه مفتاح، نتأكد من Firebase
         const key = license.licenseKey;
         if (!key) return true;
         
-        // استدعاء دالة Firebase المعلنة عالمياً
+        // التحقق من أنه ليس ترخيص ملفات (يبدأ بـ FILE-)
+        if (key && key.startsWith('FILE-')) {
+            // ترخيص الملفات يتم التحقق منه بشكل منفصل
+            return true;
+        }
+        
         if (typeof window.verifyLicenseWithFirebase === 'function') {
             try {
                 const result = await window.verifyLicenseWithFirebase(key);
                 if (!result.valid) {
-                    // الترخيص مش صحيح، نلغيه
                     this.licenseData = null;
                     this.isValidated = false;
                     this.startTrial();
@@ -115,7 +136,7 @@ class LicenseManager {
                 }
                 return true;
             } catch (error) {
-                console.warn('فشل التحقق من Firebase، نستخدم النسخة المحلية:', error);
+                console.warn('فشل التحقق من Firebase:', error);
                 return true;
             }
         }
@@ -123,42 +144,139 @@ class LicenseManager {
         return true;
     }
 
-    // ====== التحقق الدوري كل 5 دقائق ======
-    startPeriodicVerification() {
-        if (this.verificationInterval) {
-            clearInterval(this.verificationInterval);
+    // ====== تفعيل الترخيص مع الخطة ======
+    async activateLicense(key) {
+        // التحقق من أنه ليس ترخيص ملفات
+        if (key && key.startsWith('FILE-')) {
+            return { success: false, message: '⚠️ هذا ترخيص ملفات، يرجى استخدام صفحة التفعيل بالملفات' };
         }
         
-        this.verificationInterval = setInterval(() => {
-            this.verifyLicenseWithFirebase().then(valid => {
-                if (!valid) {
+        if (typeof window.verifyLicenseWithFirebase === 'function') {
+            try {
+                const result = await window.verifyLicenseWithFirebase(key);
+                
+                if (result.valid) {
+                    const plan = result.plan || 'monthly';
+                    const duration = this.getPlanDuration(plan);
+                    const expiryDate = this.calculateExpiry(duration);
+                    
+                    const premiumData = {
+                        type: 'premium',
+                        plan: plan,
+                        startDate: new Date().toISOString(),
+                        expiryDate: expiryDate,
+                        features: this.getPremiumFeatures(),
+                        status: 'active',
+                        licenseKey: key,
+                        isPremium: true
+                    };
+                    
+                    this.licenseData = premiumData;
+                    this.isValidated = true;
+                    this.saveLicense(premiumData);
                     this.notifyListeners();
-                    this.updateUIAfterValidation();
+                    
+                    const planNames = {
+                        'monthly': 'شهرية',
+                        'yearly': 'سنوية',
+                        'trial': 'تجريبية'
+                    };
+                    
+                    return { 
+                        success: true, 
+                        message: `✅ تم تفعيل النسخة المدفوعة (${planNames[plan] || plan}) - ${duration} يوم`
+                    };
+                } else {
+                    return { success: false, message: result.message };
                 }
-            });
-        }, 5 * 60 * 1000); // 5 دقائق
+            } catch (error) {
+                console.error("خطأ في الاتصال بخادم Firebase:", error);
+                return this.activateLicenseLocal(key);
+            }
+        } else {
+            return this.activateLicenseLocal(key);
+        }
     }
 
-    // ====== تحديث الواجهة بعد التحقق ======
-    updateUIAfterValidation() {
-        const info = this.getLicenseInfo();
-        if (info && !info.isPremium) {
-            const statusEl = document.getElementById('licenseStatusText');
-            if (statusEl) {
-                statusEl.innerHTML = `
-                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-                    ⚠️ تم إلغاء الترخيص المدفوع. جاري التحويل للنسخة المجانية.
-                `;
+    // ====== تفعيل الترخيص محلياً (احتياطي) ======
+    activateLicenseLocal(key) {
+        const validKeys = [
+            'EQ2026-X9F7-KL82-MN34',
+            'EQ2026-W8E6-JK71-LM23',
+            'PREMIUM-MONTHLY-KEY',
+            'PREMIUM-YEARLY-KEY'
+        ];
+        
+        if (validKeys.includes(key)) {
+            let plan = 'monthly';
+            let duration = 30;
+            
+            if (key === 'PREMIUM-YEARLY-KEY') {
+                plan = 'yearly';
+                duration = 365;
             }
-            // تحديث الفوتر
-            const footer = document.getElementById('footer');
-            if (footer) {
-                footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية</p>`;
-            }
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+            
+            const premiumData = {
+                type: 'premium',
+                plan: plan,
+                startDate: new Date().toISOString(),
+                expiryDate: this.calculateExpiry(duration),
+                features: this.getPremiumFeatures(),
+                status: 'active',
+                licenseKey: key,
+                isPremium: true
+            };
+            
+            this.licenseData = premiumData;
+            this.isValidated = true;
+            this.saveLicense(premiumData);
+            this.notifyListeners();
+            
+            const planNames = {
+                'monthly': 'شهرية',
+                'yearly': 'سنوية'
+            };
+            
+            return { 
+                success: true, 
+                message: `✅ تم تفعيل النسخة المدفوعة (${planNames[plan] || plan}) محلياً.`
+            };
         }
+        
+        return { success: false, message: '❌ مفتاح التفعيل غير صالح' };
+    }
+
+    // ====== حساب تاريخ الانتهاء ======
+    calculateExpiry(days) {
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date.toISOString();
+    }
+
+    // ====== الحصول على معلومات الترخيص ======
+    getLicenseInfo() {
+        if (!this.licenseData) return null;
+        const daysLeft = this.getDaysLeft(this.licenseData.expiryDate);
+        const isExpired = daysLeft <= 0;
+        
+        const planNames = {
+            'monthly': 'شهرية',
+            'yearly': 'سنوية',
+            'trial': 'تجريبية'
+        };
+        
+        return {
+            type: this.licenseData.isPremium ? 'مدفوعة' : 'مجانية',
+            plan: this.licenseData.plan || 'trial',
+            planName: planNames[this.licenseData.plan] || 'تجريبية',
+            expiry: this.licenseData.expiryDate,
+            daysLeft: daysLeft,
+            isExpired: isExpired,
+            isPremium: this.licenseData.isPremium || false,
+            licenseKey: this.licenseData.licenseKey || null,
+            features: this.getFeatures(),
+            userName: this.licenseData.userName || null
+        };
     }
 
     // ====== الحصول على الميزات المتاحة ======
@@ -204,98 +322,9 @@ class LicenseManager {
         };
     }
 
-    // ====== تفعيل الترخيص (مع Firebase) ======
-    async activateLicense(key) {
-        // 1. التحقق من Firebase
-        if (typeof window.verifyLicenseWithFirebase === 'function') {
-            try {
-                const result = await window.verifyLicenseWithFirebase(key);
-                
-                if (result.valid) {
-                    const premiumData = {
-                        type: 'premium',
-                        startDate: new Date().toISOString(),
-                        expiryDate: result.expiryDate || this.calculateExpiry(365),
-                        features: this.getPremiumFeatures(),
-                        status: 'active',
-                        licenseKey: key,
-                        isPremium: true
-                    };
-                    
-                    this.licenseData = premiumData;
-                    this.isValidated = true;
-                    this.saveLicense(premiumData);
-                    this.notifyListeners();
-                    return { success: true, message: result.message };
-                } else {
-                    return { success: false, message: result.message };
-                }
-            } catch (error) {
-                console.error("خطأ في الاتصال بخادم Firebase:", error);
-                return this.activateLicenseLocal(key);
-            }
-        } else {
-            return this.activateLicenseLocal(key);
-        }
-    }
-
-    // ====== تفعيل الترخيص محلياً (احتياطي) ======
-    activateLicenseLocal(key) {
-        const validKeys = [
-            'EQ2026-X9F7-KL82-MN34',
-            'EQ2026-W8E6-JK71-LM23',
-            'EQ2026-V7D5-HI60-KL12',
-            'PREMIUM-2026-FREE-KEY'
-        ];
-        
-        if (validKeys.includes(key)) {
-            const premiumData = {
-                type: 'premium',
-                startDate: new Date().toISOString(),
-                expiryDate: this.calculateExpiry(365),
-                features: this.getPremiumFeatures(),
-                status: 'active',
-                licenseKey: key,
-                isPremium: true
-            };
-            
-            this.licenseData = premiumData;
-            this.isValidated = true;
-            this.saveLicense(premiumData);
-            this.notifyListeners();
-            return { success: true, message: '✅ تم تفعيل النسخة المدفوعة محلياً (وضع عدم الاتصال).' };
-        }
-        
-        return { success: false, message: '❌ مفتاح التفعيل غير صالح' };
-    }
-
-    // ====== حساب تاريخ الانتهاء ======
-    calculateExpiry(days) {
-        const date = new Date();
-        date.setDate(date.getDate() + days);
-        return date.toISOString();
-    }
-
     // ====== حفظ الترخيص ======
     saveLicense(data) {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-    }
-
-    // ====== الحصول على معلومات الترخيص ======
-    getLicenseInfo() {
-        if (!this.licenseData) return null;
-        const daysLeft = this.getDaysLeft(this.licenseData.expiryDate);
-        const isExpired = daysLeft <= 0;
-        
-        return {
-            type: this.licenseData.isPremium ? 'مدفوعة' : 'مجانية',
-            expiry: this.licenseData.expiryDate,
-            daysLeft: daysLeft,
-            isExpired: isExpired,
-            isPremium: this.licenseData.isPremium || false,
-            licenseKey: this.licenseData.licenseKey || null,
-            features: this.getFeatures()
-        };
     }
 
     // ====== حساب الأيام المتبقية ======
@@ -332,9 +361,48 @@ class LicenseManager {
     // ====== عرض نافذة التفعيل ======
     showActivationPrompt() {
         if (window.location.pathname.includes('activation.html')) return;
+        if (window.location.pathname.includes('activation-license.html')) return;
         
         if (confirm('⚠️ هذه الميزة متاحة فقط في النسخة المدفوعة.\n\nهل تريد الانتقال إلى صفحة التفعيل الآن؟')) {
-            window.location.href = 'activation.html';
+            window.location.href = 'activation-license.html';
+        }
+    }
+
+    // ====== التحقق الدوري ======
+    startPeriodicVerification() {
+        if (this.verificationInterval) {
+            clearInterval(this.verificationInterval);
+        }
+        
+        this.verificationInterval = setInterval(() => {
+            // التحقق من ترخيص الملفات
+            if (typeof checkFileLicenseOnStart === 'function') {
+                checkFileLicenseOnStart();
+            }
+            
+            this.verifyLicenseWithFirebase().then(valid => {
+                if (!valid) {
+                    this.notifyListeners();
+                    this.updateUIAfterValidation();
+                }
+            });
+        }, 5 * 60 * 1000);
+    }
+
+    // ====== تحديث الواجهة بعد التحقق ======
+    updateUIAfterValidation() {
+        const info = this.getLicenseInfo();
+        if (info && !info.isPremium) {
+            const statusEl = document.getElementById('licenseStatusText');
+            if (statusEl) {
+                statusEl.innerHTML = `
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                    ⚠️ تم إلغاء الترخيص المدفوع. جاري التحويل للنسخة التجريبية.
+                `;
+            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         }
     }
 }
@@ -342,7 +410,39 @@ class LicenseManager {
 // ====== إنشاء نسخة واحدة من مدير الترخيص ======
 const licenseManager = new LicenseManager();
 
-// ====== دالة مساعدة للتحقق من الميزات في أي مكان ======
+// ====== التحقق من ترخيص الملفات عند بدء التطبيق ======
+function checkFileLicenseOnStart() {
+    const fileLicense = localStorage.getItem('license_data');
+    if (fileLicense) {
+        try {
+            const license = JSON.parse(fileLicense);
+            const expiry = new Date(license.expiryDate);
+            const now = new Date();
+            
+            if (expiry > now) {
+                // الترخيص ساري → تطبيقه
+                if (typeof applyLicenseToSystem === 'function') {
+                    applyLicenseToSystem(license);
+                }
+                return true;
+            } else {
+                // الترخيص منتهي → حذفه والعودة للتجريبي
+                localStorage.removeItem('license_data');
+                localStorage.removeItem('license_file');
+                if (typeof showToast === 'function') {
+                    showToast('⚠️ انتهت صلاحية الترخيص، تم التحويل للنسخة التجريبية', 'error');
+                }
+                return false;
+            }
+        } catch (e) {
+            console.warn('Invalid file license:', e);
+            return false;
+        }
+    }
+    return false;
+}
+
+// ====== دوال مساعدة ======
 function checkFeature(featureName, message) {
     if (!licenseManager.canUse(featureName)) {
         const msg = message || '⚠️ هذه الميزة متاحة فقط في النسخة المدفوعة. قم بالترقية الآن!';
@@ -353,7 +453,6 @@ function checkFeature(featureName, message) {
     return true;
 }
 
-// ====== دالة للتحقق من الحد الأقصى ======
 function checkLimit(currentCount, maxCount, featureName) {
     if (currentCount >= maxCount) {
         const msg = `⚠️ النسخة المجانية تسمح بـ ${maxCount} ${featureName} فقط. قم بالترقية للاستفادة من المزيد.`;
