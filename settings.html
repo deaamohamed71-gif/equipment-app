@@ -490,7 +490,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم (حجر الأساس) ====== -->
+                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم (تم تحديث الزر) ====== -->
                     <div class="dev-card" style="border: 2px solid var(--gold);">
                         <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
                         <h3>📤 إنشاء وإرسال ترخيص لمستخدم</h3>
@@ -1396,7 +1396,7 @@
         }
 
         // ============================================================
-        //  7. إنشاء وإرسال ترخيص لمستخدم (الجزء الأساسي)
+        //  7. إنشاء وإرسال ترخيص لمستخدم (المعدل والنهائي)
         // ============================================================
         function generateAndSendLicense() {
             const userName = document.getElementById('createUserName').value.trim();
@@ -1405,6 +1405,7 @@
             const plan = document.getElementById('createPlan').value;
             const days = parseInt(document.getElementById('createDays').value) || 365;
             
+            // ✅ التحقق من البيانات
             if (!userName) {
                 showToast('⚠️ الرجاء إدخال اسم المستخدم', 'error');
                 document.getElementById('createUserName').focus();
@@ -1431,93 +1432,76 @@
             const planKey = planMap[plan] || 'yearly';
             
             try {
-                let result = null;
-                
+                // ✅ استخدام الدالة العالمية من license-file.js
                 if (typeof window.generateLicense === 'function') {
-                    result = window.generateLicense(deviceId, userName, userPhone, planKey, days);
-                } else {
-                    const licenseData = {
-                        deviceId: deviceId,
-                        userName: userName,
-                        userPhone: userPhone,
-                        plan: planKey,
-                        expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date().toISOString(),
-                        version: '1.0',
-                        features: {
-                            maxItems: Infinity,
-                            maxOffers: Infinity,
-                            maxClients: Infinity,
-                            canExportPDF: true,
-                            canExportExcel: true,
-                            canReports: true,
-                            canSignatures: true,
-                            canFullDesign: true,
-                            canCharts: true,
-                            showWatermark: false,
-                            isPremium: true
-                        }
-                    };
-                    
-                    const json = JSON.stringify(licenseData);
-                    const encoded = encodeURIComponent(json);
-                    const encrypted = btoa(encoded);
-                    const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
-                    const fileContent = `${encrypted}.${signature}`;
-                    
-                    const blob = new Blob([fileContent], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `license_${deviceId.substring(0, 8)}.zlx`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    result = licenseData;
+                    const result = window.generateLicense(deviceId, userName, userPhone, planKey, days);
+                    if (result) {
+                        showToast(`✅ تم إنشاء الترخيص لـ ${userName} بنجاح`, 'success');
+                        addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
+                        return;
+                    }
                 }
                 
-                if (result) {
-                    // حفظ في Firebase
-                    saveLicenseToFirebase({
-                        deviceId: deviceId,
-                        userName: userName,
-                        userPhone: userPhone,
-                        plan: planKey,
-                        expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
-                        createdAt: new Date().toISOString(),
-                        status: 'active'
-                    });
-                    
-                    const statusDiv = document.getElementById('createLicenseStatus');
-                    const msgSpan = document.getElementById('createLicenseMessage');
-                    statusDiv.style.display = 'block';
-                    msgSpan.textContent = `✅ تم إنشاء ملف الترخيص بنجاح للمستخدم ${userName} (${plan} - ${days} يوم)`;
-                    statusDiv.style.background = 'rgba(45,143,74,0.1)';
-                    statusDiv.style.borderColor = 'var(--success)';
-                    statusDiv.style.color = 'var(--success)';
-                    
-                    showToast(`✅ تم إنشاء ترخيص لـ ${userName}`, 'success');
-                    addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
-                    
-                    refreshAllLicenses();
-                    
-                    sessionStorage.setItem('last_created_license', JSON.stringify({
-                        userName, userPhone, deviceId, plan, days
-                    }));
-                } else {
-                    throw new Error('فشل إنشاء الترخيص');
-                }
+                // ✅ خطة بديلة (لو الدالة مش موجودة)
+                const licenseData = {
+                    deviceId: deviceId,
+                    userName: userName,
+                    userPhone: userPhone,
+                    plan: planKey,
+                    expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    version: '1.0',
+                    features: {
+                        maxItems: Infinity,
+                        maxOffers: Infinity,
+                        maxClients: Infinity,
+                        canExportPDF: true,
+                        canExportExcel: true,
+                        canReports: true,
+                        canSignatures: true,
+                        canFullDesign: true,
+                        canCharts: true,
+                        showWatermark: false,
+                        isPremium: true
+                    }
+                };
+                
+                // تشفير البيانات
+                const json = JSON.stringify(licenseData);
+                const encoded = encodeURIComponent(json);
+                const encrypted = btoa(encoded);
+                const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
+                const fileContent = `${encrypted}.${signature}`;
+                
+                // إنشاء الملف
+                const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `license_${deviceId.substring(0, 8)}.zlx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // حفظ في Firebase
+                saveLicenseToFirebase({
+                    deviceId: deviceId,
+                    userName: userName,
+                    userPhone: userPhone,
+                    plan: planKey,
+                    expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                    createdAt: new Date().toISOString(),
+                    status: 'active'
+                });
+                
+                showToast(`✅ تم إنشاء الترخيص لـ ${userName}`, 'success');
+                addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
+                refreshAllLicenses();
+                
             } catch (error) {
                 console.error('Error generating license:', error);
-                const statusDiv = document.getElementById('createLicenseStatus');
-                const msgSpan = document.getElementById('createLicenseMessage');
-                statusDiv.style.display = 'block';
-                msgSpan.textContent = `❌ حدث خطأ: ${error.message || 'فشل إنشاء الترخيص'}`;
-                statusDiv.style.background = 'rgba(192,57,43,0.1)';
-                statusDiv.style.borderColor = 'var(--danger)';
-                statusDiv.style.color = 'var(--danger)';
-                showToast('❌ حدث خطأ في إنشاء الترخيص', 'error');
+                showToast('❌ حدث خطأ في إنشاء الترخيص: ' + error.message, 'error');
             }
         }
 
