@@ -298,6 +298,27 @@
             }
         }
     </style>
+    
+    <!-- ====== استقبال الخطة المختارة من الرابط ====== -->
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const plan = urlParams.get('plan');
+            
+            if (plan) {
+                setTimeout(() => {
+                    const planSelect = document.getElementById('userPlan');
+                    if (planSelect) {
+                        if (plan === 'monthly' || plan === 'شهرية') {
+                            planSelect.value = 'شهرية';
+                        } else if (plan === 'yearly' || plan === 'سنوية') {
+                            planSelect.value = 'سنوية';
+                        }
+                    }
+                }, 500);
+            }
+        })();
+    </script>
 </head>
 <body>
     <div id="toast" class="toast">
