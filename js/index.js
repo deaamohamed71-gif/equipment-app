@@ -1,4 +1,4 @@
-// js/index.js - كود الصفحة الرئيسية (محدث للتحقق من حالة الترخيص + الإشعارات)
+// js/index.js - كود الصفحة الرئيسية (محدث للتحقق من حالة الترخيص + الإشعارات من Firebase)
 
 // ====== تحميل بيانات الترخيص ======
 function loadLicenseStatus() {
@@ -69,14 +69,84 @@ function loadLicenseStatus() {
     return false;
 }
 
-// ====== تحميل الإشعارات ======
-function loadNotifications() {
+// ====== تحميل الإشعارات من Firebase ======
+async function loadNotifications() {
     const container = document.getElementById('notificationsList');
     const countEl = document.getElementById('notifCount');
     
     if (!container) return;
     
-    // جلب الإشعارات من localStorage
+    try {
+        const db = window.firebaseDB;
+        if (!db) {
+            // لو Firebase مش متاح، استخدم localStorage
+            loadNotificationsLocal();
+            return;
+        }
+        
+        // ✅ جلب الإشعارات من Firestore (أحدث 10)
+        const notificationsRef = window.collection(db, 'notifications');
+        const q = window.query(notificationsRef, window.orderBy('timestamp', 'desc'), window.limit(20));
+        const querySnapshot = await window.getDocs(q);
+        
+        const notifications = [];
+        querySnapshot.forEach(doc => {
+            notifications.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // ✅ تحديث العدد
+        if (countEl) {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            countEl.textContent = unreadCount;
+            countEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        }
+        
+        if (notifications.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;color:var(--text-light);padding:1.5rem;">
+                    <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                    لا توجد إشعارات جديدة
+                </div>
+            `;
+            return;
+        }
+        
+        // ✅ عرض الإشعارات
+        container.innerHTML = notifications.map((notif, index) => {
+            const isNew = !notif.read && (notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
+            return `
+                <div class="notification-item" style="padding:0.6rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.05)' : 'transparent'};border-radius:8px;transition:all 0.3s;cursor:pointer;" onclick="markNotificationRead('${notif.id}')">
+                    <i class="fas fa-bell" style="color:var(--gold);font-size:1.1rem;margin-top:0.2rem;"></i>
+                    <div style="flex:1;">
+                        <strong style="font-size:0.9rem;color:var(--text);display:block;">${notif.title || 'إشعار'}</strong>
+                        <p style="font-size:0.8rem;color:var(--text-light);margin:0.2rem 0;">${notif.message || ''}</p>
+                        <span style="font-size:0.6rem;color:var(--text-light);opacity:0.6;">
+                            ${notif.timestamp ? new Date(notif.timestamp).toLocaleString('ar-EG') : ''}
+                            ${isNew ? ' 🆕 جديد' : ''}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // ✅ تحديث آخر ظهور
+        localStorage.setItem('last_notification_view', new Date().toISOString());
+        
+        // ✅ عرض إشعار منبثق للإشعارات الجديدة
+        showNewNotificationToast(notifications);
+        
+    } catch (error) {
+        console.warn('Error loading notifications from Firebase:', error);
+        // استخدم localStorage كاحتياطي
+        loadNotificationsLocal();
+    }
+}
+
+// ====== عرض الإشعارات من localStorage (احتياطي) ======
+function loadNotificationsLocal() {
+    const container = document.getElementById('notificationsList');
+    const countEl = document.getElementById('notifCount');
+    
     let notifications = [];
     try {
         notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
@@ -84,10 +154,10 @@ function loadNotifications() {
         notifications = [];
     }
     
-    // تحديث العدد
+    const unreadCount = notifications.filter(n => !n.read).length;
     if (countEl) {
-        countEl.textContent = notifications.length;
-        countEl.style.display = notifications.length > 0 ? 'inline-block' : 'none';
+        countEl.textContent = unreadCount;
+        countEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
     }
     
     if (notifications.length === 0) {
@@ -100,11 +170,9 @@ function loadNotifications() {
         return;
     }
     
-    // عرض أحدث 10 إشعارات (الأحدث أولاً)
     const recent = [...notifications].reverse().slice(0, 10);
-    
     container.innerHTML = recent.map((notif, index) => {
-        const isNew = notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000));
+        const isNew = !notif.read && (notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
         return `
             <div class="notification-item" style="padding:0.6rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.05)' : 'transparent'};border-radius:8px;transition:all 0.3s;">
                 <i class="fas fa-bell" style="color:var(--gold);font-size:1.1rem;margin-top:0.2rem;"></i>
@@ -113,27 +181,23 @@ function loadNotifications() {
                     <p style="font-size:0.8rem;color:var(--text-light);margin:0.2rem 0;">${notif.message || ''}</p>
                     <span style="font-size:0.6rem;color:var(--text-light);opacity:0.6;">
                         ${notif.timestamp ? new Date(notif.timestamp).toLocaleString('ar-EG') : ''}
-                        ${isNew ? '🆕 جديد' : ''}
+                        ${isNew ? ' 🆕 جديد' : ''}
                     </span>
                 </div>
             </div>
         `;
     }).join('');
-    
-    // تحديث آخر ظهور للإشعارات
-    if (notifications.length > 0) {
-        localStorage.setItem('last_notification_view', new Date().toISOString());
-    }
 }
 
-// ====== عرض إشعار منبثق (Toast) عند وجود إشعارات جديدة ======
-function showNotificationToast() {
+// ====== عرض إشعار منبثق للإشعارات الجديدة ======
+function showNewNotificationToast(notifications) {
     try {
-        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
         const lastShown = localStorage.getItem('last_notification_shown') || '1970-01-01';
         
-        // الإشعارات الجديدة فقط
-        const newNotifs = notifications.filter(n => n.timestamp && n.timestamp > lastShown);
+        // الإشعارات الجديدة فقط (غير مقروءة ومحدثة)
+        const newNotifs = notifications.filter(n => 
+            !n.read && n.timestamp && n.timestamp > lastShown
+        );
         
         if (newNotifs.length > 0) {
             // عرض أحدث إشعار جديد
@@ -150,7 +214,46 @@ function showNotificationToast() {
     }
 }
 
-// ====== تحميل البيانات ======
+// ====== تعليم الإشعار كمقروء ======
+async function markNotificationRead(notificationId) {
+    try {
+        const db = window.firebaseDB;
+        if (db) {
+            const docRef = window.doc(db, 'notifications', notificationId);
+            await window.updateDoc(docRef, {
+                read: true,
+                readAt: new Date().toISOString()
+            });
+            console.log('✅ تم تعليم الإشعار كمقروء');
+            
+            // ✅ تحديث الواجهة
+            loadNotifications();
+        }
+    } catch (error) {
+        console.warn('Error marking notification as read:', error);
+        // تعليم كمقروء محلياً
+        markNotificationReadLocal(notificationId);
+    }
+}
+
+// ====== تعليم الإشعار كمقروء محلياً (احتياطي) ======
+function markNotificationReadLocal(notificationId) {
+    try {
+        let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        notifications = notifications.map(n => {
+            if (n.id === notificationId || n.timestamp === notificationId) {
+                return { ...n, read: true, readAt: new Date().toISOString() };
+            }
+            return n;
+        });
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        loadNotificationsLocal();
+    } catch (e) {
+        console.warn('Error marking notification as read locally:', e);
+    }
+}
+
+// ====== تحميل بيانات لوحة التحكم ======
 function loadDashboardData() {
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
@@ -233,13 +336,14 @@ function getOfferStatus(offer) {
 function addTestNotification() {
     const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
     notifications.push({
+        id: 'test_' + Date.now(),
         title: '📢 تحديث جديد',
-        message: 'تم إضافة نظام الإشعارات في لوحة التحكم',
-        timestamp: new Date().toISOString()
+        message: 'تم إضافة نظام الإشعارات في لوحة التحكم (تجريبي)',
+        timestamp: new Date().toISOString(),
+        read: false
     });
     localStorage.setItem('notifications', JSON.stringify(notifications));
     loadNotifications();
-    showNotificationToast();
     if (typeof showToast === 'function') {
         showToast('✅ تم إضافة إشعار تجريبي', 'success');
     }
@@ -274,17 +378,17 @@ document.addEventListener('DOMContentLoaded', function() {
         loadLicenseStatus();
         loadDashboardData();
         loadNotifications();
-        
-        // عرض الإشعارات الجديدة بعد ثانية
-        setTimeout(function() {
-            showNotificationToast();
-        }, 1000);
     }, 150);
     
-    // ✅ إضافة زر تجريبي للإشعارات (في Console)
+    // ✅ تحديث الإشعارات كل 30 ثانية
+    setInterval(function() {
+        loadNotifications();
+    }, 30000);
+    
     console.log('📢 لإضافة إشعار تجريبي، اكتب: addTestNotification()');
 });
 
 // جعل الدوال متاحة عالمياً
 window.addTestNotification = addTestNotification;
 window.loadNotifications = loadNotifications;
+window.markNotificationRead = markNotificationRead;
