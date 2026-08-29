@@ -43,7 +43,7 @@
         }
         .dev-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -431,7 +431,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 4. إدارة الترخيص المتقدمة (بالبحث في Firebase) ====== -->
+                    <!-- ====== 4. البحث عن ترخيص مستخدم (Firebase + Local) ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-search"></i></div>
                         <h3>🔍 البحث عن ترخيص مستخدم</h3>
@@ -490,7 +490,65 @@
                         </div>
                     </div>
 
-                    <!-- ====== 5. إعدادات النظام المتقدمة ====== -->
+                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم (حجر الأساس) ====== -->
+                    <div class="dev-card" style="border: 2px solid var(--gold);">
+                        <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
+                        <h3>📤 إنشاء وإرسال ترخيص لمستخدم</h3>
+                        <p>أدخل بيانات المستخدم لإنشاء ملف ترخيص (.zlx) وإرساله له</p>
+                        
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">👤 اسم المستخدم</label>
+                                <input type="text" id="createUserName" placeholder="أحمد محمد علي" />
+                            </div>
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">📱 رقم الهاتف</label>
+                                <input type="text" id="createUserPhone" placeholder="01012345678" />
+                            </div>
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">🆔 معرف الجهاز (Device ID)</label>
+                                <input type="text" id="createDeviceId" placeholder="ASSAM-1A2B-3C4D-5E6F" />
+                            </div>
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">📋 الخطة</label>
+                                <select id="createPlan">
+                                    <option value="شهرية">شهرية (99 ج.م)</option>
+                                    <option value="سنوية" selected>سنوية (499 ج.م)</option>
+                                    <option value="تجريبية">تجريبية (90 يوم)</option>
+                                </select>
+                            </div>
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">📅 عدد الأيام</label>
+                                <input type="number" id="createDays" value="365" min="1" max="730" />
+                            </div>
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;justify-content:flex-end;">
+                                <label style="font-size:0.8rem;font-weight:600;">&nbsp;</label>
+                                <button class="dev-btn dev-btn-gold" onclick="generateAndSendLicense()" style="width:100%;justify-content:center;">
+                                    <i class="fas fa-download"></i> إنشاء ملف الترخيص
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- أزرار الإجراءات -->
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+                            <button class="dev-btn dev-btn-primary" onclick="copyUserData()">
+                                <i class="fas fa-copy"></i> نسخ بيانات المستخدم
+                            </button>
+                            <button class="dev-btn dev-btn-success" onclick="sendLicenseViaWhatsApp()">
+                                <i class="fab fa-whatsapp"></i> إرسال عبر واتساب
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="clearCreateForm()">
+                                <i class="fas fa-eraser"></i> مسح الحقول
+                            </button>
+                        </div>
+                        
+                        <!-- حالة الإنشاء -->
+                        <div id="createLicenseStatus" style="margin-top:0.5rem;font-size:0.85rem;display:none;padding:0.5rem;border-radius:8px;background:rgba(45,143,74,0.1);border:1px solid var(--success);color:var(--success);">
+                            ✅ <span id="createLicenseMessage">تم إنشاء ملف الترخيص بنجاح!</span>
+                        </div>
+                    </div>
+
+                    <!-- ====== 6. إعدادات النظام المتقدمة ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-sliders-h"></i></div>
                         <h3>⚙️ إعدادات النظام المتقدمة</h3>
@@ -516,7 +574,7 @@
                         </button>
                     </div>
 
-                    <!-- ====== 6. تحليل الأداء ====== -->
+                    <!-- ====== 7. تحليل الأداء ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-chart-line"></i></div>
                         <h3>📊 تحليل الأداء</h3>
@@ -534,7 +592,7 @@
                         </button>
                     </div>
 
-                    <!-- ====== 7. إدارة الإشعارات ====== -->
+                    <!-- ====== 8. إدارة الإشعارات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-bell"></i></div>
                         <h3>🔔 إدارة الإشعارات</h3>
@@ -560,7 +618,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 8. سجل النشاطات ====== -->
+                    <!-- ====== 9. سجل النشاطات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-history"></i></div>
                         <h3>📋 سجل النشاطات</h3>
@@ -578,7 +636,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 9. معلومات التطبيق ====== -->
+                    <!-- ====== 10. معلومات التطبيق ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-info-circle"></i></div>
                         <h3>معلومات التطبيق</h3>
@@ -590,7 +648,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 10. تنظيف البيانات ====== -->
+                    <!-- ====== 11. تنظيف البيانات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-broom"></i></div>
                         <h3>تنظيف البيانات</h3>
@@ -600,7 +658,7 @@
                         </button>
                     </div>
 
-                    <!-- ====== 11. تصدير واستيراد البيانات ====== -->
+                    <!-- ====== 12. تصدير واستيراد البيانات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-file-import-export"></i></div>
                         <h3>تصدير واستيراد البيانات</h3>
@@ -900,14 +958,13 @@
                 return;
             }
             
-            // 🔍 البحث في LocalStorage أولاً
-            loadingDiv.style.display = 'block';
-            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البحث في LocalStorage...';
-            
             let foundLicense = null;
             let source = 'LocalStorage';
             
-            // 1. البحث في license_data
+            // 🔍 1. البحث في LocalStorage أولاً
+            loadingDiv.style.display = 'block';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البحث في LocalStorage...';
+            
             const licenseData = localStorage.getItem('license_data');
             if (licenseData) {
                 try {
@@ -918,7 +975,6 @@
                 } catch (e) {}
             }
             
-            // 2. البحث في app_license_data
             if (!foundLicense) {
                 const appLicense = localStorage.getItem('app_license_data');
                 if (appLicense) {
@@ -932,40 +988,26 @@
                 }
             }
             
-            // 3. البحث في قائمة التراخيص المخزنة
-            if (!foundLicense) {
-                const allLicenses = localStorage.getItem('all_licenses_list');
-                if (allLicenses) {
-                    try {
-                        const list = JSON.parse(allLicenses);
-                        foundLicense = list.find(l => l.deviceId && l.deviceId.toUpperCase() === deviceId.toUpperCase());
-                        if (foundLicense) source = 'LocalStorage (list)';
-                    } catch (e) {}
-                }
-            }
-            
-            // ❌ لم يتم العثور في LocalStorage → نبحث في Firebase
+            // 🔍 2. البحث في Firebase
             if (!foundLicense) {
                 loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البحث في Firebase...';
                 
                 try {
                     const db = window.firebaseDB;
                     if (db) {
-                        // محاولة جلب الترخيص مباشرة من Firestore
                         const docRef = doc(db, 'licenses', deviceId);
                         const docSnap = await getDoc(docRef);
                         
                         if (docSnap.exists()) {
-                            const firebaseData = docSnap.data();
+                            const data = docSnap.data();
                             foundLicense = {
                                 deviceId: deviceId,
-                                userName: firebaseData.userName || firebaseData.name || 'غير محدد',
-                                userPhone: firebaseData.userPhone || firebaseData.phone || 'غير محدد',
-                                plan: firebaseData.plan || firebaseData.planName || 'غير محدد',
-                                expiryDate: firebaseData.expiryDate || firebaseData.expiry || firebaseData.expiresAt,
-                                createdAt: firebaseData.createdAt || firebaseData.created || firebaseData.startDate,
-                                status: firebaseData.status || 'active',
-                                source: 'Firebase'
+                                userName: data.userName || data.name || 'غير محدد',
+                                userPhone: data.userPhone || data.phone || 'غير محدد',
+                                plan: data.plan || data.planName || 'غير محدد',
+                                expiryDate: data.expiryDate || data.expiry || data.expiresAt,
+                                createdAt: data.createdAt || data.created || data.startDate,
+                                status: data.status || 'active'
                             };
                             source = '☁️ Firebase';
                         } else {
@@ -982,8 +1024,7 @@
                                         plan: data.plan || data.planName || 'غير محدد',
                                         expiryDate: data.expiryDate || data.expiry || data.expiresAt,
                                         createdAt: data.createdAt || data.created || data.startDate,
-                                        status: data.status || 'active',
-                                        source: 'Firebase'
+                                        status: data.status || 'active'
                                     };
                                     source = '☁️ Firebase';
                                 }
@@ -997,14 +1038,12 @@
             
             loadingDiv.style.display = 'none';
             
-            // ❌ لم يتم العثور في أي مكان
             if (!foundLicense) {
                 errorMsg.textContent = `❌ لم يتم العثور على ترخيص للمعرف: ${deviceId}`;
                 errorDiv.style.display = 'block';
                 return;
             }
             
-            // ✅ عرض النتائج
             displayLicenseResult(foundLicense, deviceId, source);
         }
 
@@ -1016,7 +1055,6 @@
             const errorDiv = document.getElementById('licenseSearchError');
             errorDiv.style.display = 'none';
             
-            // استخراج البيانات
             const userName = license.userName || license.name || 'غير محدد';
             const userPhone = license.userPhone || license.phone || 'غير محدد';
             const plan = license.plan || license.planName || 'غير محدد';
@@ -1024,7 +1062,6 @@
             const createdAt = license.createdAt || license.created || license.startDate || 'غير محدد';
             const status = license.status || 'active';
             
-            // حساب الأيام المتبقية
             let daysLeft = 'غير محدد';
             let statusDisplay = 'غير معروف';
             let statusColor = 'var(--text-light)';
@@ -1055,7 +1092,6 @@
                 statusColor = 'var(--danger)';
             }
             
-            // عرض البيانات
             document.getElementById('resultDeviceId').textContent = deviceId;
             document.getElementById('resultUserName').textContent = userName;
             document.getElementById('resultUserPhone').textContent = userPhone;
@@ -1066,13 +1102,10 @@
             document.getElementById('resultCreatedAt').textContent = createdAt ? new Date(createdAt).toLocaleDateString('ar-EG') : 'غير محدد';
             document.getElementById('resultSource').textContent = `📁 المصدر: ${source}`;
             
-            // تخزين المعرف المؤقت للاستخدام في دوال الحذف/التمديد
             document.getElementById('searchDeviceId').dataset.foundDevice = deviceId;
             
             resultDiv.style.display = 'block';
             showToast(`✅ تم العثور على ترخيص للمستخدم: ${userName}`, 'success');
-            
-            // تسجيل النشاط
             addActivityLog(`🔍 بحث عن ترخيص: ${deviceId} (${source})`);
         }
 
@@ -1090,7 +1123,7 @@
             
             let deleted = false;
             
-            // 1. حذف من license_data (LocalStorage)
+            // 1. حذف من LocalStorage
             const licenseData = localStorage.getItem('license_data');
             if (licenseData) {
                 try {
@@ -1103,7 +1136,6 @@
                 } catch (e) {}
             }
             
-            // 2. حذف من app_license_data
             const appLicense = localStorage.getItem('app_license_data');
             if (appLicense) {
                 try {
@@ -1115,7 +1147,7 @@
                 } catch (e) {}
             }
             
-            // 3. حذف من Firebase
+            // 2. حذف من Firebase
             try {
                 const db = window.firebaseDB;
                 if (db) {
@@ -1128,7 +1160,6 @@
                 console.warn('Failed to delete from Firebase:', error);
             }
             
-            // إخفاء النتائج
             document.getElementById('licenseSearchResult').style.display = 'none';
             document.getElementById('searchDeviceId').value = '';
             document.getElementById('searchDeviceId').dataset.foundDevice = '';
@@ -1154,7 +1185,6 @@
             }
             
             const days = parseInt(prompt('📅 عدد الأيام للإضافة:', '30')) || 30;
-            
             if (days <= 0) {
                 showToast('⚠️ يجب إدخال عدد أيام صحيح', 'error');
                 return;
@@ -1163,7 +1193,7 @@
             let extended = false;
             let newExpiry = null;
             
-            // 1. تحديث في license_data
+            // 1. تحديث في LocalStorage
             const licenseData = localStorage.getItem('license_data');
             if (licenseData) {
                 try {
@@ -1179,7 +1209,6 @@
                 } catch (e) {}
             }
             
-            // 2. تحديث في app_license_data
             if (!extended) {
                 const appLicense = localStorage.getItem('app_license_data');
                 if (appLicense) {
@@ -1197,7 +1226,7 @@
                 }
             }
             
-            // 3. تحديث في Firebase
+            // 2. تحديث في Firebase
             try {
                 const db = window.firebaseDB;
                 if (db) {
@@ -1223,8 +1252,6 @@
             if (extended) {
                 showToast(`✅ تم تمديد ترخيص ${deviceId} بـ ${days} يوم`, 'success');
                 addActivityLog(`➕ تمديد ترخيص: ${deviceId} (+${days} يوم)`);
-                
-                // إعادة عرض النتائج
                 const deviceIdInput = document.getElementById('searchDeviceId');
                 deviceIdInput.value = deviceId;
                 await searchLicenseByDevice();
@@ -1266,13 +1293,9 @@
                         status: data.status || 'active'
                     };
                     
-                    // حفظ في LocalStorage كنسخة محدثة
                     localStorage.setItem('license_data', JSON.stringify(license));
-                    
                     showToast('✅ تم تحديث الترخيص من Firebase', 'success');
                     addActivityLog(`🔄 تحديث ترخيص من Firebase: ${deviceId}`);
-                    
-                    // إعادة عرض النتائج
                     displayLicenseResult(license, deviceId, '☁️ Firebase (محدث)');
                     refreshAllLicenses();
                 } else {
@@ -1323,7 +1346,6 @@
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
                         const deviceId = doc.id;
-                        // تجنب التكرار
                         if (!allLicenses.find(l => l.deviceId === deviceId)) {
                             allLicenses.push({
                                 deviceId: deviceId,
@@ -1345,7 +1367,6 @@
                 return;
             }
             
-            // حفظ القائمة في localStorage للتخزين المؤقت
             localStorage.setItem('all_licenses_list', JSON.stringify(allLicenses));
             
             container.innerHTML = allLicenses.map((lic, idx) => `
@@ -1366,9 +1387,6 @@
             showToast(`✅ تم تحميل ${allLicenses.length} ترخيص`, 'success');
         }
 
-        // ============================================================
-        //  البحث السريع من قائمة التراخيص
-        // ============================================================
         function searchByDeviceId(deviceId) {
             if (deviceId) {
                 document.getElementById('searchDeviceId').value = deviceId;
@@ -1377,7 +1395,260 @@
         }
 
         // ============================================================
-        //  7. إعدادات النظام المتقدمة
+        //  7. إنشاء وإرسال ترخيص لمستخدم (الجزء الأساسي)
+        // ============================================================
+        function generateAndSendLicense() {
+            const userName = document.getElementById('createUserName').value.trim();
+            const userPhone = document.getElementById('createUserPhone').value.trim();
+            const deviceId = document.getElementById('createDeviceId').value.trim();
+            const plan = document.getElementById('createPlan').value;
+            const days = parseInt(document.getElementById('createDays').value) || 365;
+            
+            if (!userName) {
+                showToast('⚠️ الرجاء إدخال اسم المستخدم', 'error');
+                document.getElementById('createUserName').focus();
+                return;
+            }
+            
+            if (!userPhone || userPhone.length < 10) {
+                showToast('⚠️ الرجاء إدخال رقم هاتف صحيح (10 أرقام على الأقل)', 'error');
+                document.getElementById('createUserPhone').focus();
+                return;
+            }
+            
+            if (!deviceId || deviceId.length < 10) {
+                showToast('⚠️ الرجاء إدخال معرف جهاز صحيح', 'error');
+                document.getElementById('createDeviceId').focus();
+                return;
+            }
+            
+            const planMap = {
+                'شهرية': 'monthly',
+                'سنوية': 'yearly',
+                'تجريبية': 'trial'
+            };
+            const planKey = planMap[plan] || 'yearly';
+            
+            try {
+                let result = null;
+                
+                if (typeof window.generateLicense === 'function') {
+                    result = window.generateLicense(deviceId, userName, userPhone, planKey, days);
+                } else {
+                    const licenseData = {
+                        deviceId: deviceId,
+                        userName: userName,
+                        userPhone: userPhone,
+                        plan: planKey,
+                        expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                        createdAt: new Date().toISOString(),
+                        version: '1.0',
+                        features: {
+                            maxItems: Infinity,
+                            maxOffers: Infinity,
+                            maxClients: Infinity,
+                            canExportPDF: true,
+                            canExportExcel: true,
+                            canReports: true,
+                            canSignatures: true,
+                            canFullDesign: true,
+                            canCharts: true,
+                            showWatermark: false,
+                            isPremium: true
+                        }
+                    };
+                    
+                    const json = JSON.stringify(licenseData);
+                    const encoded = encodeURIComponent(json);
+                    const encrypted = btoa(encoded);
+                    const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
+                    const fileContent = `${encrypted}.${signature}`;
+                    
+                    const blob = new Blob([fileContent], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `license_${deviceId.substring(0, 8)}.zlx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    result = licenseData;
+                }
+                
+                if (result) {
+                    saveLicenseToFirebase({
+                        deviceId: deviceId,
+                        userName: userName,
+                        userPhone: userPhone,
+                        plan: planKey,
+                        expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                        createdAt: new Date().toISOString(),
+                        status: 'active'
+                    });
+                    
+                    const statusDiv = document.getElementById('createLicenseStatus');
+                    const msgSpan = document.getElementById('createLicenseMessage');
+                    statusDiv.style.display = 'block';
+                    msgSpan.textContent = `✅ تم إنشاء ملف الترخيص بنجاح للمستخدم ${userName} (${plan} - ${days} يوم)`;
+                    statusDiv.style.background = 'rgba(45,143,74,0.1)';
+                    statusDiv.style.borderColor = 'var(--success)';
+                    statusDiv.style.color = 'var(--success)';
+                    
+                    showToast(`✅ تم إنشاء ترخيص لـ ${userName}`, 'success');
+                    addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
+                    
+                    refreshAllLicenses();
+                    
+                    sessionStorage.setItem('last_created_license', JSON.stringify({
+                        userName, userPhone, deviceId, plan, days
+                    }));
+                } else {
+                    throw new Error('فشل إنشاء الترخيص');
+                }
+            } catch (error) {
+                console.error('Error generating license:', error);
+                const statusDiv = document.getElementById('createLicenseStatus');
+                const msgSpan = document.getElementById('createLicenseMessage');
+                statusDiv.style.display = 'block';
+                msgSpan.textContent = `❌ حدث خطأ: ${error.message || 'فشل إنشاء الترخيص'}`;
+                statusDiv.style.background = 'rgba(192,57,43,0.1)';
+                statusDiv.style.borderColor = 'var(--danger)';
+                statusDiv.style.color = 'var(--danger)';
+                showToast('❌ حدث خطأ في إنشاء الترخيص', 'error');
+            }
+        }
+
+        // ============================================================
+        //  حفظ الترخيص في Firebase
+        // ============================================================
+        async function saveLicenseToFirebase(licenseData) {
+            try {
+                const db = window.firebaseDB;
+                if (!db) {
+                    console.warn('Firebase غير متاح، تم الحفظ محلياً فقط');
+                    return false;
+                }
+                
+                const docRef = doc(db, 'licenses', licenseData.deviceId);
+                await setDoc(docRef, {
+                    deviceId: licenseData.deviceId,
+                    userName: licenseData.userName,
+                    userPhone: licenseData.userPhone,
+                    plan: licenseData.plan,
+                    expiryDate: licenseData.expiryDate,
+                    createdAt: licenseData.createdAt || new Date().toISOString(),
+                    status: licenseData.status || 'active',
+                    updatedAt: new Date().toISOString()
+                });
+                
+                console.log('✅ تم حفظ الترخيص في Firebase');
+                return true;
+            } catch (error) {
+                console.error('Error saving to Firebase:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        //  نسخ بيانات المستخدم
+        // ============================================================
+        function copyUserData() {
+            const userName = document.getElementById('createUserName').value.trim();
+            const userPhone = document.getElementById('createUserPhone').value.trim();
+            const deviceId = document.getElementById('createDeviceId').value.trim();
+            const plan = document.getElementById('createPlan').value;
+            const days = document.getElementById('createDays').value;
+            
+            if (!userName && !userPhone && !deviceId) {
+                showToast('⚠️ لا توجد بيانات لنسخها', 'error');
+                return;
+            }
+            
+            const text = `📋 بيانات المستخدم:\n\n` +
+                `👤 الاسم: ${userName || 'غير محدد'}\n` +
+                `📱 الهاتف: ${userPhone || 'غير محدد'}\n` +
+                `🆔 معرف الجهاز: ${deviceId || 'غير محدد'}\n` +
+                `📋 الخطة: ${plan || 'غير محدد'}\n` +
+                `📅 المدة: ${days || 'غير محدد'} يوم`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => showToast('✅ تم نسخ بيانات المستخدم', 'success'))
+                    .catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ تم نسخ بيانات المستخدم', 'success');
+            } catch (err) {
+                showToast('❌ فشل النسخ، يرجى نسخها يدوياً', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ============================================================
+        //  إرسال الترخيص عبر واتساب
+        // ============================================================
+        function sendLicenseViaWhatsApp() {
+            const userName = document.getElementById('createUserName').value.trim();
+            const userPhone = document.getElementById('createUserPhone').value.trim();
+            const deviceId = document.getElementById('createDeviceId').value.trim();
+            const plan = document.getElementById('createPlan').value;
+            const days = document.getElementById('createDays').value;
+            
+            if (!userName || !userPhone || !deviceId) {
+                showToast('⚠️ الرجاء إدخال جميع بيانات المستخدم أولاً', 'error');
+                return;
+            }
+            
+            const message = 
+                `📋 *بيانات الترخيص الجديد*\n\n` +
+                `👤 *الاسم:* ${userName}\n` +
+                `📱 *الهاتف:* ${userPhone}\n` +
+                `🆔 *معرف الجهاز:* ${deviceId}\n` +
+                `📋 *الخطة:* ${plan}\n` +
+                `📅 *المدة:* ${days} يوم\n\n` +
+                `📌 *ملف الترخيص مرفق بصيغة .zlx*\n` +
+                `🔑 *يرجى تحميل الملف ورفعه في صفحة التفعيل*`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${userPhone.replace(/^0/, '20')}?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+            showToast(`📤 جاري فتح واتساب لإرسال البيانات إلى ${userName}`, 'success');
+            addActivityLog(`📤 إرسال ترخيص عبر واتساب إلى ${userName} (${userPhone})`);
+        }
+
+        // ============================================================
+        //  مسح حقول النموذج
+        // ============================================================
+        function clearCreateForm() {
+            document.getElementById('createUserName').value = '';
+            document.getElementById('createUserPhone').value = '';
+            document.getElementById('createDeviceId').value = '';
+            document.getElementById('createPlan').value = 'سنوية';
+            document.getElementById('createDays').value = '365';
+            
+            const statusDiv = document.getElementById('createLicenseStatus');
+            statusDiv.style.display = 'none';
+            
+            showToast('🧹 تم مسح الحقول', 'success');
+        }
+
+        // ============================================================
+        //  8. إعدادات النظام المتقدمة
         // ============================================================
         function loadSystemSettings() {
             const maxItems = localStorage.getItem('setting_maxItems') || '3';
@@ -1402,7 +1673,6 @@
             localStorage.setItem('setting_maxClients', maxClients);
             localStorage.setItem('setting_trialDays', trialDays);
             
-            // تحديث licenseManager إن وجد
             if (typeof licenseManager !== 'undefined') {
                 licenseManager.MAX_ITEMS = parseInt(maxItems);
                 licenseManager.MAX_OFFERS = parseInt(maxOffers);
@@ -1419,16 +1689,14 @@
         }
 
         // ============================================================
-        //  8. تحليل الأداء
+        //  9. تحليل الأداء
         // ============================================================
         function refreshPerformance() {
-            // وقت التحميل
             const loadTime = window.performance.timing ?
                 (window.performance.timing.loadEventEnd - window.performance.timing.navigationStart) / 1000 :
                 'غير متاح';
             document.getElementById('perfLoadTime').textContent = typeof loadTime === 'number' ? loadTime.toFixed(2) + ' ثانية' : loadTime;
             
-            // استخدام التخزين
             let totalSize = 0;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -1437,7 +1705,6 @@
             }
             document.getElementById('perfStorage').textContent = (totalSize / 1024).toFixed(1) + ' KB';
             
-            // الإحصائيات
             const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
             const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
             const equipment = JSON.parse(localStorage.getItem('equipDataV12') || '[]');
@@ -1462,7 +1729,7 @@
         }
 
         // ============================================================
-        //  9. إدارة الإشعارات
+        //  10. إدارة الإشعارات
         // ============================================================
         function sendNotification() {
             const title = document.getElementById('notificationTitle').value.trim();
@@ -1480,24 +1747,21 @@
                 'free': 'المستخدمين المجانيين'
             };
             
-            // تسجيل الإشعار في السجل
             const log = document.getElementById('notificationLog');
             const entry = document.createElement('div');
             entry.className = 'log-entry';
             entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${targetLabels[target]}`;
             log.prepend(entry);
             
-            // محاكاة إرسال الإشعار
             showToast(`✅ تم إرسال الإشعار إلى ${targetLabels[target]}`, 'success');
             addActivityLog(`🔔 إرسال إشعار: "${title}" إلى ${targetLabels[target]}`);
             
-            // تنظيف الحقول
             document.getElementById('notificationTitle').value = '';
             document.getElementById('notificationMessage').value = '';
         }
 
         // ============================================================
-        //  10. سجل النشاطات
+        //  11. سجل النشاطات
         // ============================================================
         function addActivityLog(message) {
             const logs = JSON.parse(localStorage.getItem('activity_log') || '[]');
@@ -1547,7 +1811,7 @@
         }
 
         // ============================================================
-        //  11. دوال مساعدة عامة
+        //  12. دوال مساعدة عامة
         // ============================================================
         function clearAllData() {
             if (confirm('⚠️ هذا الإجراء سيمسح جميع بيانات التطبيق! هل أنت متأكد؟')) {
@@ -1600,7 +1864,7 @@
         }
 
         // ============================================================
-        //  12. التهيئة
+        //  13. التهيئة
         // ============================================================
         function initDevPanel() {
             document.getElementById('devDate').textContent = new Date().toLocaleDateString('ar-EG');
@@ -1611,23 +1875,19 @@
             refreshAllLicenses();
             loadActivityLog();
             
-            // التحقق من النسخ الاحتياطي التلقائي
             const backupEnabled = localStorage.getItem('backup_enabled') === 'true';
             const backupFreq = localStorage.getItem('backup_frequency') || 'غير محدد';
             if (backupEnabled) {
                 document.getElementById('lastBackupTime').textContent = 'مفعل (' + backupFreq + ')';
             }
             
-            // محاكاة تسجيل نشاط
             addActivityLog('📊 فتح لوحة المطور');
         }
 
-        // تشغيل التهيئة
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(initDevPanel, 300);
         });
 
-        // تحديث الإحصائيات كل 30 ثانية
         setInterval(() => {
             refreshPerformance();
         }, 30000);
