@@ -1,3 +1,4 @@
+<!-- quotation.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -31,7 +32,36 @@
         <span id="toastMessage">تم الحفظ بنجاح</span>
     </div>
 
-    <div id="header"></div>
+    <!-- ====== الهيدر الجديد (هامبورجر) ====== -->
+    <header class="header-hamburger" id="headerHamburger">
+        <div class="logo" onclick="goHome()">
+            <img id="headerLogo" src="" alt="الشعار" style="display:none;" />
+            <h1><i class="fas fa-crown"></i> عروض المعدات</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleMode()" id="modeToggle" title="تبديل الوضع">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="hamburger-btn" id="hamburgerBtn" title="القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== السايدبار ====== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text"><i class="fas fa-crown"></i> عروض المعدات</span>
+            <button class="close-btn" id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-links" id="sidebarLinks">
+            <!-- سيتم تعبئته بواسطة JavaScript -->
+        </div>
+        <div class="sidebar-footer">
+            <span class="license-status" id="sidebarLicenseStatus">📋 النسخة المجانية</span>
+        </div>
+    </div>
 
     <div class="dashboard">
         <div class="quotation-container">
@@ -212,8 +242,57 @@
         </div>
     </div>
 
+    <!-- ====== السكريبتات الأساسية (الترتيب الصحيح) ====== -->
     <script src="js/license.js"></script>
+    <script src="js/license-file.js"></script>
     <script src="js/main.js"></script>
     <script src="js/quotation.js"></script>
+    
+    <!-- ====== Fullscreen API ====== -->
+    <script>
+        (function() {
+            function requestFullscreen() {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
+            }
+            
+            const events = ['click', 'touchstart'];
+            function handleFirstInteraction() {
+                requestFullscreen();
+                events.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction);
+                });
+            }
+            events.forEach(event => {
+                document.addEventListener(event, handleFirstInteraction, { once: true });
+            });
+            
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    window.scrollTo(0, 1);
+                }
+            });
+            
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 300);
+            });
+            
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 500);
+            });
+            
+            console.log('✅ Fullscreen API تم تفعيلها');
+        })();
+    </script>
 </body>
 </html>
