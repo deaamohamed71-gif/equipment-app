@@ -95,7 +95,7 @@ async function loadNotifications() {
         
         // ✅ استخدام onSnapshot للاستماع الفوري
         const notificationsRef = window.collection(db, 'notifications');
-        const q = window.query(notificationsRef, window.orderBy('timestamp', 'desc'), window.limit(20));
+        const q = window.query(notificationsRef, window.orderBy('timestamp', 'desc'), window.limit(1));
         
         window.unsubscribeNotifications = window.onSnapshot(q, (querySnapshot) => {
             const notifications = [];
@@ -103,10 +103,13 @@ async function loadNotifications() {
                 notifications.push({ id: doc.id, ...doc.data() });
             });
             
+            // ✅ عرض الإشعار الأحدث فقط
             renderNotifications(notifications, container, countEl);
             
             // عرض إشعار منبثق للإشعارات الجديدة
-            showNewNotificationToast(notifications);
+            if (notifications.length > 0) {
+                showNewNotificationToast(notifications);
+            }
             
         }, (error) => {
             console.warn('Error listening to notifications:', error);
@@ -119,13 +122,17 @@ async function loadNotifications() {
     }
 }
 
-// ====== عرض الإشعارات في الواجهة ======
+// ====== عرض الإشعار الأحدث فقط في الواجهة ======
 function renderNotifications(notifications, container, countEl) {
     // ✅ تحديث العدد
-    const unreadCount = notifications.filter(n => !n.read).length;
     if (countEl) {
-        countEl.textContent = unreadCount;
-        countEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        if (notifications.length > 0) {
+            countEl.textContent = '1';
+            countEl.style.display = 'inline-block';
+        } else {
+            countEl.textContent = '0';
+            countEl.style.display = 'none';
+        }
     }
     
     if (notifications.length === 0) {
@@ -138,23 +145,24 @@ function renderNotifications(notifications, container, countEl) {
         return;
     }
     
-    // ✅ عرض الإشعارات
-    container.innerHTML = notifications.map((notif, index) => {
-        const isNew = !notif.read && (notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
-        return `
-            <div class="notification-item" style="padding:0.6rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.05)' : 'transparent'};border-radius:8px;transition:all 0.3s;cursor:pointer;" onclick="markNotificationRead('${notif.id}')">
-                <i class="fas fa-bell" style="color:var(--gold);font-size:1.1rem;margin-top:0.2rem;"></i>
-                <div style="flex:1;">
-                    <strong style="font-size:0.9rem;color:var(--text);display:block;">${notif.title || 'إشعار'}</strong>
-                    <p style="font-size:0.8rem;color:var(--text-light);margin:0.2rem 0;">${notif.message || ''}</p>
-                    <span style="font-size:0.6rem;color:var(--text-light);opacity:0.6;">
-                        ${notif.timestamp ? new Date(notif.timestamp).toLocaleString('ar-EG') : ''}
-                        ${isNew ? ' 🆕 جديد' : ''}
-                    </span>
-                </div>
+    // ✅ عرض أحدث إشعار فقط (الأول في القائمة)
+    const latest = notifications[0];
+    const isNew = !latest.read && (latest.timestamp && (new Date(latest.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
+    
+    container.innerHTML = `
+        <div class="notification-item" style="padding:0.8rem 1rem;display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.08)' : 'rgba(201,168,76,0.03)'};border-radius:10px;border:1px solid ${isNew ? 'var(--gold)' : 'var(--border)'};transition:all 0.3s;cursor:pointer;" onclick="markNotificationRead('${latest.id}')">
+            <i class="fas fa-bell" style="color:var(--gold);font-size:1.2rem;margin-top:0.2rem;"></i>
+            <div style="flex:1;">
+                <strong style="font-size:0.95rem;color:var(--text);display:block;">${latest.title || 'إشعار'}</strong>
+                <p style="font-size:0.85rem;color:var(--text-light);margin:0.3rem 0;">${latest.message || ''}</p>
+                <span style="font-size:0.65rem;color:var(--text-light);opacity:0.6;">
+                    ${latest.timestamp ? new Date(latest.timestamp).toLocaleString('ar-EG') : ''}
+                    ${isNew ? ' 🆕 جديد' : ''}
+                </span>
             </div>
-        `;
-    }).join('');
+            ${isNew ? `<span style="background:var(--gold);color:#fff;padding:0.1rem 0.6rem;border-radius:12px;font-size:0.6rem;font-weight:700;">جديد</span>` : ''}
+        </div>
+    `;
     
     // ✅ تحديث آخر ظهور
     localStorage.setItem('last_notification_view', new Date().toISOString());
@@ -172,10 +180,15 @@ function loadNotificationsLocal() {
         notifications = [];
     }
     
-    const unreadCount = notifications.filter(n => !n.read).length;
+    // ✅ عرض أحدث إشعار فقط
     if (countEl) {
-        countEl.textContent = unreadCount;
-        countEl.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        if (notifications.length > 0) {
+            countEl.textContent = '1';
+            countEl.style.display = 'inline-block';
+        } else {
+            countEl.textContent = '0';
+            countEl.style.display = 'none';
+        }
     }
     
     if (notifications.length === 0) {
@@ -188,23 +201,24 @@ function loadNotificationsLocal() {
         return;
     }
     
-    const recent = [...notifications].reverse().slice(0, 10);
-    container.innerHTML = recent.map((notif, index) => {
-        const isNew = !notif.read && (notif.timestamp && (new Date(notif.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
-        return `
-            <div class="notification-item" style="padding:0.6rem 0.8rem;border-bottom:1px solid var(--border);display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.05)' : 'transparent'};border-radius:8px;transition:all 0.3s;">
-                <i class="fas fa-bell" style="color:var(--gold);font-size:1.1rem;margin-top:0.2rem;"></i>
-                <div style="flex:1;">
-                    <strong style="font-size:0.9rem;color:var(--text);display:block;">${notif.title || 'إشعار'}</strong>
-                    <p style="font-size:0.8rem;color:var(--text-light);margin:0.2rem 0;">${notif.message || ''}</p>
-                    <span style="font-size:0.6rem;color:var(--text-light);opacity:0.6;">
-                        ${notif.timestamp ? new Date(notif.timestamp).toLocaleString('ar-EG') : ''}
-                        ${isNew ? ' 🆕 جديد' : ''}
-                    </span>
-                </div>
+    // ✅ عرض أحدث إشعار
+    const latest = notifications[notifications.length - 1];
+    const isNew = !latest.read && (latest.timestamp && (new Date(latest.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)));
+    
+    container.innerHTML = `
+        <div class="notification-item" style="padding:0.8rem 1rem;display:flex;gap:0.8rem;align-items:flex-start;background:${isNew ? 'rgba(201,168,76,0.08)' : 'rgba(201,168,76,0.03)'};border-radius:10px;border:1px solid ${isNew ? 'var(--gold)' : 'var(--border)'};">
+            <i class="fas fa-bell" style="color:var(--gold);font-size:1.2rem;margin-top:0.2rem;"></i>
+            <div style="flex:1;">
+                <strong style="font-size:0.95rem;color:var(--text);display:block;">${latest.title || 'إشعار'}</strong>
+                <p style="font-size:0.85rem;color:var(--text-light);margin:0.3rem 0;">${latest.message || ''}</p>
+                <span style="font-size:0.65rem;color:var(--text-light);opacity:0.6;">
+                    ${latest.timestamp ? new Date(latest.timestamp).toLocaleString('ar-EG') : ''}
+                    ${isNew ? ' 🆕 جديد' : ''}
+                </span>
             </div>
-        `;
-    }).join('');
+            ${isNew ? `<span style="background:var(--gold);color:#fff;padding:0.1rem 0.6rem;border-radius:12px;font-size:0.6rem;font-weight:700;">جديد</span>` : ''}
+        </div>
+    `;
 }
 
 // ====== عرض إشعار منبثق للإشعارات الجديدة ======
@@ -219,7 +233,7 @@ function showNewNotificationToast(notifications) {
         
         if (newNotifs.length > 0) {
             // عرض أحدث إشعار جديد
-            const latest = newNotifs[newNotifs.length - 1];
+            const latest = newNotifs[0];
             if (typeof showToast === 'function') {
                 showToast(`🔔 ${latest.title || 'إشعار جديد'}: ${latest.message || ''}`, 'success');
             } else {
@@ -351,15 +365,14 @@ function getOfferStatus(offer) {
 
 // ====== إضافة إشعار تجريبي (للتجربة) ======
 function addTestNotification() {
-    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-    notifications.push({
+    const notification = {
         id: 'test_' + Date.now(),
         title: '📢 تحديث جديد',
         message: 'تم إضافة نظام الإشعارات في لوحة التحكم (تجريبي)',
         timestamp: new Date().toISOString(),
         read: false
-    });
-    localStorage.setItem('notifications', JSON.stringify(notifications));
+    };
+    localStorage.setItem('notifications', JSON.stringify([notification]));
     loadNotifications();
     if (typeof showToast === 'function') {
         showToast('✅ تم إضافة إشعار تجريبي', 'success');
@@ -397,8 +410,9 @@ document.addEventListener('DOMContentLoaded', function() {
         loadNotifications();
     }, 150);
     
-    // ✅ تنبيه: الإشعارات الآن تعمل بـ onSnapshot (استماع فوري)
+    // ✅ تنبيه: الإشعارات الآن تعمل بـ onSnapshot (استماع فوري) وتعرض أحدث إشعار فقط
     console.log('📢 الإشعارات تعمل بـ onSnapshot - تظهر فوراً عند إرسالها');
+    console.log('📢 يتم عرض أحدث إشعار فقط (تم مسح القديم)');
     console.log('📢 لإضافة إشعار تجريبي، اكتب: addTestNotification()');
 });
 
