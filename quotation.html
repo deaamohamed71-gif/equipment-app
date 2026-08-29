@@ -32,6 +32,13 @@
         <span id="toastMessage">تم الحفظ بنجاح</span>
     </div>
 
+    <!-- ====== زر العودة للرئيسية ====== -->
+    <div class="back-home-btn">
+        <a href="dashboard.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-arrow-right"></i> العودة للرئيسية
+        </a>
+    </div>
+
     <!-- ====== الهيدر الجديد (هامبورجر) ====== -->
     <header class="header-hamburger" id="headerHamburger">
         <div class="logo" onclick="goHome()">
@@ -248,7 +255,7 @@
     <script src="js/main.js"></script>
     <script src="js/quotation.js"></script>
     
-    <!-- ====== كود السايدبار (مضاف لحل المشكلة) ====== -->
+    <!-- ====== كود السايدبار ====== -->
     <script>
         (function() {
             const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -257,7 +264,6 @@
             const closeBtn = document.getElementById('closeSidebar');
             const sidebarLinks = document.getElementById('sidebarLinks');
 
-            // روابط السايدبار
             const links = [
                 { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
                 { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
@@ -280,7 +286,6 @@
                 </a>
             `).join('');
 
-            // دوال الفتح والإغلاق
             function openSidebar() {
                 sidebar.classList.add('open');
                 overlay.classList.add('active');
@@ -293,7 +298,6 @@
                 document.body.style.overflow = '';
             }
 
-            // الأحداث
             hamburgerBtn.addEventListener('click', openSidebar);
             closeBtn.addEventListener('click', closeSidebar);
             overlay.addEventListener('click', closeSidebar);
