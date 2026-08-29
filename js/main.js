@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع رابط الترخيص الجديد)
+// js/main.js - الكود الأساسي المشترك (محدث للتحقق من الترخيص عند بدء التشغيل)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -87,7 +87,6 @@ function loadHeaderFooter() {
         const isLandingPage = currentPage === 'index.html';
         const isLicenseActivationPage = currentPage === 'activation-license.html';
         
-        // إخفاء الهيدر في صفحات معينة
         if (isOnboardingPage || isHelpPage || isSettingsPage || isChangelogPage || isSirkatPage || isLandingPage || isLicenseActivationPage) {
             headerPlaceholder.style.display = 'none';
             return;
@@ -165,15 +164,37 @@ function loadHeaderFooter() {
             return;
         }
         
-        const features = licenseManager ? licenseManager.getFeatures() : { isPremium: false };
-        const status = features.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        // ✅ التحقق من حالة الترخيص لتحديث الفوتر
+        let isPremium = false;
+        const appLicense = localStorage.getItem('app_license_data');
+        if (appLicense) {
+            try {
+                const data = JSON.parse(appLicense);
+                isPremium = data.isPremium || false;
+            } catch (e) {}
+        }
         
+        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
         footerPlaceholder.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
     }
 }
 
 // ====== التحقق من الترخيص عند بدء التطبيق ======
 async function checkLicenseOnStart() {
+    // ✅ التحقق من ترخيص الملفات أولاً
+    if (typeof checkFileLicenseOnStart === 'function') {
+        const result = checkFileLicenseOnStart();
+        if (result) {
+            // الترخيص بالملفات موجود وصالح
+            const footer = document.getElementById('footer');
+            if (footer) {
+                footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
+            }
+            return true;
+        }
+    }
+    
+    // ✅ التحقق من الترخيص العادي
     if (typeof licenseManager !== 'undefined') {
         const info = licenseManager.getLicenseInfo();
         if (info && info.isPremium && info.licenseKey) {
@@ -202,6 +223,11 @@ async function checkLicenseOnStart() {
 
 // ====== التهيئة العامة ======
 function initApp() {
+    // ✅ التحقق من الترخيص عند بدء التشغيل
+    if (typeof checkLicenseOnStart === 'function') {
+        checkLicenseOnStart();
+    }
+    
     if (typeof licenseManager !== 'undefined') {
         licenseManager.initialize();
         
