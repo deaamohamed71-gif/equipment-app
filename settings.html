@@ -592,16 +592,16 @@
                         </button>
                     </div>
 
-                    <!-- ====== 8. إدارة الإشعارات (المحدثة) ====== -->
+                    <!-- ====== 8. إدارة الإشعارات (نسخة واحدة فقط) ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-bell"></i></div>
                         <h3>🔔 إدارة الإشعارات</h3>
-                        <p>إرسال إشعارات لجميع المستخدمين (تُحفظ في Firebase)</p>
+                        <p>إرسال إشعار جديد (يُحذف القديم تلقائياً)</p>
                         <div class="input-group">
                             <input type="text" id="notificationTitle" placeholder="عنوان الإشعار" value="📢 تحديث جديد" />
                         </div>
                         <div class="input-group">
-                            <textarea id="notificationMessage" placeholder="نص الإشعار" rows="2" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;width:100%;">تم إصدار تحديث جديد للتطبيق، يرجى تحديث الصفحة للاستفادة من الميزات الجديدة</textarea>
+                            <textarea id="notificationMessage" placeholder="نص الإشعار" rows="2" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;width:100%;">تم إصدار تحديث جديد للتطبيق</textarea>
                         </div>
                         <div class="input-group">
                             <select id="notificationTarget">
@@ -610,7 +610,7 @@
                                 <option value="free">المستخدمين المجانيين</option>
                             </select>
                             <button class="dev-btn dev-btn-success" onclick="sendNotification()">
-                                <i class="fas fa-paper-plane"></i> إرسال الإشعار
+                                <i class="fas fa-paper-plane"></i> إرسال الإشعار (يحذف القديم)
                             </button>
                         </div>
                         <div id="notificationLog" class="log-area" style="margin-top:0.5rem;max-height:100px;">
@@ -1711,7 +1711,7 @@
         }
 
         // ============================================================
-        //  10. إدارة الإشعارات (المحدثة)
+        //  10. إدارة الإشعارات (نسخة واحدة فقط)
         // ============================================================
         async function sendNotification() {
             const title = document.getElementById('notificationTitle').value.trim();
@@ -1731,29 +1731,40 @@
                     return;
                 }
                 
-                // ✅ حفظ الإشعار في Firestore
-                const notificationData = {
+                const notificationsRef = window.collection(db, 'notifications');
+                
+                // ✅ 1. مسح جميع الإشعارات القديمة
+                const snapshot = await window.getDocs(notificationsRef);
+                if (!snapshot.empty) {
+                    const deletePromises = [];
+                    snapshot.forEach(doc => {
+                        deletePromises.push(window.deleteDoc(doc.ref));
+                    });
+                    await Promise.all(deletePromises);
+                    console.log(`✅ تم مسح ${snapshot.size} إشعارات قديمة`);
+                }
+                
+                // ✅ 2. إضافة الإشعار الجديد
+                await window.addDoc(notificationsRef, {
                     title: title,
                     message: message,
                     target: target || 'all',
                     timestamp: new Date().toISOString(),
                     read: false,
                     createdAt: new Date().toISOString()
-                };
+                });
                 
-                await window.addDoc(window.collection(db, 'notifications'), notificationData);
+                // ✅ 3. تسجيل في السجل المحلي
+                addActivityLog(`🔔 إرسال إشعار جديد: "${title}" إلى ${target} (تم مسح القديم)`);
                 
-                // ✅ تسجيل في السجل المحلي
-                addActivityLog(`🔔 إرسال إشعار: "${title}" إلى ${target}`);
-                
-                // ✅ تحديث الـ Log في الواجهة
+                // ✅ 4. تحديث الـ Log في الواجهة
                 const log = document.getElementById('notificationLog');
                 const entry = document.createElement('div');
                 entry.className = 'log-entry';
-                entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${target}`;
+                entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${target} (جديد)`;
                 log.prepend(entry);
                 
-                showToast('✅ تم إرسال الإشعار بنجاح (تم حفظه في Firebase)', 'success');
+                showToast('✅ تم إرسال الإشعار (تم مسح القديم)', 'success');
                 
                 // تنظيف الحقول
                 document.getElementById('notificationTitle').value = '';
@@ -1763,7 +1774,7 @@
                 console.error('❌ Error sending notification:', error);
                 showToast('❌ حدث خطأ في إرسال الإشعار: ' + error.message, 'error');
                 
-                // ✅ خطة احتياطية: حفظ محلياً
+                // خطة احتياطية: حفظ محلياً
                 saveNotificationLocal(title, message, target);
             }
         }
@@ -1773,15 +1784,19 @@
         // ============================================================
         function saveNotificationLocal(title, message, target) {
             try {
-                let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
-                notifications.push({
+                // مسح القديم محلياً
+                localStorage.removeItem('notifications');
+                
+                // حفظ الجديد
+                const notification = {
+                    id: 'local_' + Date.now(),
                     title: title,
                     message: message,
                     target: target || 'all',
                     timestamp: new Date().toISOString(),
                     read: false
-                });
-                localStorage.setItem('notifications', JSON.stringify(notifications));
+                };
+                localStorage.setItem('notifications', JSON.stringify([notification]));
                 
                 addActivityLog(`🔔 إرسال إشعار (محلي): "${title}" إلى ${target}`);
                 
@@ -1931,7 +1946,7 @@
         }, 30000);
 
         console.log('✅ لوحة المطور - تم تهيئتها بنجاح');
-        console.log('✅ الإشعارات تحفظ في Firebase وتظهر لجميع المستخدمين');
+        console.log('✅ الإشعارات: كل إشعار جديد يمسح القديم');
     </script>
 </body>
 </html>
