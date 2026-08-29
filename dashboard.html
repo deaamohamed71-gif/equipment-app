@@ -1,4 +1,3 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -41,7 +40,7 @@
         </div>
     </header>
 
-    <!-- ====== السايدبار (القائمة الجانبية) ====== -->
+    <!-- ====== السايدبار ====== -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -64,7 +63,7 @@
                 <p class="page-subtitle">مرحباً بك في نظام إدارة عروض أسعار المعدات</p>
             </div>
 
-            <!-- ====== حالة الترخيص ====== -->
+            <!-- حالة الترخيص -->
             <div id="licenseStatus" style="background:var(--bg-light); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:1.5rem; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <span id="licenseStatusText" style="font-family:'Cairo',sans-serif;">
                     <i class="fas fa-info-circle"></i> جاري تحميل معلومات الترخيص...
@@ -75,7 +74,7 @@
                 </a>
             </div>
 
-            <!-- ====== الإحصائيات ====== -->
+            <!-- الإحصائيات -->
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
@@ -103,7 +102,7 @@
                 </div>
             </div>
 
-            <!-- ====== العروض الأخيرة ====== -->
+            <!-- العروض الأخيرة -->
             <div class="section-card">
                 <div class="section-header">
                     <h2><i class="fas fa-clock"></i> أحدث العروض</h2>
@@ -133,7 +132,7 @@
                 </div>
             </div>
 
-            <!-- ====== الروابط السريعة ====== -->
+            <!-- الروابط السريعة -->
             <div class="quick-actions">
                 <a href="quotation.html" class="quick-action-card" style="--action-color: var(--primary);">
                     <i class="fas fa-file-invoice"></i>
@@ -165,7 +164,7 @@
     <script src="js/main.js"></script>
     <script src="js/index.js"></script>
 
-    <!-- ====== كود التحكم في السايدبار ====== -->
+    <!-- ====== كود السايدبار ====== -->
     <script>
         (function() {
             const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -174,7 +173,6 @@
             const closeBtn = document.getElementById('closeSidebar');
             const sidebarLinks = document.getElementById('sidebarLinks');
             
-            // روابط السايدبار
             const links = [
                 { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
                 { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
@@ -189,7 +187,6 @@
                 { href: 'activation.html', icon: 'fa-key', text: 'التفعيل' }
             ];
             
-            // تعبئة الروابط
             const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
             sidebarLinks.innerHTML = links.map(link => `
                 <a href="${link.href}" class="${link.href === currentPage ? 'active' : ''}">
@@ -198,31 +195,26 @@
                 </a>
             `).join('');
             
-            // فتح القائمة
             function openSidebar() {
                 sidebar.classList.add('open');
                 overlay.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
             
-            // إغلاق القائمة
             function closeSidebar() {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('active');
                 document.body.style.overflow = '';
             }
             
-            // أحداث
             hamburgerBtn.addEventListener('click', openSidebar);
             closeBtn.addEventListener('click', closeSidebar);
             overlay.addEventListener('click', closeSidebar);
             
-            // إغلاق عند الضغط على Esc
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeSidebar();
             });
             
-            // إغلاق عند الضغط على رابط
             document.querySelectorAll('.sidebar-links a').forEach(link => {
                 link.addEventListener('click', closeSidebar);
             });
@@ -231,5 +223,51 @@
         })();
     </script>
 
+    <!-- ====== ✅ Fullscreen API ====== -->
+    <script>
+        (function() {
+            function requestFullscreen() {
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {});
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                }
+            }
+            
+            const events = ['click', 'touchstart'];
+            function handleFirstInteraction() {
+                requestFullscreen();
+                events.forEach(event => {
+                    document.removeEventListener(event, handleFirstInteraction);
+                });
+            }
+            events.forEach(event => {
+                document.addEventListener(event, handleFirstInteraction, { once: true });
+            });
+            
+            document.addEventListener('fullscreenchange', function() {
+                if (document.fullscreenElement) {
+                    window.scrollTo(0, 1);
+                }
+            });
+            
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 300);
+            });
+            
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 500);
+            });
+            
+            console.log('✅ Fullscreen API تم تفعيلها');
+        })();
+    </script>
 </body>
 </html>
