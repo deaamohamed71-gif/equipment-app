@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const infoEl = document.getElementById('licenseInfo');
                 if (infoEl) infoEl.style.display = 'block';
                 
-                // إظهار زر التفعيل إذا كان هناك ترخيص محفوظ
                 const activateBtn = document.getElementById('activateBtn');
                 if (activateBtn) activateBtn.style.display = 'flex';
             } catch (e) {
@@ -164,9 +163,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileName.textContent = `📄 ${file.name}`;
             }
             
-            const activateBtn = document.getElementById('activateBtn');
-            if (activateBtn) activateBtn.style.display = 'flex';
-            
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
@@ -175,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (!result || !result.valid) {
                         showLicenseError(result?.error || 'ملف تالف أو غير صالح');
-                        if (activateBtn) activateBtn.style.display = 'none';
                         return;
                     }
                     
@@ -185,29 +180,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (license.deviceId !== deviceId) {
                         showLicenseError('هذه الرخصة مخصصة لجهاز آخر ولا تطابق معرف جهازك!');
-                        if (activateBtn) activateBtn.style.display = 'none';
                         return;
                     }
                     
                     const expiry = new Date(license.expiryDate);
                     if (expiry < new Date()) {
                         showLicenseError('انتهت صلاحية الترخيص!');
-                        if (activateBtn) activateBtn.style.display = 'none';
                         return;
                     }
                     
+                    // ✅ عرض معلومات الترخيص
                     showLicenseSuccess('✅ تم التحقق من الترخيص بنجاح!');
                     displayLicenseInfo(license);
                     const infoEl = document.getElementById('licenseInfo');
                     if (infoEl) infoEl.style.display = 'block';
                     
+                    // ✅ حفظ بيانات الترخيص في localStorage
                     localStorage.setItem('license_data', JSON.stringify(license));
                     localStorage.setItem('license_file', content);
+                    
+                    // ✅ إظهار زر التفعيل
+                    const activateBtn = document.getElementById('activateBtn');
+                    if (activateBtn) activateBtn.style.display = 'flex';
                     
                 } catch (error) {
                     console.error('File read error:', error);
                     showLicenseError('حدث خطأ أثناء قراءة الملف');
-                    if (activateBtn) activateBtn.style.display = 'none';
                 }
             };
             reader.readAsText(file);
@@ -215,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ====== عرض معلومات الترخيص (محدث) ======
+// ====== عرض معلومات الترخيص ======
 function displayLicenseInfo(license) {
     try {
         const userEl = document.getElementById('infoUser');
@@ -267,72 +265,109 @@ function showLicenseSuccess(message) {
     if (successMsg) successMsg.textContent = message;
 }
 
-// ====== تفعيل الترخيص ======
+// ====== تطبيق الترخيص على النظام ======
+function applyLicenseToSystem(license) {
+    try {
+        const expiry = new Date(license.expiryDate);
+        const now = new Date();
+        const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+        
+        const premiumData = {
+            type: 'premium',
+            plan: license.plan || 'سنوية',
+            startDate: license.createdAt || new Date().toISOString(),
+            expiryDate: license.expiryDate,
+            features: {
+                maxItems: Infinity,
+                maxOffers: Infinity,
+                maxClients: Infinity,
+                canExportPDF: true,
+                canExportExcel: true,
+                canReports: true,
+                canSignatures: true,
+                canFullDesign: true,
+                canCharts: true,
+                showWatermark: false,
+                isPremium: true
+            },
+            status: 'active',
+            licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
+            isPremium: true,
+            userName: license.userName || 'مستخدم',
+            userPhone: license.userPhone || '',
+            daysLeft: daysLeft,
+            isExpired: daysLeft <= 0
+        };
+        
+        // ✅ حفظ في localStorage
+        localStorage.setItem('app_license_data', JSON.stringify(premiumData));
+        
+        // ✅ تحديث مدير الترخيص
+        if (typeof licenseManager !== 'undefined') {
+            licenseManager.licenseData = premiumData;
+            licenseManager.isValidated = true;
+            licenseManager.saveLicense(premiumData);
+            licenseManager.notifyListeners();
+        }
+        
+        // ✅ تحديث الفوتر
+        updateFooterStatus(true);
+        
+        console.log('✅ تم تطبيق الترخيص بنجاح:', premiumData);
+        
+        return { success: true, daysLeft: daysLeft };
+    } catch (error) {
+        console.error('Apply license error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ====== تفعيل الترخيص (محدث - يحفظ بشكل دائم) ======
 function activateLicense() {
     try {
+        // 1. جلب بيانات الترخيص من localStorage
         const savedLicense = localStorage.getItem('license_data');
         if (!savedLicense) {
             showToast('⚠️ يرجى رفع ملف الترخيص أولاً', 'error');
             return;
         }
         
+        // 2. فك تشفير البيانات
         const license = JSON.parse(savedLicense);
         
-        // التحقق من الصلاحية
+        // 3. التحقق من الصلاحية
         const expiry = new Date(license.expiryDate);
         if (expiry < new Date()) {
             showToast('❌ انتهت صلاحية الترخيص!', 'error');
             return;
         }
         
-        // تطبيق الترخيص على النظام
-        if (typeof applyLicenseToSystem === 'function') {
-            applyLicenseToSystem(license);
-        } else {
-            // طريقة بديلة
-            const premiumData = {
-                type: 'premium',
-                plan: license.plan || 'premium',
-                startDate: license.createdAt || new Date().toISOString(),
-                expiryDate: license.expiryDate,
-                features: license.features || {
-                    maxItems: Infinity,
-                    maxOffers: Infinity,
-                    maxClients: Infinity,
-                    canExportPDF: true,
-                    canExportExcel: true,
-                    canReports: true,
-                    canSignatures: true,
-                    canFullDesign: true,
-                    canCharts: true,
-                    showWatermark: false,
-                    isPremium: true
-                },
-                status: 'active',
-                licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
-                isPremium: true,
-                userName: license.userName,
-                userPhone: license.userPhone,
-                daysLeft: Math.ceil((new Date(license.expiryDate) - new Date()) / (1000 * 60 * 60 * 24))
-            };
-            
-            if (typeof licenseManager !== 'undefined') {
-                licenseManager.licenseData = premiumData;
-                licenseManager.isValidated = true;
-                licenseManager.saveLicense(premiumData);
-                licenseManager.notifyListeners();
-            }
-            
-            localStorage.setItem('app_license_data', JSON.stringify(premiumData));
+        // 4. التحقق من تطابق معرف الجهاز
+        const deviceIdEl = document.getElementById('deviceId');
+        const deviceId = deviceIdEl ? deviceIdEl.textContent : localStorage.getItem('device_id') || '';
+        if (license.deviceId !== deviceId) {
+            showToast('❌ هذا الترخيص ليس لهذا الجهاز!', 'error');
+            return;
         }
         
-        showToast('🎉 تم تفعيل النسخة الاحترافية بنجاح!', 'success');
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 1500);
+        // 5. ✅ تطبيق الترخيص على النظام
+        const result = applyLicenseToSystem(license);
+        
+        if (result.success) {
+            // ✅ رسالة نجاح
+            showToast(`🎉 تم تفعيل النسخة الاحترافية بنجاح! (متبقي ${result.daysLeft} يوم)`, 'success');
+            
+            // ✅ الانتقال للوحة التحكم بعد 1.5 ثانية
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        } else {
+            showToast('❌ حدث خطأ أثناء التفعيل: ' + result.error, 'error');
+        }
+        
     } catch (error) {
         console.error('Activation error:', error);
-        showToast('❌ حدث خطأ أثناء التفعيل', 'error');
+        showToast('❌ حدث خطأ أثناء التفعيل: ' + error.message, 'error');
     }
 }
 
@@ -486,6 +521,17 @@ function fallbackCopy(text) {
     document.body.removeChild(textarea);
 }
 
+// ====== تحديث الفوتر ======
+function updateFooterStatus(isPremium) {
+    const footer = document.getElementById('footer');
+    if (footer) {
+        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        const currentText = footer.innerHTML;
+        const newText = currentText.replace(/⭐ النسخة المدفوعة|📋 النسخة المجانية/, status);
+        footer.innerHTML = newText;
+    }
+}
+
 // ====== دالة المطور لإنشاء ملف ترخيص ======
 window.generateLicense = function(deviceId, userName, userPhone, plan, days) {
     try {
@@ -506,70 +552,6 @@ window.generateLicense = function(deviceId, userName, userPhone, plan, days) {
     }
 };
 
-// ====== تطبيق الترخيص على النظام ======
-function applyLicenseToSystem(license) {
-    try {
-        const expiry = new Date(license.expiryDate);
-        const now = new Date();
-        const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-        
-        const premiumData = {
-            type: 'premium',
-            plan: license.plan || 'سنوية',
-            startDate: license.createdAt || new Date().toISOString(),
-            expiryDate: license.expiryDate,
-            features: license.features || {
-                maxItems: Infinity,
-                maxOffers: Infinity,
-                maxClients: Infinity,
-                canExportPDF: true,
-                canExportExcel: true,
-                canReports: true,
-                canSignatures: true,
-                canFullDesign: true,
-                canCharts: true,
-                showWatermark: false,
-                isPremium: true
-            },
-            status: 'active',
-            licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
-            isPremium: true,
-            userName: license.userName,
-            userPhone: license.userPhone,
-            daysLeft: daysLeft,
-            isExpired: daysLeft <= 0
-        };
-        
-        localStorage.setItem('app_license_data', JSON.stringify(premiumData));
-        
-        if (typeof licenseManager !== 'undefined') {
-            licenseManager.licenseData = premiumData;
-            licenseManager.isValidated = true;
-            licenseManager.saveLicense(premiumData);
-            licenseManager.notifyListeners();
-        }
-        
-        // تحديث الفوتر
-        updateFooterStatus(true);
-        
-        return { success: true, daysLeft: daysLeft };
-    } catch (error) {
-        console.error('Apply license error:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ====== تحديث الفوتر ======
-function updateFooterStatus(isPremium) {
-    const footer = document.getElementById('footer');
-    if (footer) {
-        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
-        const currentText = footer.innerHTML;
-        const newText = currentText.replace(/⭐ النسخة المدفوعة|📋 النسخة المجانية/, status);
-        footer.innerHTML = newText;
-    }
-}
-
 // ====== جعل الدوال متاحة عالمياً ======
 window.sendToWhatsApp = sendToWhatsApp;
 window.validateUserData = validateUserData;
@@ -578,5 +560,6 @@ window.activateLicense = activateLicense;
 window.cancelActivation = cancelActivation;
 window.applyLicenseToSystem = applyLicenseToSystem;
 window.updateFooterStatus = updateFooterStatus;
+window.generateLicense = generateLicense;
 
 console.log('✅ نظام الترخيص بالملفات (ZLX) تم تهيئته بنجاح');
