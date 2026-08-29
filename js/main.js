@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع قائمة الهامبورجر)
+// js/main.js - الكود الأساسي المشترك (محدث مع عداد الأيام)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -28,7 +28,6 @@ function toggleMode() {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('themeModeV2', isDark ? 'dark' : 'light');
     
-    // تحديث أيقونة الوضع في الهيدر
     const modeToggle = document.getElementById('modeToggle');
     if (modeToggle) {
         modeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
@@ -90,13 +89,11 @@ function goHome() {
 
 // ====== تحميل الهيدر والفوتر ======
 function loadHeaderFooter() {
-    // ✅ الهيدر القديم يتم إخفاؤه (لأن الهيدر الجديد موجود في كل صفحة)
     const headerPlaceholder = document.getElementById('header');
     if (headerPlaceholder) {
         headerPlaceholder.style.display = 'none';
     }
     
-    // ✅ الفوتر
     const footerPlaceholder = document.getElementById('footer');
     if (footerPlaceholder) {
         const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
@@ -113,7 +110,6 @@ function loadHeaderFooter() {
             return;
         }
         
-        // ✅ التحقق من حالة الترخيص لتحديث الفوتر
         let isPremium = false;
         let planName = 'مجانية';
         let daysLeft = 0;
@@ -128,29 +124,52 @@ function loadHeaderFooter() {
             } catch (e) {}
         }
         
-        const status = isPremium ? `⭐ النسخة المدفوعة (${planName} - ${daysLeft} يوم)` : '📋 النسخة المجانية';
+        const status = isPremium ? `⭐ النسخة المدفوعة (${planName} - ${daysLeft} يوم)` : `📋 النسخة المجانية (${daysLeft} يوم متبقي)`;
         footerPlaceholder.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
+    }
+}
+
+// ====== تحديث عداد الأيام المتبقية ======
+function updateDaysCounter() {
+    const info = licenseManager.getLicenseInfo();
+    if (!info) return;
+    
+    const daysLeft = info.daysLeft;
+    const counterEl = document.getElementById('daysCounter');
+    if (counterEl) {
+        counterEl.textContent = `⏳ ${daysLeft} يوم متبقي`;
+        if (daysLeft < 10) {
+            counterEl.style.color = 'var(--danger)';
+        } else if (daysLeft < 30) {
+            counterEl.style.color = 'var(--warning)';
+        } else {
+            counterEl.style.color = 'var(--success)';
+        }
+    }
+    
+    // تحديث الفوتر أيضاً
+    const footer = document.getElementById('footer');
+    if (footer) {
+        const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} (${daysLeft} يوم) | 📞 01096597825</p>`;
     }
 }
 
 // ====== التحقق من الترخيص عند بدء التطبيق ======
 async function checkLicenseOnStart() {
-    // ✅ التحقق من ترخيص الملفات أولاً
     if (typeof checkFileLicenseOnStart === 'function') {
         const result = checkFileLicenseOnStart();
         if (result) {
-            // الترخيص بالملفات موجود وصالح
             const footer = document.getElementById('footer');
             if (footer) {
                 footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
             }
-            // تحديث حالة الترخيص في السايدبار
             updateSidebarLicenseStatus();
+            updateDaysCounter();
             return true;
         }
     }
     
-    // ✅ التحقق من الترخيص العادي
     if (typeof licenseManager !== 'undefined') {
         const info = licenseManager.getLicenseInfo();
         if (info && info.isPremium && info.licenseKey) {
@@ -160,14 +179,15 @@ async function checkLicenseOnStart() {
                     if (!result.valid) {
                         licenseManager.licenseData = null;
                         licenseManager.isValidated = false;
-                        licenseManager.startTrial();
+                        licenseManager.startFreeTrial();
                         licenseManager.notifyListeners();
-                        showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة التجريبية.', 'error');
+                        showToast('⚠️ تم إلغاء الترخيص المدفوع، تم التحويل للنسخة المجانية.', 'error');
                         const footer = document.getElementById('footer');
                         if (footer) {
                             footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | 📋 النسخة المجانية | 📞 01096597825</p>`;
                         }
                         updateSidebarLicenseStatus();
+                        updateDaysCounter();
                         setTimeout(() => window.location.reload(), 1500);
                     }
                 } catch (error) {
@@ -177,6 +197,7 @@ async function checkLicenseOnStart() {
         }
     }
     updateSidebarLicenseStatus();
+    updateDaysCounter();
 }
 
 // ====== تحديث حالة الترخيص في السايدبار ======
@@ -192,6 +213,10 @@ function updateSidebarLicenseStatus() {
                 statusEl.innerHTML = `⭐ ${data.plan || 'مدفوعة'} (${data.daysLeft || 0} يوم)`;
                 statusEl.style.color = 'var(--gold)';
                 return;
+            } else {
+                statusEl.innerHTML = `📋 مجانية (${data.daysLeft || 90} يوم)`;
+                statusEl.style.color = '';
+                return;
             }
         } catch (e) {}
     }
@@ -201,7 +226,6 @@ function updateSidebarLicenseStatus() {
 
 // ====== التهيئة العامة ======
 function initApp() {
-    // ✅ التحقق من الترخيص عند بدء التشغيل
     if (typeof checkLicenseOnStart === 'function') {
         checkLicenseOnStart();
     }
@@ -214,9 +238,10 @@ function initApp() {
                 const footer = document.getElementById('footer');
                 if (footer) {
                     const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
-                    footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
+                    footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} (${info.daysLeft} يوم) | 📞 01096597825</p>`;
                 }
                 updateSidebarLicenseStatus();
+                updateDaysCounter();
             }
         });
     }
@@ -225,7 +250,6 @@ function initApp() {
     loadColors();
     loadHeaderFooter();
     
-    // تحميل الشعار في الهيدر الجديد
     const logo = localStorage.getItem('companyLogo');
     if (logo && logo.startsWith('data:image')) {
         const img = document.getElementById('headerLogo');
@@ -235,13 +259,17 @@ function initApp() {
         }
     }
     
-    setTimeout(checkLicenseOnStart, 1500);
+    setTimeout(() => {
+        checkLicenseOnStart();
+        updateDaysCounter();
+    }, 1500);
 }
 
 // ====== الاستماع لتغييرات الترخيص ======
 window.addEventListener('storage', function(e) {
     if (e.key === 'app_license_data' || e.key === 'license_data') {
         updateSidebarLicenseStatus();
+        updateDaysCounter();
     }
 });
 
