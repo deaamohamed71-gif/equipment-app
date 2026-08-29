@@ -1,4 +1,4 @@
-// js/license-file.js - نظام الترخيص عبر ملفات ZLX (كامل محدث)
+// js/license-file.js - نظام الترخيص عبر ملفات ZLX (كامل محدث - يحل مشكلة التفعيل)
 
 // ====== مفتاح التشفير ======
 const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
@@ -265,13 +265,41 @@ function showLicenseSuccess(message) {
     if (successMsg) successMsg.textContent = message;
 }
 
-// ====== تطبيق الترخيص على النظام ======
+// ====== تحديث واجهة حالة الترخيص ======
+function updateLicenseStatusUI(licenseData) {
+    const statusEl = document.getElementById('licenseStatusText');
+    if (statusEl) {
+        statusEl.innerHTML = `
+            <i class="fas fa-crown" style="color: var(--gold);"></i>
+            🎉 أنت مشترك في <strong>النسخة المدفوعة</strong> - جميع الميزات متاحة!
+            <span style="font-size:0.75rem; opacity:0.7; margin-right:8px;">
+                | الخطة: ${licenseData.plan || 'مدفوعة'} | متبقي: ${licenseData.daysLeft || 0} يوم
+            </span>
+        `;
+    }
+    
+    const planDetails = document.getElementById('planDetails');
+    if (planDetails) {
+        planDetails.textContent = `📋 الخطة: ${licenseData.plan || 'مدفوعة'} (${licenseData.daysLeft || 0} يوم متبقي)`;
+        planDetails.style.display = 'block';
+        planDetails.style.color = 'var(--gold)';
+        planDetails.style.fontWeight = '600';
+    }
+    
+    const footer = document.getElementById('footer');
+    if (footer) {
+        footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
+    }
+}
+
+// ====== تطبيق الترخيص على النظام (محدث - يحل مشكلة التفعيل) ======
 function applyLicenseToSystem(license) {
     try {
         const expiry = new Date(license.expiryDate);
         const now = new Date();
         const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
         
+        // ✅ بناء بيانات الترخيص المدفوع
         const premiumData = {
             type: 'premium',
             plan: license.plan || 'سنوية',
@@ -302,16 +330,27 @@ function applyLicenseToSystem(license) {
         // ✅ حفظ في localStorage
         localStorage.setItem('app_license_data', JSON.stringify(premiumData));
         
+        // ✅ حفظ في sessionStorage كنسخة احتياطية
+        sessionStorage.setItem('app_license_data', JSON.stringify(premiumData));
+        
         // ✅ تحديث مدير الترخيص
         if (typeof licenseManager !== 'undefined') {
             licenseManager.licenseData = premiumData;
             licenseManager.isValidated = true;
             licenseManager.saveLicense(premiumData);
             licenseManager.notifyListeners();
+            
+            // ✅ تحديث الميزات فوراً
+            if (typeof licenseManager.updateUIAfterValidation === 'function') {
+                licenseManager.updateUIAfterValidation();
+            }
         }
         
         // ✅ تحديث الفوتر
         updateFooterStatus(true);
+        
+        // ✅ تحديث حالة الترخيص في الصفحة
+        updateLicenseStatusUI(premiumData);
         
         console.log('✅ تم تطبيق الترخيص بنجاح:', premiumData);
         
@@ -322,42 +361,56 @@ function applyLicenseToSystem(license) {
     }
 }
 
-// ====== تفعيل الترخيص (محدث - يحفظ بشكل دائم) ======
+// ====== تحديث الفوتر ======
+function updateFooterStatus(isPremium) {
+    const footer = document.getElementById('footer');
+    if (footer) {
+        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
+        footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ${status} | 📞 01096597825</p>`;
+    }
+}
+
+// ====== تفعيل الترخيص (محدث - يحل مشكلة التفعيل) ======
 function activateLicense() {
     try {
         // 1. جلب بيانات الترخيص من localStorage
-        const savedLicense = localStorage.getItem('license_data');
+        let savedLicense = localStorage.getItem('license_data');
+        
+        // 2. لو مش موجود، جرب من sessionStorage
+        if (!savedLicense) {
+            savedLicense = sessionStorage.getItem('license_data');
+        }
+        
         if (!savedLicense) {
             showToast('⚠️ يرجى رفع ملف الترخيص أولاً', 'error');
             return;
         }
         
-        // 2. فك تشفير البيانات
+        // 3. فك تشفير البيانات
         const license = JSON.parse(savedLicense);
         
-        // 3. التحقق من الصلاحية
+        // 4. التحقق من الصلاحية
         const expiry = new Date(license.expiryDate);
         if (expiry < new Date()) {
             showToast('❌ انتهت صلاحية الترخيص!', 'error');
             return;
         }
         
-        // 4. التحقق من تطابق معرف الجهاز
-        const deviceIdEl = document.getElementById('deviceId');
-        const deviceId = deviceIdEl ? deviceIdEl.textContent : localStorage.getItem('device_id') || '';
+        // 5. التحقق من تطابق معرف الجهاز
+        const deviceId = localStorage.getItem('device_id') || '';
         if (license.deviceId !== deviceId) {
             showToast('❌ هذا الترخيص ليس لهذا الجهاز!', 'error');
             return;
         }
         
-        // 5. ✅ تطبيق الترخيص على النظام
+        // 6. ✅ تطبيق الترخيص على النظام
         const result = applyLicenseToSystem(license);
         
         if (result.success) {
             // ✅ رسالة نجاح
             showToast(`🎉 تم تفعيل النسخة الاحترافية بنجاح! (متبقي ${result.daysLeft} يوم)`, 'success');
             
-            // ✅ الانتقال للوحة التحكم بعد 1.5 ثانية
+            // ✅ تحديث الواجهة فوراً
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 1500);
@@ -378,6 +431,7 @@ function cancelActivation() {
             localStorage.removeItem('license_data');
             localStorage.removeItem('license_file');
             localStorage.removeItem('app_license_data');
+            sessionStorage.removeItem('app_license_data');
             
             const infoEl = document.getElementById('licenseInfo');
             const fileName = document.getElementById('fileName');
@@ -398,6 +452,9 @@ function cancelActivation() {
                 licenseManager.startTrial();
                 licenseManager.notifyListeners();
             }
+            
+            // تحديث الفوتر
+            updateFooterStatus(false);
             
             showToast('✅ تم إلغاء التفعيل', 'success');
             setTimeout(() => {
@@ -521,17 +578,6 @@ function fallbackCopy(text) {
     document.body.removeChild(textarea);
 }
 
-// ====== تحديث الفوتر ======
-function updateFooterStatus(isPremium) {
-    const footer = document.getElementById('footer');
-    if (footer) {
-        const status = isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
-        const currentText = footer.innerHTML;
-        const newText = currentText.replace(/⭐ النسخة المدفوعة|📋 النسخة المجانية/, status);
-        footer.innerHTML = newText;
-    }
-}
-
 // ====== دالة المطور لإنشاء ملف ترخيص ======
 window.generateLicense = function(deviceId, userName, userPhone, plan, days) {
     try {
@@ -560,6 +606,7 @@ window.activateLicense = activateLicense;
 window.cancelActivation = cancelActivation;
 window.applyLicenseToSystem = applyLicenseToSystem;
 window.updateFooterStatus = updateFooterStatus;
+window.updateLicenseStatusUI = updateLicenseStatusUI;
 window.generateLicense = generateLicense;
 
 console.log('✅ نظام الترخيص بالملفات (ZLX) تم تهيئته بنجاح');
