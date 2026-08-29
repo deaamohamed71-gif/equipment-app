@@ -21,13 +21,42 @@ class LicenseManager {
     // ====== التهيئة ======
     initialize() {
         // ✅ التحقق من ترخيص الملفات أولاً
-        if (typeof checkFileLicenseOnStart === 'function') {
-            const fileLicenseValid = checkFileLicenseOnStart();
-            if (fileLicenseValid) {
-                // الترخيص بالملفات موجود وصالح
-                this.notifyListeners();
-                this.startPeriodicVerification();
-                return true;
+        const fileLicense = localStorage.getItem('license_data');
+        if (fileLicense) {
+            try {
+                const license = JSON.parse(fileLicense);
+                const expiry = new Date(license.expiryDate);
+                if (expiry > new Date()) {
+                    // ✅ تطبيق الترخيص مباشرة
+                    const premiumData = {
+                        type: 'premium',
+                        plan: license.plan || 'سنوية',
+                        startDate: license.createdAt || new Date().toISOString(),
+                        expiryDate: license.expiryDate,
+                        features: this.getPremiumFeatures(),
+                        status: 'active',
+                        licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
+                        isPremium: true,
+                        userName: license.userName,
+                        userPhone: license.userPhone,
+                        daysLeft: Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24))
+                    };
+                    this.licenseData = premiumData;
+                    this.isValidated = true;
+                    this.saveLicense(premiumData);
+                    this.notifyListeners();
+                    
+                    // تحديث الفوتر
+                    const footer = document.getElementById('footer');
+                    if (footer) {
+                        footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
+                    }
+                    
+                    this.startPeriodicVerification();
+                    return true;
+                }
+            } catch (e) {
+                console.warn('File license check error:', e);
             }
         }
 
@@ -275,7 +304,8 @@ class LicenseManager {
             isPremium: this.licenseData.isPremium || false,
             licenseKey: this.licenseData.licenseKey || null,
             features: this.getFeatures(),
-            userName: this.licenseData.userName || null
+            userName: this.licenseData.userName || null,
+            userPhone: this.licenseData.userPhone || null
         };
     }
 
@@ -376,8 +406,29 @@ class LicenseManager {
         
         this.verificationInterval = setInterval(() => {
             // التحقق من ترخيص الملفات
-            if (typeof checkFileLicenseOnStart === 'function') {
-                checkFileLicenseOnStart();
+            const fileLicense = localStorage.getItem('license_data');
+            if (fileLicense) {
+                try {
+                    const license = JSON.parse(fileLicense);
+                    const expiry = new Date(license.expiryDate);
+                    if (expiry > new Date()) {
+                        // الترخيص ساري
+                        return;
+                    } else {
+                        // الترخيص منتهي
+                        localStorage.removeItem('license_data');
+                        localStorage.removeItem('license_file');
+                        if (this.licenseData && this.licenseData.isPremium) {
+                            this.licenseData = null;
+                            this.isValidated = false;
+                            this.startTrial();
+                            this.notifyListeners();
+                            showToast('⚠️ انتهت صلاحية الترخيص، تم التحويل للنسخة التجريبية', 'error');
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Periodic file license check error:', e);
+                }
             }
             
             this.verifyLicenseWithFirebase().then(valid => {
@@ -423,6 +474,47 @@ function checkFileLicenseOnStart() {
                 // الترخيص ساري → تطبيقه
                 if (typeof applyLicenseToSystem === 'function') {
                     applyLicenseToSystem(license);
+                } else {
+                    // طريقة بديلة
+                    const premiumData = {
+                        type: 'premium',
+                        plan: license.plan || 'سنوية',
+                        startDate: license.createdAt || new Date().toISOString(),
+                        expiryDate: license.expiryDate,
+                        features: {
+                            maxItems: Infinity,
+                            maxOffers: Infinity,
+                            maxClients: Infinity,
+                            canExportPDF: true,
+                            canExportExcel: true,
+                            canReports: true,
+                            canSignatures: true,
+                            canFullDesign: true,
+                            canCharts: true,
+                            showWatermark: false,
+                            isPremium: true
+                        },
+                        status: 'active',
+                        licenseKey: 'FILE-' + license.deviceId.substring(0, 8),
+                        isPremium: true,
+                        userName: license.userName,
+                        userPhone: license.userPhone,
+                        daysLeft: Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+                    };
+                    
+                    localStorage.setItem('app_license_data', JSON.stringify(premiumData));
+                    if (typeof licenseManager !== 'undefined') {
+                        licenseManager.licenseData = premiumData;
+                        licenseManager.isValidated = true;
+                        licenseManager.saveLicense(premiumData);
+                        licenseManager.notifyListeners();
+                    }
+                    
+                    // تحديث الفوتر
+                    const footer = document.getElementById('footer');
+                    if (footer) {
+                        footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
+                    }
                 }
                 return true;
             } else {
