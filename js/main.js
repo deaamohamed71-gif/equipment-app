@@ -1,4 +1,4 @@
-// js/main.js - الكود الأساسي المشترك (محدث مع عداد الأيام)
+// js/main.js - الكود الأساسي المشترك (محدث مع عداد الأيام و Firebase)
 
 // ====== التوست ======
 function showToast(message, type = 'success') {
@@ -147,7 +147,6 @@ function updateDaysCounter() {
         }
     }
     
-    // تحديث الفوتر أيضاً
     const footer = document.getElementById('footer');
     if (footer) {
         const status = info.isPremium ? '⭐ النسخة المدفوعة' : '📋 النسخة المجانية';
@@ -157,19 +156,48 @@ function updateDaysCounter() {
 
 // ====== التحقق من الترخيص عند بدء التطبيق ======
 async function checkLicenseOnStart() {
+    // ✅ أولاً: التحقق من Firestore (الترخيص المركزي)
+    const deviceId = localStorage.getItem('device_id') || '';
+    const activeLicenseId = localStorage.getItem('active_license_id');
+    
+    if (activeLicenseId && deviceId && typeof window.verifyLicenseFromFirestore === 'function') {
+        try {
+            const result = await window.verifyLicenseFromFirestore(activeLicenseId);
+            if (result.valid && result.data) {
+                const license = result.licenseData || {
+                    deviceId: result.data.deviceId,
+                    userName: result.data.userName,
+                    userPhone: result.data.userPhone,
+                    plan: result.data.plan,
+                    expiryDate: result.data.expiryDate
+                };
+                if (typeof window.applyLicenseToSystem === 'function') {
+                    window.applyLicenseToSystem(license);
+                }
+                console.log('✅ تم تفعيل الترخيص من Firestore');
+                updateSidebarLicenseStatus();
+                updateDaysCounter();
+                return true;
+            } else {
+                localStorage.removeItem('active_license_id');
+                console.log('❌ الترخيص غير صالح، تم إلغاؤه');
+            }
+        } catch (error) {
+            console.warn('فشل التحقق من Firestore:', error);
+        }
+    }
+    
+    // ✅ ثانياً: التحقق من ترخيص الملفات المحلي
     if (typeof checkFileLicenseOnStart === 'function') {
         const result = checkFileLicenseOnStart();
         if (result) {
-            const footer = document.getElementById('footer');
-            if (footer) {
-                footer.innerHTML = `<p>© 2026 نظام عروض أسعار المعدات | جميع الحقوق محفوظة | ⭐ النسخة المدفوعة | 📞 01096597825</p>`;
-            }
             updateSidebarLicenseStatus();
             updateDaysCounter();
             return true;
         }
     }
     
+    // ✅ ثالثاً: التحقق من الترخيص العادي (app_license_data)
     if (typeof licenseManager !== 'undefined') {
         const info = licenseManager.getLicenseInfo();
         if (info && info.isPremium && info.licenseKey) {
@@ -189,6 +217,7 @@ async function checkLicenseOnStart() {
                         updateSidebarLicenseStatus();
                         updateDaysCounter();
                         setTimeout(() => window.location.reload(), 1500);
+                        return false;
                     }
                 } catch (error) {
                     console.warn('فشل التحقق من Firebase عند بدء التشغيل:', error);
@@ -196,8 +225,10 @@ async function checkLicenseOnStart() {
             }
         }
     }
+    
     updateSidebarLicenseStatus();
     updateDaysCounter();
+    return false;
 }
 
 // ====== تحديث حالة الترخيص في السايدبار ======
@@ -226,9 +257,10 @@ function updateSidebarLicenseStatus() {
 
 // ====== التهيئة العامة ======
 function initApp() {
-    if (typeof checkLicenseOnStart === 'function') {
+    // ✅ التحقق من الترخيص عند بدء التشغيل
+    setTimeout(() => {
         checkLicenseOnStart();
-    }
+    }, 500);
     
     if (typeof licenseManager !== 'undefined') {
         licenseManager.initialize();
@@ -258,11 +290,6 @@ function initApp() {
             img.style.display = 'block';
         }
     }
-    
-    setTimeout(() => {
-        checkLicenseOnStart();
-        updateDaysCounter();
-    }, 1500);
 }
 
 // ====== الاستماع لتغييرات الترخيص ======
