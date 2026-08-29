@@ -1,11 +1,12 @@
-// js/firebase.js - دوال Firebase المشتركة (بالمفتاح الجديد)
+// js/firebase.js - دوال Firebase المشتركة (محدثة مع Storage و Firestore)
 
-// ====== Firebase SDK ======
+// ====== استيراد Firebase SDK ======
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// 🔑 إعدادات Firebase - بالمفتاح الجديد
+// ====== إعدادات Firebase ======
 const firebaseConfig = {
     apiKey: "AIzaSyCZ-7iiOf1-_DObFFzc67oRMMDDCLzCoac",
     authDomain: "equipment-license-system.firebaseapp.com",
@@ -16,16 +17,38 @@ const firebaseConfig = {
     measurementId: "G-2BVY6Z9WQKS"
 };
 
-// تهيئة Firebase
+// ====== تهيئة Firebase ======
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
+// ====== جعل الكائنات متاحة عالمياً ======
 window.firebaseApp = app;
 window.firebaseAuth = auth;
 window.firebaseDB = db;
+window.firebaseStorage = storage;
 
-// ====== دالة التحقق من الترخيص ======
+// ====== دوال Firestore ======
+window.getFirestore = getFirestore;
+window.doc = doc;
+window.getDoc = getDoc;
+window.setDoc = setDoc;
+window.updateDoc = updateDoc;
+window.deleteDoc = deleteDoc;
+
+// ====== دوال Storage ======
+window.getStorage = getStorage;
+window.ref = ref;
+window.uploadBytes = uploadBytes;
+window.getDownloadURL = getDownloadURL;
+window.deleteObject = deleteObject;
+
+// ====== دوال Auth ======
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.onAuthStateChanged = onAuthStateChanged;
+
+// ====== دالة التحقق من الترخيص من Firebase ======
 window.verifyLicenseWithFirebase = async function(licenseKey) {
     try {
         const docRef = doc(db, "licenses", licenseKey);
@@ -51,7 +74,9 @@ window.verifyLicenseWithFirebase = async function(licenseKey) {
             valid: true, 
             message: "✅ ترخيص صالح",
             plan: data.plan || 'premium',
-            expiryDate: data.expiryDate
+            expiryDate: data.expiryDate,
+            userName: data.userName || '',
+            userPhone: data.userPhone || ''
         };
     } catch (error) {
         console.error("خطأ في التحقق من الترخيص:", error);
