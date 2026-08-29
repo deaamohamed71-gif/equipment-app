@@ -1,4 +1,4 @@
-// js/license-file.js - نظام الترخيص بالملفات (محدث)
+// js/license-file.js - نظام الترخيص بالملفات (محدث مع Firestore)
 
 // ====== مفتاح التشفير ======
 const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
@@ -74,13 +74,12 @@ function decryptLicense(encryptedData) {
 
 // ====== التحقق من صحة السيريال ======
 function validateSerial(deviceId, plan) {
-    // قائمة السيريالات المسموحة للخطط المدفوعة
     const validSerials = {
         'monthly': ['ASSAM-MONTHLY-', 'DELL-MONTHLY-', 'HP-MONTHLY-'],
         'yearly': ['ASSAM-YEARLY-', 'DELL-YEARLY-', 'HP-YEARLY-']
     };
     
-    if (plan === 'مجانية' || plan === 'trial') return true; // الخطة المجانية لا تحتاج سيريال
+    if (plan === 'مجانية' || plan === 'trial') return true;
     
     const prefixes = validSerials[plan] || [];
     return prefixes.some(prefix => deviceId.startsWith(prefix));
@@ -89,7 +88,6 @@ function validateSerial(deviceId, plan) {
 // ====== إنشاء ملف ترخيص (للمطور) ======
 function generateLicenseFile(userData) {
     try {
-        // التحقق من صحة السيريال
         if (!validateSerial(userData.deviceId, userData.plan)) {
             showToast('❌ سيريال الجهاز غير صالح لهذه الخطة', 'error');
             return null;
@@ -135,6 +133,108 @@ function generateLicenseFile(userData) {
     } catch (error) {
         console.error('Generate license error:', error);
         return null;
+    }
+}
+
+// ====== حفظ الترخيص في Firestore ======
+async function saveLicenseToFirestore(licenseData) {
+    try {
+        const db = window.firebaseDB;
+        if (!db) {
+            console.warn('Firestore غير متاح');
+            return false;
+        }
+        
+        const docRef = doc(db, 'licenses', licenseData.deviceId);
+        const fileData = btoa(JSON.stringify(licenseData));
+        
+        await setDoc(docRef, {
+            deviceId: licenseData.deviceId,
+            userName: licenseData.userName || 'مستخدم',
+            userPhone: licenseData.userPhone || '',
+            plan: licenseData.plan || 'سنوية',
+            expiryDate: licenseData.expiryDate,
+            createdAt: new Date().toISOString(),
+            fileData: fileData,
+            status: 'active',
+            activatedAt: new Date().toISOString()
+        });
+        
+        console.log('✅ تم حفظ الترخيص في Firestore');
+        return true;
+    } catch (error) {
+        console.error('Error saving to Firestore:', error);
+        showToast('❌ حدث خطأ في حفظ الترخيص', 'error');
+        return false;
+    }
+}
+
+// ====== التحقق من الترخيص من Firestore ======
+async function verifyLicenseFromFirestore(deviceId) {
+    try {
+        const db = window.firebaseDB;
+        if (!db) {
+            console.warn('Firestore غير متاح');
+            return { valid: false, error: 'Firestore غير متاح' };
+        }
+        
+        const docRef = doc(db, 'licenses', deviceId);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            return { valid: false, error: 'الترخيص غير موجود في قاعدة البيانات' };
+        }
+        
+        const data = docSnap.data();
+        
+        if (data.status !== 'active') {
+            return { valid: false, error: 'الترخيص غير نشط' };
+        }
+        
+        const expiry = new Date(data.expiryDate);
+        if (expiry < new Date()) {
+            await updateDoc(docRef, { status: 'expired' });
+            return { valid: false, error: 'انتهت صلاحية الترخيص' };
+        }
+        
+        let licenseData = null;
+        if (data.fileData) {
+            try {
+                const json = atob(data.fileData);
+                licenseData = JSON.parse(json);
+            } catch (e) {
+                console.warn('فشل فك تشفير بيانات الترخيص');
+            }
+        }
+        
+        return { 
+            valid: true, 
+            data: data,
+            licenseData: licenseData
+        };
+    } catch (error) {
+        console.error('Error verifying license:', error);
+        return { valid: false, error: error.message };
+    }
+}
+
+// ====== تحديث حالة الترخيص في Firestore ======
+async function updateLicenseStatus(deviceId, status) {
+    try {
+        const db = window.firebaseDB;
+        if (!db) return false;
+        
+        const docRef = doc(db, 'licenses', deviceId);
+        await updateDoc(docRef, { 
+            status: status,
+            updatedAt: new Date().toISOString()
+        });
+        
+        console.log(`✅ تم تحديث حالة الترخيص إلى: ${status}`);
+        return true;
+    } catch (error) {
+        console.error('Error updating license status:', error);
+        return false;
     }
 }
 
@@ -222,17 +322,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
-                    // ✅ عرض معلومات الترخيص
                     showLicenseSuccess('✅ تم التحقق من الترخيص بنجاح!');
                     displayLicenseInfo(license);
                     const infoEl = document.getElementById('licenseInfo');
                     if (infoEl) infoEl.style.display = 'block';
                     
-                    // ✅ حفظ بيانات الترخيص في localStorage
                     localStorage.setItem('license_data', JSON.stringify(license));
                     localStorage.setItem('license_file', content);
                     
-                    // ✅ إظهار زر التفعيل
                     const activateBtn = document.getElementById('activateBtn');
                     if (activateBtn) activateBtn.style.display = 'flex';
                     
@@ -332,29 +429,17 @@ function applyLicenseToSystem(license) {
             isExpired: daysLeft <= 0
         };
         
-        // ✅ حفظ في localStorage
         localStorage.setItem('app_license_data', JSON.stringify(premiumData));
-        
-        // ✅ حفظ في sessionStorage كنسخة احتياطية
         sessionStorage.setItem('app_license_data', JSON.stringify(premiumData));
         
-        // ✅ تحديث مدير الترخيص
         if (typeof licenseManager !== 'undefined') {
             licenseManager.licenseData = premiumData;
             licenseManager.isValidated = true;
             licenseManager.saveLicense(premiumData);
             licenseManager.notifyListeners();
-            
-            // ✅ تحديث الميزات فوراً
-            if (typeof licenseManager.updateUIAfterValidation === 'function') {
-                licenseManager.updateUIAfterValidation();
-            }
         }
         
-        // ✅ تحديث الفوتر
         updateFooterStatus(true);
-        
-        // ✅ تحديث حالة الترخيص في الصفحة
         updateLicenseStatusUI(premiumData);
         
         console.log('✅ تم تطبيق الترخيص بنجاح:', premiumData);
@@ -402,47 +487,43 @@ function updateFooterStatus(isPremium) {
     }
 }
 
-// ====== تفعيل الترخيص ======
-function activateLicense() {
+// ====== تفعيل الترخيص (محدث - يحفظ في Firestore) ======
+async function activateLicense() {
     try {
-        // 1. جلب بيانات الترخيص من localStorage
         let savedLicense = localStorage.getItem('license_data');
-        
-        // 2. لو مش موجود، جرب من sessionStorage
-        if (!savedLicense) {
-            savedLicense = sessionStorage.getItem('license_data');
-        }
-        
         if (!savedLicense) {
             showToast('⚠️ يرجى رفع ملف الترخيص أولاً', 'error');
             return;
         }
         
-        // 3. فك تشفير البيانات
         const license = JSON.parse(savedLicense);
+        const deviceId = localStorage.getItem('device_id') || '';
         
-        // 4. التحقق من الصلاحية
         const expiry = new Date(license.expiryDate);
         if (expiry < new Date()) {
             showToast('❌ انتهت صلاحية الترخيص!', 'error');
             return;
         }
         
-        // 5. التحقق من تطابق معرف الجهاز
-        const deviceId = localStorage.getItem('device_id') || '';
         if (license.deviceId !== deviceId) {
             showToast('❌ هذا الترخيص ليس لهذا الجهاز!', 'error');
             return;
         }
         
-        // 6. ✅ تطبيق الترخيص على النظام
+        showToast('⏳ جاري حفظ الترخيص في قاعدة البيانات...', 'success');
+        const saved = await saveLicenseToFirestore(license);
+        
+        if (!saved) {
+            showToast('❌ فشل حفظ الترخيص في قاعدة البيانات', 'error');
+            return;
+        }
+        
         const result = applyLicenseToSystem(license);
         
         if (result.success) {
-            // ✅ رسالة نجاح
             showToast(`🎉 تم تفعيل النسخة الاحترافية بنجاح! (متبقي ${result.daysLeft} يوم)`, 'success');
+            localStorage.setItem('active_license_id', license.deviceId);
             
-            // ✅ تحديث الواجهة فوراً
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 1500);
@@ -460,9 +541,15 @@ function activateLicense() {
 function cancelActivation() {
     if (confirm('⚠️ هل أنت متأكد من إلغاء التفعيل؟')) {
         try {
+            const deviceId = localStorage.getItem('device_id') || '';
+            if (deviceId) {
+                updateLicenseStatus(deviceId, 'inactive');
+            }
+            
             localStorage.removeItem('license_data');
             localStorage.removeItem('license_file');
             localStorage.removeItem('app_license_data');
+            localStorage.removeItem('active_license_id');
             sessionStorage.removeItem('app_license_data');
             
             const infoEl = document.getElementById('licenseInfo');
@@ -477,7 +564,6 @@ function cancelActivation() {
             if (successEl) successEl.style.display = 'none';
             if (activateBtn) activateBtn.style.display = 'none';
             
-            // إعادة تعيين مدير الترخيص
             if (typeof licenseManager !== 'undefined') {
                 licenseManager.licenseData = null;
                 licenseManager.isValidated = false;
@@ -485,7 +571,6 @@ function cancelActivation() {
                 licenseManager.notifyListeners();
             }
             
-            // تحديث الفوتر
             updateFooterStatus(false);
             
             showToast('✅ تم إلغاء التفعيل', 'success');
@@ -535,7 +620,6 @@ function validateUserData() {
 function sendToWhatsApp() {
     const validation = validateUserData();
     
-    // إذا كانت الخطة مجانية، نوجه لبدء التجربة
     if (validation.data.plan === 'مجانية') {
         startFreeTrialFromUI();
         return;
@@ -648,5 +732,8 @@ window.updateLicenseStatusUI = updateLicenseStatusUI;
 window.generateLicense = generateLicense;
 window.startFreeTrialFromUI = startFreeTrialFromUI;
 window.validateSerial = validateSerial;
+window.saveLicenseToFirestore = saveLicenseToFirestore;
+window.verifyLicenseFromFirestore = verifyLicenseFromFirestore;
+window.updateLicenseStatus = updateLicenseStatus;
 
 console.log('✅ نظام الترخيص بالملفات (ZLX) تم تهيئته بنجاح');
