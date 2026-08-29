@@ -490,7 +490,7 @@
                         </div>
                     </div>
 
-                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم (تم تحديث الزر) ====== -->
+                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم ====== -->
                     <div class="dev-card" style="border: 2px solid var(--gold);">
                         <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
                         <h3>📤 إنشاء وإرسال ترخيص لمستخدم</h3>
@@ -592,16 +592,16 @@
                         </button>
                     </div>
 
-                    <!-- ====== 8. إدارة الإشعارات ====== -->
+                    <!-- ====== 8. إدارة الإشعارات (المحدثة) ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-bell"></i></div>
                         <h3>🔔 إدارة الإشعارات</h3>
-                        <p>إرسال إشعارات لجميع المستخدمين</p>
+                        <p>إرسال إشعارات لجميع المستخدمين (تُحفظ في Firebase)</p>
                         <div class="input-group">
-                            <input type="text" id="notificationTitle" placeholder="عنوان الإشعار" value="تحديث جديد" />
+                            <input type="text" id="notificationTitle" placeholder="عنوان الإشعار" value="📢 تحديث جديد" />
                         </div>
                         <div class="input-group">
-                            <textarea id="notificationMessage" placeholder="نص الإشعار" rows="2" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;width:100%;">📢 تم إصدار تحديث جديد للتطبيق</textarea>
+                            <textarea id="notificationMessage" placeholder="نص الإشعار" rows="2" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;width:100%;">تم إصدار تحديث جديد للتطبيق، يرجى تحديث الصفحة للاستفادة من الميزات الجديدة</textarea>
                         </div>
                         <div class="input-group">
                             <select id="notificationTarget">
@@ -1396,7 +1396,7 @@
         }
 
         // ============================================================
-        //  7. إنشاء وإرسال ترخيص لمستخدم (المعدل والنهائي)
+        //  7. إنشاء وإرسال ترخيص لمستخدم
         // ============================================================
         function generateAndSendLicense() {
             const userName = document.getElementById('createUserName').value.trim();
@@ -1405,7 +1405,6 @@
             const plan = document.getElementById('createPlan').value;
             const days = parseInt(document.getElementById('createDays').value) || 365;
             
-            // ✅ التحقق من البيانات
             if (!userName) {
                 showToast('⚠️ الرجاء إدخال اسم المستخدم', 'error');
                 document.getElementById('createUserName').focus();
@@ -1442,7 +1441,7 @@
                     }
                 }
                 
-                // ✅ خطة بديلة (لو الدالة مش موجودة)
+                // ✅ خطة بديلة
                 const licenseData = {
                     deviceId: deviceId,
                     userName: userName,
@@ -1466,14 +1465,12 @@
                     }
                 };
                 
-                // تشفير البيانات
                 const json = JSON.stringify(licenseData);
                 const encoded = encodeURIComponent(json);
                 const encrypted = btoa(encoded);
                 const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
                 const fileContent = `${encrypted}.${signature}`;
                 
-                // إنشاء الملف
                 const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1484,7 +1481,6 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 
-                // حفظ في Firebase
                 saveLicenseToFirebase({
                     deviceId: deviceId,
                     userName: userName,
@@ -1715,9 +1711,9 @@
         }
 
         // ============================================================
-        //  10. إدارة الإشعارات
+        //  10. إدارة الإشعارات (المحدثة)
         // ============================================================
-        function sendNotification() {
+        async function sendNotification() {
             const title = document.getElementById('notificationTitle').value.trim();
             const message = document.getElementById('notificationMessage').value.trim();
             const target = document.getElementById('notificationTarget').value;
@@ -1727,23 +1723,79 @@
                 return;
             }
             
-            const targetLabels = {
-                'all': 'جميع المستخدمين',
-                'premium': 'المستخدمين المدفوعين',
-                'free': 'المستخدمين المجانيين'
-            };
-            
-            const log = document.getElementById('notificationLog');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${targetLabels[target]}`;
-            log.prepend(entry);
-            
-            showToast(`✅ تم إرسال الإشعار إلى ${targetLabels[target]}`, 'success');
-            addActivityLog(`🔔 إرسال إشعار: "${title}" إلى ${targetLabels[target]}`);
-            
-            document.getElementById('notificationTitle').value = '';
-            document.getElementById('notificationMessage').value = '';
+            try {
+                const db = window.firebaseDB;
+                if (!db) {
+                    showToast('⚠️ Firebase غير متاح، سيتم الحفظ محلياً فقط', 'warning');
+                    saveNotificationLocal(title, message, target);
+                    return;
+                }
+                
+                // ✅ حفظ الإشعار في Firestore
+                const notificationData = {
+                    title: title,
+                    message: message,
+                    target: target || 'all',
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                await window.addDoc(window.collection(db, 'notifications'), notificationData);
+                
+                // ✅ تسجيل في السجل المحلي
+                addActivityLog(`🔔 إرسال إشعار: "${title}" إلى ${target}`);
+                
+                // ✅ تحديث الـ Log في الواجهة
+                const log = document.getElementById('notificationLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${target}`;
+                log.prepend(entry);
+                
+                showToast('✅ تم إرسال الإشعار بنجاح (تم حفظه في Firebase)', 'success');
+                
+                // تنظيف الحقول
+                document.getElementById('notificationTitle').value = '';
+                document.getElementById('notificationMessage').value = '';
+                
+            } catch (error) {
+                console.error('❌ Error sending notification:', error);
+                showToast('❌ حدث خطأ في إرسال الإشعار: ' + error.message, 'error');
+                
+                // ✅ خطة احتياطية: حفظ محلياً
+                saveNotificationLocal(title, message, target);
+            }
+        }
+
+        // ============================================================
+        //  حفظ الإشعار محلياً (احتياطي)
+        // ============================================================
+        function saveNotificationLocal(title, message, target) {
+            try {
+                let notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+                notifications.push({
+                    title: title,
+                    message: message,
+                    target: target || 'all',
+                    timestamp: new Date().toISOString(),
+                    read: false
+                });
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                
+                addActivityLog(`🔔 إرسال إشعار (محلي): "${title}" إلى ${target}`);
+                
+                const log = document.getElementById('notificationLog');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${target} (محلي)`;
+                log.prepend(entry);
+                
+                showToast('✅ تم إرسال الإشعار محلياً (Firebase غير متاح)', 'success');
+            } catch (error) {
+                console.error('Error saving notification locally:', error);
+                showToast('❌ حدث خطأ في حفظ الإشعار', 'error');
+            }
         }
 
         // ============================================================
@@ -1879,6 +1931,7 @@
         }, 30000);
 
         console.log('✅ لوحة المطور - تم تهيئتها بنجاح');
+        console.log('✅ الإشعارات تحفظ في Firebase وتظهر لجميع المستخدمين');
     </script>
 </body>
 </html>
