@@ -248,6 +248,68 @@
     <script src="js/main.js"></script>
     <script src="js/quotation.js"></script>
     
+    <!-- ====== كود السايدبار (مضاف لحل المشكلة) ====== -->
+    <script>
+        (function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('closeSidebar');
+            const sidebarLinks = document.getElementById('sidebarLinks');
+
+            // روابط السايدبار
+            const links = [
+                { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
+                { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
+                { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
+                { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
+                { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
+                { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
+                { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
+                { href: 'settings.html', icon: 'fa-tools', text: 'المطور' },
+                { href: 'activation-license.html', icon: 'fa-file-certificate', text: 'ترخيص الملفات' },
+                { href: 'activation.html', icon: 'fa-key', text: 'التفعيل' }
+            ];
+
+            const currentPage = window.location.pathname.split('/').pop() || 'quotation.html';
+            sidebarLinks.innerHTML = links.map(link => `
+                <a href="${link.href}" class="${link.href === currentPage ? 'active' : ''}">
+                    <i class="fas ${link.icon}"></i>
+                    ${link.text}
+                </a>
+            `).join('');
+
+            // دوال الفتح والإغلاق
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // الأحداث
+            hamburgerBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            document.querySelectorAll('.sidebar-links a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            console.log('✅ قائمة الهامبورجر في quotation.html تم تهيئتها بنجاح');
+        })();
+    </script>
+
     <!-- ====== Fullscreen API ====== -->
     <script>
         (function() {
@@ -294,5 +356,6 @@
             console.log('✅ Fullscreen API تم تفعيلها');
         })();
     </script>
+    
 </body>
 </html>
