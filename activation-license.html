@@ -1,3 +1,4 @@
+<!-- activation-license.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -13,13 +14,12 @@
     
     <style>
         .license-activation-container {
-            max-width: 500px;
-            margin: 2rem auto;
+            max-width: 550px;
+            margin: 1.5rem auto;
             padding: 2rem;
             background: var(--bg-light);
             border-radius: 20px;
             border: 1px solid var(--border);
-            text-align: center;
         }
         body.dark-mode .license-activation-container {
             background: rgba(255,255,255,0.03);
@@ -29,6 +29,7 @@
             font-size: 1.5rem;
             color: var(--primary);
             font-family: 'Cairo', sans-serif;
+            text-align: center;
             margin-bottom: 0.5rem;
         }
         .license-title i {
@@ -37,14 +38,73 @@
         .license-subtitle {
             color: var(--text-light);
             font-size: 0.9rem;
+            text-align: center;
             margin-bottom: 1.5rem;
         }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+        .form-group label i {
+            color: var(--gold);
+            margin-left: 4px;
+        }
+        .form-group label .required {
+            color: var(--danger);
+            font-weight: 700;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,107,138,0.1);
+        }
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background: rgba(0,0,0,0.3);
+            color: #d4c8a0;
+            border-color: rgba(255,255,255,0.06);
+        }
+        body.dark-mode .form-group label {
+            color: #d4c8a0;
+        }
+        .form-group .hint {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            opacity: 0.7;
+            margin-top: 0.2rem;
+        }
+        
         .device-id-box {
             background: var(--primary-light);
-            padding: 1rem;
+            padding: 0.8rem 1rem;
             border-radius: 12px;
-            margin-bottom: 1.5rem;
             border: 1px solid var(--primary);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
         body.dark-mode .device-id-box {
             background: rgba(26,107,138,0.1);
@@ -52,57 +112,62 @@
         .device-id-box .label {
             font-size: 0.8rem;
             color: var(--text-light);
-            display: block;
-            margin-bottom: 0.3rem;
         }
         .device-id-box .id {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--primary);
             font-family: monospace;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             cursor: pointer;
             user-select: all;
         }
         .device-id-box .id:hover {
             color: var(--gold);
         }
-        .file-upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 2rem 1rem;
-            margin-bottom: 1.5rem;
+        .device-id-box .btn-copy {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            min-height: 30px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
+            font-family: 'Cairo', sans-serif;
         }
-        .file-upload-area:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
+        .device-id-box .btn-copy:hover {
+            background: var(--primary-dark);
         }
-        .file-upload-area .icon {
-            font-size: 3rem;
-            color: var(--gold);
-            margin-bottom: 0.5rem;
-        }
-        .file-upload-area .text {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-        .file-upload-area .file-name {
-            color: var(--primary);
-            font-weight: 700;
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: #fff;
+            border-color: #25D366;
+            width: 100%;
+            justify-content: center;
+            padding: 0.8rem;
+            font-size: 1rem;
             margin-top: 0.5rem;
         }
-        .file-upload-area input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
+        .btn-whatsapp:hover {
+            background: #1da851;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37,211,102,0.3);
         }
+        .btn-whatsapp i {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+        
+        .btn-upload {
+            width: 100%;
+            justify-content: center;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
         .license-error {
             background: rgba(192,57,43,0.1);
             border: 1px solid var(--danger);
@@ -123,17 +188,45 @@
             font-size: 0.9rem;
             display: none;
         }
-        .license-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
+        
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            text-align: center;
         }
-        .license-actions .btn {
-            flex: 1;
-            min-width: 120px;
-            justify-content: center;
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
         }
+        .file-upload-area .icon {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 0.3rem;
+        }
+        .file-upload-area .text {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        .file-upload-area .file-name {
+            color: var(--primary);
+            font-weight: 700;
+            margin-top: 0.3rem;
+        }
+        .file-upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
         .license-info {
             margin-top: 1rem;
             padding: 1rem;
@@ -170,13 +263,39 @@
         body.dark-mode .license-info .info-value {
             color: var(--gold);
         }
-        /* نصيحة النسخ */
-        .copy-hint {
-            font-size: 0.7rem;
+        
+        .divider-text {
+            text-align: center;
+            margin: 1rem 0;
             color: var(--text-light);
-            display: block;
-            margin-top: 0.2rem;
-            opacity: 0.7;
+            font-size: 0.8rem;
+            position: relative;
+        }
+        .divider-text::before,
+        .divider-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background: var(--border);
+        }
+        .divider-text::before { left: 0; }
+        .divider-text::after { right: 0; }
+        
+        @media (max-width: 480px) {
+            .license-activation-container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+            .device-id-box {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .license-title {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
@@ -195,27 +314,53 @@
                 <i class="fas fa-crown"></i> تفعيل النسخة الاحترافية
             </div>
             <p class="license-subtitle">
-                يرجى إرسال معرف الجهاز إلى المطور للحصول على ملف الرخصة (.zlx)
+                اختر الخطة المناسبة وأرسل بياناتك للمطور لاستلام ملف الترخيص
             </p>
 
             <!-- معرف الجهاز مع زر نسخ -->
             <div class="device-id-box">
-                <span class="label"><i class="fas fa-microchip"></i> معرف الجهاز</span>
-                <div style="display:flex; align-items:center; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+                <div>
+                    <span class="label"><i class="fas fa-microchip"></i> معرف الجهاز</span>
                     <div class="id" id="deviceId" onclick="copyDeviceId()">جاري التحميل...</div>
-                    <button class="btn btn-sm btn-primary" onclick="copyDeviceId()" style="padding:0.2rem 0.6rem; font-size:0.7rem; min-height:30px;">
-                        <i class="fas fa-copy"></i> نسخ
-                    </button>
                 </div>
-                <span class="copy-hint">
-                    💡 اضغط على "نسخ" ثم أرسل المعرف للمطور
-                </span>
+                <button class="btn-copy" onclick="copyDeviceId()">
+                    <i class="fas fa-copy"></i> نسخ
+                </button>
             </div>
 
-            <!-- رفع الملف -->
+            <!-- نموذج بيانات المستخدم -->
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> الاسم الثلاثي <span class="required">*</span></label>
+                <input type="text" id="userFullName" placeholder="أدخل اسمك الثلاثي كاملاً" required />
+                <div class="hint">مثال: أحمد محمد علي</div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> رقم الهاتف <span class="required">*</span></label>
+                <input type="tel" id="userPhone" placeholder="أدخل رقم هاتفك المحمول" required />
+                <div class="hint">مثال: 01012345678</div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-calendar-alt"></i> الخطة <span class="required">*</span></label>
+                <select id="userPlan" required>
+                    <option value="">-- اختر الخطة --</option>
+                    <option value="شهرية">📅 شهرية - 99 ج.م</option>
+                    <option value="سنوية">📆 سنوية - 499 ج.م (وفر 50%)</option>
+                </select>
+            </div>
+
+            <!-- زر إرسال للمطور -->
+            <button class="btn btn-whatsapp" onclick="sendToWhatsApp()">
+                <i class="fab fa-whatsapp"></i> إرسال للمطور لإتمام التفعيل
+            </button>
+
+            <div class="divider-text">أو</div>
+
+            <!-- رفع ملف الترخيص -->
             <div class="file-upload-area" id="fileUploadArea">
                 <div class="icon"><i class="fas fa-file-upload"></i></div>
-                <div class="text">اضغط هنا لرفع ملف الرخصة (.zlx)</div>
+                <div class="text">📂 اضغط هنا لرفع ملف الرخصة (.zlx)</div>
                 <div class="file-name" id="fileName"></div>
                 <input type="file" id="licenseFile" accept=".zlx" />
             </div>
@@ -234,31 +379,34 @@
             <div class="license-info" id="licenseInfo">
                 <div class="info-row">
                     <span class="info-label">المستخدم</span>
-                    <span class="info-value" id="infoUser">أحمد محمد</span>
+                    <span class="info-value" id="infoUser">---</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">الهاتف</span>
+                    <span class="info-value" id="infoPhone">---</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">الخطة</span>
-                    <span class="info-value" id="infoPlan">سنوية</span>
+                    <span class="info-value" id="infoPlan">---</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">معرف الجهاز</span>
+                    <span class="info-value" id="infoDeviceId">---</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">تاريخ الانتهاء</span>
-                    <span class="info-value" id="infoExpiry">2027-08-28</span>
+                    <span class="info-value" id="infoExpiry">---</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">المتبقي</span>
-                    <span class="info-value" id="infoDays">365 يوم</span>
+                    <span class="info-value" id="infoDays">---</span>
                 </div>
             </div>
 
-            <!-- الأزرار -->
-            <div class="license-actions">
-                <button class="btn btn-danger" onclick="cancelActivation()">
-                    <i class="fas fa-times"></i> إلغاء
-                </button>
-                <button class="btn btn-success" id="activateBtn" onclick="activateLicense()">
-                    <i class="fas fa-check"></i> تفعيل البرنامج
-                </button>
-            </div>
+            <!-- زر تفعيل البرنامج -->
+            <button class="btn btn-success btn-upload" id="activateBtn" onclick="activateLicense()" style="display:none;">
+                <i class="fas fa-check"></i> تفعيل البرنامج
+            </button>
 
         </div>
     </div>
