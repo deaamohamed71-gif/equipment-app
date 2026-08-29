@@ -1,3 +1,4 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -63,7 +64,6 @@
                 <p class="page-subtitle">مرحباً بك في نظام إدارة عروض أسعار المعدات</p>
             </div>
 
-            <!-- حالة الترخيص -->
             <div id="licenseStatus" style="background:var(--bg-light); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:1.5rem; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <span id="licenseStatusText" style="font-family:'Cairo',sans-serif;">
                     <i class="fas fa-info-circle"></i> جاري تحميل معلومات الترخيص...
@@ -74,7 +74,6 @@
                 </a>
             </div>
 
-            <!-- الإحصائيات -->
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
@@ -102,7 +101,6 @@
                 </div>
             </div>
 
-            <!-- العروض الأخيرة -->
             <div class="section-card">
                 <div class="section-header">
                     <h2><i class="fas fa-clock"></i> أحدث العروض</h2>
@@ -132,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- الروابط السريعة -->
             <div class="quick-actions">
                 <a href="quotation.html" class="quick-action-card" style="--action-color: var(--primary);">
                     <i class="fas fa-file-invoice"></i>
@@ -159,10 +156,6 @@
     </div>
 
     <div id="footer"></div>
-
-    <script src="js/license.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/index.js"></script>
 
     <!-- ====== كود السايدبار ====== -->
     <script>
@@ -223,7 +216,7 @@
         })();
     </script>
 
-    <!-- ====== ✅ Fullscreen API ====== -->
+    <!-- ====== Fullscreen API ====== -->
     <script>
         (function() {
             function requestFullscreen() {
@@ -269,5 +262,12 @@
             console.log('✅ Fullscreen API تم تفعيلها');
         })();
     </script>
+
+    <!-- ====== السكريبتات الأساسية (الترتيب الصحيح) ====== -->
+    <script src="js/license.js"></script>
+    <script src="js/license-file.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/index.js"></script>
+    
 </body>
 </html>
