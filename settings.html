@@ -274,6 +274,18 @@
             justify-content: center;
         }
         
+        /* ====== زر العودة للرئيسية ====== */
+        .back-home-btn {
+            margin-bottom: 1rem;
+            text-align: right;
+            padding: 0.5rem;
+        }
+        .back-home-btn .btn {
+            font-size: 0.8rem;
+            padding: 0.3rem 1rem;
+            min-height: 34px;
+        }
+        
         @media (max-width: 768px) {
             .dev-grid {
                 grid-template-columns: 1fr;
@@ -296,6 +308,9 @@
             .dev-card .input-group input,
             .dev-card .input-group select {
                 min-width: auto;
+            }
+            .back-home-btn {
+                text-align: center;
             }
         }
     </style>
@@ -327,6 +342,13 @@
     <div class="dashboard">
         <div class="dev-container" id="devContainer">
             
+            <!-- ====== زر العودة للرئيسية ====== -->
+            <div class="back-home-btn">
+                <a href="dashboard.html" class="btn btn-primary btn-sm">
+                    <i class="fas fa-arrow-right"></i> العودة للرئيسية
+                </a>
+            </div>
+
             <!-- ====== شاشة تسجيل الدخول ====== -->
             <div id="loginScreen" style="display:none;">
                 <div class="login-container">
@@ -490,25 +512,38 @@
                         </div>
                     </div>
 
-                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم ====== -->
+                    <!-- ====== 5. إنشاء وإرسال ترخيص لمستخدم (مع حقل الإيميل) ====== -->
                     <div class="dev-card" style="border: 2px solid var(--gold);">
                         <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
                         <h3>📤 إنشاء وإرسال ترخيص لمستخدم</h3>
                         <p>أدخل بيانات المستخدم لإنشاء ملف ترخيص (.zlx) وإرساله له</p>
                         
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem;">
+                            <!-- حقل اسم المستخدم -->
                             <div class="input-group" style="flex-direction:column;gap:0.2rem;">
                                 <label style="font-size:0.8rem;font-weight:600;">👤 اسم المستخدم</label>
                                 <input type="text" id="createUserName" placeholder="أحمد محمد علي" />
                             </div>
+                            
+                            <!-- حقل الإيميل (جديد) -->
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;">
+                                <label style="font-size:0.8rem;font-weight:600;">📧 البريد الإلكتروني</label>
+                                <input type="email" id="createUserEmail" placeholder="example@gmail.com" />
+                            </div>
+                            
+                            <!-- حقل رقم الهاتف -->
                             <div class="input-group" style="flex-direction:column;gap:0.2rem;">
                                 <label style="font-size:0.8rem;font-weight:600;">📱 رقم الهاتف</label>
                                 <input type="text" id="createUserPhone" placeholder="01012345678" />
                             </div>
+                            
+                            <!-- حقل معرف الجهاز -->
                             <div class="input-group" style="flex-direction:column;gap:0.2rem;">
                                 <label style="font-size:0.8rem;font-weight:600;">🆔 معرف الجهاز (Device ID)</label>
                                 <input type="text" id="createDeviceId" placeholder="ASSAM-1A2B-3C4D-5E6F" />
                             </div>
+                            
+                            <!-- حقل الخطة -->
                             <div class="input-group" style="flex-direction:column;gap:0.2rem;">
                                 <label style="font-size:0.8rem;font-weight:600;">📋 الخطة</label>
                                 <select id="createPlan">
@@ -517,11 +552,15 @@
                                     <option value="تجريبية">تجريبية (90 يوم)</option>
                                 </select>
                             </div>
+                            
+                            <!-- حقل عدد الأيام -->
                             <div class="input-group" style="flex-direction:column;gap:0.2rem;">
                                 <label style="font-size:0.8rem;font-weight:600;">📅 عدد الأيام</label>
                                 <input type="number" id="createDays" value="365" min="1" max="730" />
                             </div>
-                            <div class="input-group" style="flex-direction:column;gap:0.2rem;justify-content:flex-end;">
+                            
+                            <!-- زر الإنشاء (يمتد على عمودين) -->
+                            <div class="input-group" style="flex-direction:column;gap:0.2rem;justify-content:flex-end;grid-column:span 2;">
                                 <label style="font-size:0.8rem;font-weight:600;">&nbsp;</label>
                                 <button class="dev-btn dev-btn-gold" onclick="generateAndSendLicense()" style="width:100%;justify-content:center;">
                                     <i class="fas fa-download"></i> إنشاء ملف الترخيص
@@ -592,7 +631,7 @@
                         </button>
                     </div>
 
-                    <!-- ====== 8. إدارة الإشعارات (نسخة واحدة فقط) ====== -->
+                    <!-- ====== 8. إدارة الإشعارات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-bell"></i></div>
                         <h3>🔔 إدارة الإشعارات</h3>
@@ -1396,18 +1435,27 @@
         }
 
         // ============================================================
-        //  7. إنشاء وإرسال ترخيص لمستخدم
+        //  7. إنشاء وإرسال ترخيص لمستخدم (محدث مع الإيميل)
         // ============================================================
         function generateAndSendLicense() {
             const userName = document.getElementById('createUserName').value.trim();
+            const userEmail = document.getElementById('createUserEmail').value.trim();
             const userPhone = document.getElementById('createUserPhone').value.trim();
             const deviceId = document.getElementById('createDeviceId').value.trim();
             const plan = document.getElementById('createPlan').value;
             const days = parseInt(document.getElementById('createDays').value) || 365;
             
+            // ✅ التحقق من البيانات
             if (!userName) {
                 showToast('⚠️ الرجاء إدخال اسم المستخدم', 'error');
                 document.getElementById('createUserName').focus();
+                return;
+            }
+            
+            // ✅ التحقق من الإيميل (اختياري لكن لو موجود يتأكد من صحته)
+            if (userEmail && !userEmail.includes('@')) {
+                showToast('⚠️ البريد الإلكتروني غير صحيح', 'error');
+                document.getElementById('createUserEmail').focus();
                 return;
             }
             
@@ -1436,7 +1484,7 @@
                     const result = window.generateLicense(deviceId, userName, userPhone, planKey, days);
                     if (result) {
                         showToast(`✅ تم إنشاء الترخيص لـ ${userName} بنجاح`, 'success');
-                        addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
+                        addActivityLog(`📤 إنشاء ترخيص: ${userName} (${userEmail || 'بدون إيميل'}) (${plan} - ${days} يوم)`);
                         return;
                     }
                 }
@@ -1445,6 +1493,7 @@
                 const licenseData = {
                     deviceId: deviceId,
                     userName: userName,
+                    userEmail: userEmail || '',
                     userPhone: userPhone,
                     plan: planKey,
                     expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
@@ -1484,6 +1533,7 @@
                 saveLicenseToFirebase({
                     deviceId: deviceId,
                     userName: userName,
+                    userEmail: userEmail || '',
                     userPhone: userPhone,
                     plan: planKey,
                     expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
@@ -1492,7 +1542,7 @@
                 });
                 
                 showToast(`✅ تم إنشاء الترخيص لـ ${userName}`, 'success');
-                addActivityLog(`📤 إنشاء ترخيص: ${userName} (${plan} - ${days} يوم)`);
+                addActivityLog(`📤 إنشاء ترخيص: ${userName} (${userEmail || 'بدون إيميل'}) (${plan} - ${days} يوم)`);
                 refreshAllLicenses();
                 
             } catch (error) {
@@ -1502,7 +1552,7 @@
         }
 
         // ============================================================
-        //  حفظ الترخيص في Firebase
+        //  حفظ الترخيص في Firebase (محدث مع الإيميل)
         // ============================================================
         async function saveLicenseToFirebase(licenseData) {
             try {
@@ -1516,6 +1566,7 @@
                 await window.setDoc(docRef, {
                     deviceId: licenseData.deviceId,
                     userName: licenseData.userName,
+                    userEmail: licenseData.userEmail || '',
                     userPhone: licenseData.userPhone,
                     plan: licenseData.plan,
                     expiryDate: licenseData.expiryDate,
@@ -1533,10 +1584,11 @@
         }
 
         // ============================================================
-        //  نسخ بيانات المستخدم
+        //  نسخ بيانات المستخدم (محدث مع الإيميل)
         // ============================================================
         function copyUserData() {
             const userName = document.getElementById('createUserName').value.trim();
+            const userEmail = document.getElementById('createUserEmail').value.trim();
             const userPhone = document.getElementById('createUserPhone').value.trim();
             const deviceId = document.getElementById('createDeviceId').value.trim();
             const plan = document.getElementById('createPlan').value;
@@ -1549,6 +1601,7 @@
             
             const text = `📋 بيانات المستخدم:\n\n` +
                 `👤 الاسم: ${userName || 'غير محدد'}\n` +
+                `📧 الإيميل: ${userEmail || 'غير محدد'}\n` +
                 `📱 الهاتف: ${userPhone || 'غير محدد'}\n` +
                 `🆔 معرف الجهاز: ${deviceId || 'غير محدد'}\n` +
                 `📋 الخطة: ${plan || 'غير محدد'}\n` +
@@ -1581,10 +1634,11 @@
         }
 
         // ============================================================
-        //  إرسال الترخيص عبر واتساب
+        //  إرسال الترخيص عبر واتساب (محدث مع الإيميل)
         // ============================================================
         function sendLicenseViaWhatsApp() {
             const userName = document.getElementById('createUserName').value.trim();
+            const userEmail = document.getElementById('createUserEmail').value.trim();
             const userPhone = document.getElementById('createUserPhone').value.trim();
             const deviceId = document.getElementById('createDeviceId').value.trim();
             const plan = document.getElementById('createPlan').value;
@@ -1598,6 +1652,7 @@
             const message = 
                 `📋 *بيانات الترخيص الجديد*\n\n` +
                 `👤 *الاسم:* ${userName}\n` +
+                `📧 *الإيميل:* ${userEmail || 'غير محدد'}\n` +
                 `📱 *الهاتف:* ${userPhone}\n` +
                 `🆔 *معرف الجهاز:* ${deviceId}\n` +
                 `📋 *الخطة:* ${plan}\n` +
@@ -1614,10 +1669,11 @@
         }
 
         // ============================================================
-        //  مسح حقول النموذج
+        //  مسح حقول النموذج (محدث مع الإيميل)
         // ============================================================
         function clearCreateForm() {
             document.getElementById('createUserName').value = '';
+            document.getElementById('createUserEmail').value = '';
             document.getElementById('createUserPhone').value = '';
             document.getElementById('createDeviceId').value = '';
             document.getElementById('createPlan').value = 'سنوية';
@@ -1711,7 +1767,7 @@
         }
 
         // ============================================================
-        //  10. إدارة الإشعارات (نسخة واحدة فقط)
+        //  10. إدارة الإشعارات
         // ============================================================
         async function sendNotification() {
             const title = document.getElementById('notificationTitle').value.trim();
@@ -1946,6 +2002,7 @@
         }, 30000);
 
         console.log('✅ لوحة المطور - تم تهيئتها بنجاح');
+        console.log('✅ تم إضافة حقل الإيميل في قسم إنشاء التراخيص');
         console.log('✅ الإشعارات: كل إشعار جديد يمسح القديم');
     </script>
 </body>
