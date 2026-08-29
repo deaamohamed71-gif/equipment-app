@@ -85,6 +85,38 @@ function validateSerial(deviceId, plan) {
     return prefixes.some(prefix => deviceId.startsWith(prefix));
 }
 
+// ====== التحقق من صحة بيانات المستخدم ======
+function validateUserData() {
+    const fullName = document.getElementById('userFullName')?.value.trim();
+    const phone = document.getElementById('userPhone')?.value.trim();
+    const plan = document.getElementById('userPlan')?.value;
+    const deviceId = document.getElementById('deviceId')?.textContent || localStorage.getItem('device_id') || '';
+    
+    let errors = [];
+    
+    if (!fullName || fullName.split(' ').length < 2) {
+        errors.push('الاسم الثلاثي (يجب أن يتكون من اسمين على الأقل)');
+    }
+    
+    if (!phone || phone.length < 10) {
+        errors.push('رقم الهاتف (يجب أن يكون 10 أرقام على الأقل)');
+    }
+    
+    if (!plan || plan === '') {
+        errors.push('الخطة (يجب اختيار خطة)');
+    }
+    
+    if (!deviceId || deviceId === 'جاري التحميل...') {
+        errors.push('معرف الجهاز (لم يتم تحميله بعد)');
+    }
+    
+    return {
+        valid: errors.length === 0,
+        errors: errors,
+        data: { fullName, phone, plan, deviceId }
+    };
+}
+
 // ====== إنشاء ملف ترخيص (للمطور) ======
 function generateLicenseFile(userData) {
     try {
@@ -159,7 +191,7 @@ async function ensureAnonymousAuth() {
         }
         
         // ✅ تسجيل دخول مجهول
-        const result = await signInAnonymously(auth);
+        const result = await window.signInAnonymously(auth);
         console.log('✅ تم تسجيل دخول مجهول:', result.user.uid);
         return { success: true, user: result.user };
         
@@ -190,8 +222,8 @@ async function saveLicenseToFirestore(licenseData) {
         }
         
         // 3️⃣ حفظ الترخيص في Firestore
-        const docRef = doc(db, 'licenses', licenseData.deviceId);
-        await setDoc(docRef, {
+        const docRef = window.doc(db, 'licenses', licenseData.deviceId);
+        await window.setDoc(docRef, {
             deviceId: licenseData.deviceId,
             userName: licenseData.userName || 'مستخدم',
             userPhone: licenseData.userPhone || '',
@@ -614,7 +646,10 @@ function fallbackCopy(text) {
     document.body.removeChild(textarea);
 }
 
-// ====== دوال المطور ======
+// ============================================================
+//  دوال المطور (متاحة عالمياً)
+// ============================================================
+
 window.generateLicense = function(deviceId, userName, userPhone, plan, days) {
     try {
         const finalDeviceId = deviceId || localStorage.getItem('device_id') || 'UNKNOWN';
@@ -635,8 +670,8 @@ window.generateLicense = function(deviceId, userName, userPhone, plan, days) {
 };
 
 // ====== جعل الدوال متاحة عالمياً ======
-window.sendToWhatsApp = sendToWhatsApp;
 window.validateUserData = validateUserData;
+window.sendToWhatsApp = sendToWhatsApp;
 window.copyDeviceId = copyDeviceId;
 window.activateLicense = activateLicense;
 window.applyLicenseToSystem = applyLicenseToSystem;
