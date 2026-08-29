@@ -693,8 +693,9 @@
 
     <div id="footer"></div>
 
-    <!-- ====== السكربتات ====== -->
-    <script src="js/firebase.js" type="module"></script>
+    <!-- ====== السكربتات (الترتيب الصحيح) ====== -->
+    <script type="module" src="js/firebase.js"></script>
+    <script src="js/license.js"></script>
     <script src="js/main.js"></script>
     <script src="js/license-file.js"></script>
     
@@ -995,8 +996,8 @@
                 try {
                     const db = window.firebaseDB;
                     if (db) {
-                        const docRef = doc(db, 'licenses', deviceId);
-                        const docSnap = await getDoc(docRef);
+                        const docRef = window.doc(db, 'licenses', deviceId);
+                        const docSnap = await window.getDoc(docRef);
                         
                         if (docSnap.exists()) {
                             const data = docSnap.data();
@@ -1012,8 +1013,8 @@
                             source = '☁️ Firebase';
                         } else {
                             // البحث في جميع التراخيص
-                            const allLicensesRef = collection(db, 'licenses');
-                            const querySnapshot = await getDocs(allLicensesRef);
+                            const allLicensesRef = window.collection(db, 'licenses');
+                            const querySnapshot = await window.getDocs(allLicensesRef);
                             querySnapshot.forEach(doc => {
                                 const data = doc.data();
                                 if (data.deviceId && data.deviceId.toUpperCase() === deviceId.toUpperCase()) {
@@ -1151,8 +1152,8 @@
             try {
                 const db = window.firebaseDB;
                 if (db) {
-                    const docRef = doc(db, 'licenses', deviceId);
-                    await deleteDoc(docRef);
+                    const docRef = window.doc(db, 'licenses', deviceId);
+                    await window.deleteDoc(docRef);
                     deleted = true;
                     showToast(`✅ تم حذف الترخيص من Firebase`, 'success');
                 }
@@ -1230,13 +1231,13 @@
             try {
                 const db = window.firebaseDB;
                 if (db) {
-                    const docRef = doc(db, 'licenses', deviceId);
-                    const docSnap = await getDoc(docRef);
+                    const docRef = window.doc(db, 'licenses', deviceId);
+                    const docSnap = await window.getDoc(docRef);
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         const currentExpiry = data.expiryDate ? new Date(data.expiryDate) : new Date();
                         currentExpiry.setDate(currentExpiry.getDate() + days);
-                        await updateDoc(docRef, {
+                        await window.updateDoc(docRef, {
                             expiryDate: currentExpiry.toISOString(),
                             updatedAt: new Date().toISOString()
                         });
@@ -1278,8 +1279,8 @@
                     return;
                 }
                 
-                const docRef = doc(db, 'licenses', deviceId);
-                const docSnap = await getDoc(docRef);
+                const docRef = window.doc(db, 'licenses', deviceId);
+                const docSnap = await window.getDoc(docRef);
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -1341,8 +1342,8 @@
             try {
                 const db = window.firebaseDB;
                 if (db) {
-                    const licensesRef = collection(db, 'licenses');
-                    const querySnapshot = await getDocs(licensesRef);
+                    const licensesRef = window.collection(db, 'licenses');
+                    const querySnapshot = await window.getDocs(licensesRef);
                     querySnapshot.forEach(doc => {
                         const data = doc.data();
                         const deviceId = doc.id;
@@ -1477,6 +1478,7 @@
                 }
                 
                 if (result) {
+                    // حفظ في Firebase
                     saveLicenseToFirebase({
                         deviceId: deviceId,
                         userName: userName,
@@ -1530,8 +1532,8 @@
                     return false;
                 }
                 
-                const docRef = doc(db, 'licenses', licenseData.deviceId);
-                await setDoc(docRef, {
+                const docRef = window.doc(db, 'licenses', licenseData.deviceId);
+                await window.setDoc(docRef, {
                     deviceId: licenseData.deviceId,
                     userName: licenseData.userName,
                     userPhone: licenseData.userPhone,
