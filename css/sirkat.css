@@ -1,4 +1,4 @@
-/* css/sirkat.css - أنماط صفحة سركات (محدث) */
+/* css/sirkat.css - أنماط صفحة سركات (محدثة للموبايل والأزرار) */
 
 .sirkat-container {
     max-width: 1200px;
@@ -9,9 +9,9 @@
 .sirkat-header {
     background: var(--primary);
     color: #fff;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.2rem;
     border-radius: 16px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
 .sirkat-header-top {
@@ -25,7 +25,7 @@
 .sirkat-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .sirkat-logo img {
@@ -37,7 +37,7 @@
 }
 
 .sirkat-logo h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
     font-family: 'Cairo', sans-serif;
 }
@@ -46,7 +46,7 @@
     font-size: 1rem;
     font-weight: 600;
     background: rgba(255,255,255,0.15);
-    padding: 0.2rem 0.8rem;
+    padding: 0.3rem 1rem;
     border-radius: 20px;
 }
 
@@ -83,9 +83,9 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
-    padding: 0.6rem 1rem;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem 0.8rem;
     background: var(--bg-light);
     border-radius: 12px;
     border: 1px solid var(--border);
@@ -99,12 +99,12 @@ body.dark-mode .sirkat-controls {
 .sirkat-controls-left {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
 .sirkat-controls-left label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text);
 }
@@ -115,13 +115,14 @@ body.dark-mode .sirkat-controls {
 
 .sirkat-controls-left select,
 .sirkat-controls-left input {
-    padding: 0.3rem 0.6rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 8px;
     border: 1px solid var(--border);
     background: #fff;
     color: var(--text);
     font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    min-height: 32px;
 }
 
 body.dark-mode .sirkat-controls-left select,
@@ -139,8 +140,8 @@ body.dark-mode .sirkat-controls-left input {
 
 .sirkat-controls-right .btn {
     font-size: 0.75rem;
-    padding: 0.3rem 0.8rem;
-    min-height: 32px;
+    padding: 0.35rem 0.8rem;
+    min-height: 36px;
 }
 
 /* ====== الجدول ====== */
@@ -160,8 +161,8 @@ body.dark-mode .sirkat-table-wrap {
 .sirkat-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
-    min-width: 700px;
+    font-size: 0.8rem;
+    min-width: 650px;
 }
 
 .sirkat-table th {
@@ -178,26 +179,25 @@ body.dark-mode .sirkat-table-wrap {
 }
 
 .sirkat-table td {
-    padding: 0.25rem 0.2rem;
+    padding: 0.35rem 0.25rem;
     text-align: center;
     border-bottom: 1px solid var(--border);
     color: var(--text);
     vertical-align: middle;
     font-family: 'Cairo', sans-serif;
     font-size: 0.75rem;
-    height: 32px;
 }
 
 .sirkat-table td input {
     width: 100%;
-    padding: 0.1rem 0.1rem;
+    padding: 0.15rem 0.1rem;
     border: none;
     background: transparent;
     text-align: center;
     font-size: 0.75rem;
     color: var(--text);
     font-family: 'Cairo', sans-serif;
-    height: 28px;
+    min-height: 28px;
 }
 
 .sirkat-table td input:focus {
@@ -215,7 +215,7 @@ body.dark-mode .sirkat-table td input {
 }
 
 .sirkat-table td input[type="time"] {
-    width: 60px;
+    width: 70px;
 }
 
 .sirkat-table td .total-hours {
@@ -225,7 +225,7 @@ body.dark-mode .sirkat-table td input {
 
 .sirkat-table tfoot td {
     font-weight: 700;
-    padding: 0.4rem 0.3rem;
+    padding: 0.5rem 0.3rem;
     border-top: 2px solid var(--primary);
     background: var(--bg-light);
     color: var(--text);
@@ -240,13 +240,13 @@ body.dark-mode .sirkat-table tfoot td {
 .sirkat-supervisor {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 0.8rem;
     background: var(--bg-light);
     border-radius: 12px;
     border: 1px solid var(--border);
-    margin-top: 1rem;
+    margin-top: 0.8rem;
 }
 
 body.dark-mode .sirkat-supervisor {
@@ -266,14 +266,15 @@ body.dark-mode .sirkat-supervisor {
 
 .sirkat-supervisor input {
     flex: 1;
-    padding: 0.3rem 0.8rem;
+    padding: 0.35rem 0.6rem;
     border-radius: 8px;
     border: 1px solid var(--border);
     background: #fff;
     color: var(--text);
     font-family: 'Cairo', sans-serif;
     font-size: 0.85rem;
-    min-width: 200px;
+    min-width: 150px;
+    min-height: 36px;
 }
 
 body.dark-mode .sirkat-supervisor input {
@@ -291,160 +292,12 @@ body.dark-mode .sirkat-supervisor input {
 /* ====== زر العودة ====== */
 .sirkat-back {
     text-align: center;
-    padding: 1.5rem 0 0.5rem;
+    padding: 1rem 0 0.5rem;
 }
 
-/* ====== الطباعة ====== */
-@media print {
-    .no-print {
-        display: none !important;
-    }
-    
-    .sirkat-container {
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-    }
-    
-    .sirkat-header {
-        border-radius: 0 !important;
-        padding: 0.3rem 0.6rem !important;
-        margin-bottom: 0.2rem !important;
-        background: var(--primary) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .sirkat-logo h1 {
-        font-size: 0.8rem !important;
-    }
-    
-    .sirkat-logo img {
-        max-height: 22px !important;
-    }
-    
-    .sirkat-date {
-        font-size: 0.6rem !important;
-        padding: 0.1rem 0.4rem !important;
-        background: rgba(255,255,255,0.2) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .sirkat-header-bottom h2 {
-        font-size: 0.7rem !important;
-    }
-    
-    .sirkat-header-bottom p {
-        font-size: 0.6rem !important;
-    }
-    
-    .sirkat-table-wrap {
-        border: 1px solid #ccc !important;
-        border-radius: 4px !important;
-        overflow: hidden !important;
-        page-break-inside: avoid !important;
-    }
-    
-    .sirkat-table {
-        font-size: 0.5rem !important;
-        width: 100% !important;
-        min-width: auto !important;
-        border-collapse: collapse !important;
-    }
-    
-    .sirkat-table th {
-        font-size: 0.5rem !important;
-        padding: 0.1rem 0.08rem !important;
-        background: var(--primary) !important;
-        color: #fff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        height: 18px !important;
-    }
-    
-    .sirkat-table td {
-        font-size: 0.5rem !important;
-        padding: 0.05rem 0.05rem !important;
-        border-bottom: 1px solid #ddd !important;
-        color: var(--text) !important;
-        height: 18px !important;
-        line-height: 1.2 !important;
-    }
-    
-    .sirkat-table td input {
-        font-size: 0.5rem !important;
-        padding: 0 !important;
-        border: none !important;
-        background: transparent !important;
-        color: var(--text) !important;
-        height: 16px !important;
-        min-height: 16px !important;
-    }
-    
-    .sirkat-table td input[type="time"] {
-        width: 35px !important;
-    }
-    
-    /* 🔥 إخفاء placeholder في الطباعة */
-    .sirkat-table td input::placeholder {
-        color: transparent !important;
-        opacity: 0 !important;
-    }
-    
-    .sirkat-table td .total-hours {
-        font-weight: 700 !important;
-        color: var(--primary) !important;
-    }
-    
-    .sirkat-table tfoot td {
-        font-size: 0.55rem !important;
-        padding: 0.1rem 0.08rem !important;
-        border-top: 2px solid var(--primary) !important;
-        color: var(--text) !important;
-        height: 20px !important;
-    }
-    
-    .sirkat-supervisor {
-        padding: 0.15rem 0.3rem !important;
-        margin-top: 0.2rem !important;
-        border: none !important;
-        background: transparent !important;
-    }
-    
-    .sirkat-supervisor label {
-        font-size: 0.6rem !important;
-        color: var(--text) !important;
-    }
-    
-    .sirkat-supervisor input {
-        font-size: 0.6rem !important;
-        padding: 0.05rem 0.2rem !important;
-        min-width: 80px !important;
-        border: none !important;
-        border-bottom: 1px solid var(--primary) !important;
-        background: transparent !important;
-        color: var(--text) !important;
-        height: 20px !important;
-    }
-    
-    /* 🔥 منع ظهور placeholder في الطباعة */
-    .sirkat-supervisor input::placeholder {
-        color: transparent !important;
-        opacity: 0 !important;
-    }
-    
-    .sirkat-table tbody tr {
-        page-break-inside: avoid !important;
-        height: 18px !important;
-    }
-    
-    #footer, #header, .dashboard {
-        display: none !important;
-    }
-}
-
-/* ====== تحسينات الموبايل ====== */
+/* ============================================================
+   ✅ تحسينات الموبايل - حل مشكلة الجدول والأزرار
+   ============================================================ */
 @media (max-width: 768px) {
     .sirkat-header {
         padding: 0.8rem;
@@ -460,7 +313,7 @@ body.dark-mode .sirkat-supervisor input {
     
     .sirkat-date {
         font-size: 0.8rem;
-        padding: 0.15rem 0.6rem;
+        padding: 0.2rem 0.6rem;
     }
     
     .sirkat-header-bottom h2 {
@@ -475,42 +328,77 @@ body.dark-mode .sirkat-supervisor input {
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
+        padding: 0.5rem 0.6rem;
     }
     
     .sirkat-controls-left {
         justify-content: center;
+        gap: 0.4rem;
+    }
+    
+    .sirkat-controls-left select,
+    .sirkat-controls-left input {
+        font-size: 0.7rem;
+        min-height: 28px;
+        padding: 0.15rem 0.4rem;
     }
     
     .sirkat-controls-right {
         justify-content: center;
+        gap: 0.4rem;
     }
     
+    /* 🔥 تكبير الأزرار على الموبايل */
+    .sirkat-controls-right .btn {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.7rem;
+        min-height: 34px;
+        flex: 1;
+        justify-content: center;
+        max-width: 120px;
+    }
+    
+    /* 🔥 تحسين الجدول للموبايل */
     .sirkat-table {
         font-size: 0.65rem;
-        min-width: 500px;
+        min-width: 550px;
     }
     
     .sirkat-table th {
-        font-size: 0.65rem;
-        padding: 0.3rem 0.15rem;
+        font-size: 0.6rem;
+        padding: 0.35rem 0.15rem;
     }
     
     .sirkat-table td {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.15rem;
+        font-size: 0.6rem;
+        padding: 0.25rem 0.15rem;
     }
     
     .sirkat-table td input {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
+        min-height: 24px;
+        padding: 0.1rem 0.05rem;
+    }
+    
+    .sirkat-table td input[type="time"] {
+        width: 55px;
     }
     
     .sirkat-supervisor {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.4rem;
+        padding: 0.5rem 0.6rem;
     }
     
     .sirkat-supervisor input {
         min-width: auto;
+        font-size: 0.8rem;
+        min-height: 32px;
+    }
+    
+    .sirkat-supervisor label {
+        font-size: 0.8rem;
     }
 }
 
@@ -524,22 +412,305 @@ body.dark-mode .sirkat-supervisor input {
         flex-direction: column;
     }
     
+    .sirkat-logo h1 {
+        font-size: 0.9rem;
+    }
+    
+    .sirkat-logo img {
+        max-height: 30px;
+    }
+    
+    .sirkat-date {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+    }
+    
+    .sirkat-header-bottom h2 {
+        font-size: 0.75rem;
+    }
+    
+    .sirkat-header-bottom p {
+        font-size: 0.65rem;
+    }
+    
+    /* 🔥 الجدول مضغوط جداً */
     .sirkat-table {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
         min-width: 400px;
     }
     
     .sirkat-table th {
-        font-size: 0.55rem;
-        padding: 0.2rem 0.1rem;
+        font-size: 0.45rem;
+        padding: 0.25rem 0.1rem;
     }
     
     .sirkat-table td {
-        font-size: 0.55rem;
-        padding: 0.15rem 0.1rem;
+        font-size: 0.45rem;
+        padding: 0.15rem 0.08rem;
     }
     
     .sirkat-table td input {
-        font-size: 0.55rem;
+        font-size: 0.45rem;
+        min-height: 20px;
+        padding: 0.05rem 0.05rem;
+    }
+    
+    .sirkat-table td input[type="time"] {
+        width: 40px;
+        font-size: 0.4rem;
+    }
+    
+    .sirkat-table td .total-hours {
+        font-size: 0.45rem;
+    }
+    
+    .sirkat-table tfoot td {
+        font-size: 0.5rem;
+        padding: 0.25rem 0.1rem;
+    }
+    
+    /* 🔥 الأزرار في صف واحد */
+    .sirkat-controls-right {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.3rem;
+        width: 100%;
+    }
+    
+    .sirkat-controls-right .btn {
+        font-size: 0.6rem;
+        padding: 0.25rem 0.4rem;
+        min-height: 30px;
+        max-width: none;
+        flex: none;
+    }
+    
+    .sirkat-controls-left label {
+        font-size: 0.65rem;
+    }
+    
+    .sirkat-controls-left select,
+    .sirkat-controls-left input {
+        font-size: 0.6rem;
+        min-height: 24px;
+        padding: 0.1rem 0.3rem;
+    }
+    
+    .sirkat-supervisor label {
+        font-size: 0.7rem;
+    }
+    
+    .sirkat-supervisor input {
+        font-size: 0.7rem;
+        min-height: 28px;
+    }
+}
+
+/* ============================================================
+   طباعة PDF (تبقى كما هي - محسنة)
+   ============================================================ */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .sirkat-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    .dashboard {
+        padding: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+    }
+    
+    body {
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 9px !important;
+    }
+    
+    .sirkat-header {
+        background: #1a6b8a !important;
+        color: #fff !important;
+        padding: 0.3rem 0.6rem !important;
+        margin-bottom: 0.3rem !important;
+        border-radius: 4px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .sirkat-logo h1 {
+        font-size: 0.9rem !important;
+        color: #fff !important;
+    }
+    
+    .sirkat-logo img {
+        max-height: 25px !important;
+    }
+    
+    .sirkat-date {
+        font-size: 0.65rem !important;
+        padding: 0.1rem 0.4rem !important;
+        background: rgba(255,255,255,0.15) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color: #fff !important;
+    }
+    
+    .sirkat-header-bottom h2 {
+        font-size: 0.75rem !important;
+        color: #fff !important;
+    }
+    
+    .sirkat-header-bottom h2 i {
+        color: #c9a84c !important;
+    }
+    
+    .sirkat-header-bottom p {
+        font-size: 0.6rem !important;
+        color: rgba(255,255,255,0.9) !important;
+    }
+    
+    .sirkat-table-wrap {
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        background: #fff !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .sirkat-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 0.5rem !important;
+        min-width: auto !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .sirkat-table th {
+        background: #1a6b8a !important;
+        color: #fff !important;
+        font-size: 0.45rem !important;
+        padding: 0.12rem 0.08rem !important;
+        text-align: center !important;
+        border: 1px solid #1a6b8a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        height: 3.5mm !important;
+    }
+    
+    .sirkat-table td {
+        font-size: 0.45rem !important;
+        padding: 0.08rem 0.06rem !important;
+        border-bottom: 1px solid #ddd !important;
+        border-left: 1px solid #eee !important;
+        border-right: 1px solid #eee !important;
+        color: #222 !important;
+        text-align: center !important;
+        height: 3mm !important;
+        vertical-align: middle !important;
+    }
+    
+    .sirkat-table td input {
+        font-size: 0.45rem !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        color: #222 !important;
+        text-align: center !important;
+        width: 100% !important;
+        height: 2.5mm !important;
+        min-height: 2mm !important;
+    }
+    
+    .sirkat-table td input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    
+    .sirkat-table td input[type="time"] {
+        width: 35px !important;
+        font-size: 0.4rem !important;
+    }
+    
+    .sirkat-table td .total-hours {
+        font-weight: 700 !important;
+        color: #1a6b8a !important;
+    }
+    
+    .sirkat-table tbody tr:nth-child(even) td {
+        background-color: #f8fafc !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .sirkat-table tfoot td {
+        font-size: 0.5rem !important;
+        padding: 0.12rem 0.08rem !important;
+        border-top: 2px solid #1a6b8a !important;
+        background: #fff !important;
+        color: #222 !important;
+        height: 3.5mm !important;
+    }
+    
+    .sirkat-supervisor {
+        padding: 0.15rem 0.3rem !important;
+        margin-top: 0.2rem !important;
+        border: none !important;
+        background: transparent !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+    }
+    
+    .sirkat-supervisor label {
+        font-size: 0.55rem !important;
+        color: #222 !important;
+    }
+    
+    .sirkat-supervisor label i {
+        color: #c9a84c !important;
+    }
+    
+    .sirkat-supervisor input {
+        font-size: 0.55rem !important;
+        padding: 0.05rem 0.2rem !important;
+        border: none !important;
+        border-bottom: 1px solid #1a6b8a !important;
+        background: transparent !important;
+        color: #222 !important;
+        height: 3mm !important;
+        width: 40mm !important;
+    }
+    
+    .sirkat-supervisor input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    
+    .sirkat-table tbody tr {
+        page-break-inside: avoid !important;
+        height: 3mm !important;
+    }
+    
+    .sirkat-table-wrap {
+        page-break-inside: avoid !important;
+    }
+    
+    .sirkat-table tfoot {
+        page-break-inside: avoid !important;
+    }
+    
+    #header, #footer, .dashboard {
+        display: none !important;
+    }
+    
+    @page {
+        size: A4 portrait;
+        margin: 4mm 5mm;
     }
 }
