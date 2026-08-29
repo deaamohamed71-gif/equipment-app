@@ -1,19 +1,42 @@
-// js/index.js - كود الصفحة الرئيسية مع التحقق من الترخيص
+// js/index.js - كود الصفحة الرئيسية (محدث للتحقق من حالة الترخيص)
 
 // ====== تحميل بيانات الترخيص ======
 function loadLicenseStatus() {
-    const info = licenseManager.getLicenseInfo();
+    // ✅ التحقق من وجود ترخيص مدفوع مطبق
+    const appLicense = localStorage.getItem('app_license_data');
     const statusEl = document.getElementById('licenseStatusText');
+    const planDetails = document.getElementById('planDetails');
     
-    if (!statusEl) return;
+    if (appLicense) {
+        try {
+            const data = JSON.parse(appLicense);
+            if (data.isPremium) {
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <i class="fas fa-crown" style="color: var(--gold);"></i>
+                        🎉 أنت مشترك في <strong>النسخة المدفوعة</strong> - جميع الميزات متاحة!
+                        <span style="font-size:0.75rem; opacity:0.7; margin-right:8px;">
+                            | الخطة: ${data.plan || 'مدفوعة'} | متبقي: ${data.daysLeft || 0} يوم
+                        </span>
+                    `;
+                }
+                if (planDetails) {
+                    planDetails.textContent = `📋 الخطة: ${data.plan || 'مدفوعة'} (${data.daysLeft || 0} يوم متبقي)`;
+                    planDetails.style.display = 'block';
+                    planDetails.style.color = 'var(--gold)';
+                    planDetails.style.fontWeight = '600';
+                }
+                return true;
+            }
+        } catch (e) {
+            console.warn('Invalid app license data:', e);
+        }
+    }
     
-    if (info) {
-        if (info.isPremium) {
-            statusEl.innerHTML = `
-                <i class="fas fa-crown" style="color: var(--gold);"></i>
-                🎉 أنت مشترك في <strong>النسخة المدفوعة</strong> - جميع الميزات متاحة!
-            `;
-        } else {
+    // ✅ لو مش مدفوع، اعرض الحالة من licenseManager
+    if (statusEl && typeof licenseManager !== 'undefined') {
+        const info = licenseManager.getLicenseInfo();
+        if (info) {
             const daysLeft = info.daysLeft;
             let statusColor = 'var(--success)';
             let statusText = 'نشطة';
@@ -33,35 +56,17 @@ function loadLicenseStatus() {
                     | الحد الأقصى: 3 بنود، 5 عروض، 5 عملاء
                 </span>
             `;
-        }
-    } else {
-        statusEl.innerHTML = `
-            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-            ⚠️ لم يتم العثور على ترخيص. الرجاء تفعيل التطبيق.
-        `;
-    }
-}
-
-// ====== التحقق من الترخيص من Firebase عند تحميل الصفحة ======
-async function verifyLicenseOnLoad() {
-    const info = licenseManager.getLicenseInfo();
-    if (info && info.isPremium && info.licenseKey) {
-        if (typeof window.verifyLicenseWithFirebase === 'function') {
-            try {
-                const result = await window.verifyLicenseWithFirebase(info.licenseKey);
-                if (!result.valid) {
-                    licenseManager.licenseData = null;
-                    licenseManager.isValidated = false;
-                    licenseManager.startTrial();
-                    licenseManager.notifyListeners();
-                    showToast('⚠️ تم إلغاء الترخيص المدفوع.', 'error');
-                    setTimeout(() => window.location.reload(), 1500);
-                }
-            } catch (error) {
-                console.warn('فشل التحقق من Firebase:', error);
+            
+            if (planDetails) {
+                planDetails.textContent = '📋 الخطة: تجريبية (90 يوم)';
+                planDetails.style.display = 'block';
+                planDetails.style.color = 'var(--text-light)';
+                planDetails.style.fontWeight = '400';
             }
         }
     }
+    
+    return false;
 }
 
 // ====== تحميل البيانات ======
@@ -146,7 +151,9 @@ function getOfferStatus(offer) {
 // ====== التهيئة ======
 document.addEventListener('DOMContentLoaded', function() {
     // تهيئة الترخيص
-    licenseManager.initialize();
+    if (typeof licenseManager !== 'undefined') {
+        licenseManager.initialize();
+    }
     
     licenseManager.addListener(function(info) {
         if (info) {
@@ -157,6 +164,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         loadLicenseStatus();
         loadDashboardData();
-        verifyLicenseOnLoad();
     }, 150);
+    
+    // ✅ الاستماع لتغييرات الترخيص من localStorage
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'app_license_data' || e.key === 'license_data') {
+            loadLicenseStatus();
+        }
+    });
 });
