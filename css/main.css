@@ -336,6 +336,36 @@ body.dark-mode .sidebar-footer .license-status {
 }
 
 /* ============================================================
+   زر العودة للرئيسية (Back Home Button)
+   ============================================================ */
+.back-home-btn {
+    margin-bottom: 1rem;
+    text-align: right;
+    padding: 0.5rem;
+}
+
+.back-home-btn .btn {
+    font-size: 0.8rem;
+    padding: 0.3rem 1rem;
+    min-height: 34px;
+}
+
+.back-home-btn .btn i {
+    margin-left: 4px;
+}
+
+@media (max-width: 768px) {
+    .back-home-btn {
+        text-align: center;
+    }
+    .back-home-btn .btn {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.8rem;
+        min-height: 30px;
+    }
+}
+
+/* ============================================================
    الفوتر
    ============================================================ */
 #footer {
@@ -795,6 +825,15 @@ body.dark-mode .modal-content h3 {
         width: 98%;
         max-height: 95%;
     }
+    
+    .back-home-btn {
+        text-align: center;
+    }
+    .back-home-btn .btn {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.8rem;
+        min-height: 30px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -866,6 +905,12 @@ body.dark-mode .modal-content h3 {
         min-width: 32px;
         min-height: 32px;
     }
+    
+    .back-home-btn .btn {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.6rem;
+        min-height: 28px;
+    }
 }
 
 /* ============================================================
@@ -876,7 +921,8 @@ body.dark-mode .modal-content h3 {
     .header-hamburger,
     .sidebar,
     .sidebar-overlay,
-    .no-print {
+    .no-print,
+    .back-home-btn {
         display: none !important;
     }
     
