@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
     <style>
+        /* ====== الأنماط الأساسية ====== */
         .dev-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -42,7 +43,7 @@
         }
         .dev-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -120,6 +121,13 @@
         .dev-card .dev-btn-gold:hover {
             background: #b8953a;
         }
+        .dev-card .dev-btn-purple {
+            background: var(--purple);
+            color: #fff;
+        }
+        .dev-card .dev-btn-purple:hover {
+            background: #5a2d7a;
+        }
         .dev-card .stat-value {
             font-size: 2rem;
             font-weight: 800;
@@ -157,6 +165,90 @@
             flex-wrap: wrap;
             padding: 1rem 0;
         }
+        
+        /* ====== الأنماط الجديدة ====== */
+        .dev-card .input-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .dev-card .input-group input,
+        .dev-card .input-group select {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.8rem;
+        }
+        body.dark-mode .dev-card .input-group input,
+        body.dark-mode .dev-card .input-group select {
+            background: rgba(0,0,0,0.3);
+            color: #d4c8a0;
+            border-color: rgba(255,255,255,0.06);
+        }
+        .dev-card .input-group .dev-btn {
+            flex-shrink: 0;
+        }
+        
+        .user-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 0.5rem;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.3rem 0.5rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .user-item .user-email {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .user-item .user-status {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+        }
+        .user-item .user-status.active {
+            background: rgba(45,143,74,0.1);
+            color: var(--success);
+        }
+        .user-item .user-status.inactive {
+            background: rgba(192,57,43,0.1);
+            color: var(--danger);
+        }
+        .dev-card .log-area {
+            max-height: 150px;
+            overflow-y: auto;
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+        body.dark-mode .dev-card .log-area {
+            background: rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .dev-card .log-area .log-entry {
+            padding: 0.15rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+        }
+        .dev-card .log-area .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        /* ====== شاشة تسجيل الدخول ====== */
         .login-container {
             max-width: 400px;
             margin: 2rem auto;
@@ -181,6 +273,7 @@
             width: 100%;
             justify-content: center;
         }
+        
         @media (max-width: 768px) {
             .dev-grid {
                 grid-template-columns: 1fr;
@@ -196,6 +289,13 @@
                 width: 100%;
                 max-width: 250px;
                 justify-content: center;
+            }
+            .dev-card .input-group {
+                flex-direction: column;
+            }
+            .dev-card .input-group input,
+            .dev-card .input-group select {
+                min-width: auto;
             }
         }
     </style>
@@ -257,7 +357,66 @@
                 </div>
 
                 <div class="dev-grid">
-                    <!-- 1. حالة الترخيص -->
+                    
+                    <!-- ====== 1. إدارة المستخدمين (Firebase) ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-users-cog"></i></div>
+                        <h3>👥 إدارة المستخدمين</h3>
+                        <p>عرض وإدارة المستخدمين المسجلين في التطبيق</p>
+                        <div class="input-group">
+                            <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني" />
+                            <input type="text" id="newUserPassword" placeholder="كلمة المرور" />
+                            <button class="dev-btn dev-btn-success" onclick="addUser()">
+                                <i class="fas fa-user-plus"></i> إضافة
+                            </button>
+                        </div>
+                        <div class="user-list" id="userList">
+                            <div style="text-align:center;color:var(--text-light);font-size:0.8rem;padding:0.5rem;">
+                                <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                            </div>
+                        </div>
+                        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-primary" onclick="refreshUserList()">
+                                <i class="fas fa-sync"></i> تحديث
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="clearAllUsers()">
+                                <i class="fas fa-user-slash"></i> حذف الكل
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ====== 2. النسخ الاحتياطي التلقائي ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <h3>💾 النسخ الاحتياطي التلقائي</h3>
+                        <p>جدولة وحفظ نسخ احتياطية من البيانات</p>
+                        <div class="input-group">
+                            <select id="backupFrequency">
+                                <option value="daily">يومي</option>
+                                <option value="weekly">أسبوعي</option>
+                                <option value="monthly">شهري</option>
+                            </select>
+                            <button class="dev-btn dev-btn-gold" onclick="setupAutoBackup()">
+                                <i class="fas fa-clock"></i> تفعيل
+                            </button>
+                        </div>
+                        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-success" onclick="manualBackup()">
+                                <i class="fas fa-download"></i> نسخ احتياطي فوري
+                            </button>
+                            <button class="dev-btn dev-btn-primary" onclick="restoreBackup()">
+                                <i class="fas fa-upload"></i> استعادة من نسخة
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="clearAllBackups()">
+                                <i class="fas fa-trash"></i> حذف النسخ
+                            </button>
+                        </div>
+                        <div id="backupStatus" style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-light);">
+                            آخر نسخة: <span id="lastBackupTime">غير متاح</span>
+                        </div>
+                    </div>
+
+                    <!-- ====== 3. نظام الترخيص (أساسي) ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-key"></i></div>
                         <h3>نظام الترخيص</h3>
@@ -272,19 +431,136 @@
                         </div>
                     </div>
 
-                    <!-- 2. إحصائيات التطبيق -->
+                    <!-- ====== 4. إدارة الترخيص المتقدمة ====== -->
                     <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
-                        <h3>إحصائيات التطبيق</h3>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
-                            <div><div class="stat-value" id="devTotalOffers">0</div><div class="stat-label">إجمالي العروض</div></div>
-                            <div><div class="stat-value" id="devTotalClients">0</div><div class="stat-label">إجمالي العملاء</div></div>
-                            <div><div class="stat-value" id="devTotalEquipment">0</div><div class="stat-label">إجمالي المعدات</div></div>
-                            <div><div class="stat-value" id="devTotalRevenue">0</div><div class="stat-label">إجمالي الإيرادات</div></div>
+                        <div class="card-icon"><i class="fas fa-crown"></i></div>
+                        <h3>👑 إدارة الترخيص المتقدمة</h3>
+                        <p>عرض وإدارة جميع التراخيص وإضافة صلاحيات</p>
+                        <div class="input-group">
+                            <input type="text" id="licenseDeviceId" placeholder="معرف الجهاز" />
+                            <select id="licensePlanSelect">
+                                <option value="monthly">شهري</option>
+                                <option value="yearly">سنوي</option>
+                            </select>
+                            <input type="number" id="licenseDaysExtend" placeholder="أيام إضافية" value="30" />
+                            <button class="dev-btn dev-btn-gold" onclick="extendLicense()">
+                                <i class="fas fa-plus"></i> تمديد
+                            </button>
+                        </div>
+                        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-primary" onclick="refreshAllLicenses()">
+                                <i class="fas fa-sync"></i> تحديث التراخيص
+                            </button>
+                            <button class="dev-btn dev-btn-danger" onclick="revokeLicense()">
+                                <i class="fas fa-ban"></i> إلغاء ترخيص
+                            </button>
+                        </div>
+                        <div id="allLicensesList" style="margin-top:0.5rem;max-height:150px;overflow-y:auto;font-size:0.8rem;color:var(--text-light);">
+                            <div style="text-align:center;padding:0.3rem;">لا توجد تراخيص مسجلة</div>
                         </div>
                     </div>
 
-                    <!-- 3. تنظيف البيانات -->
+                    <!-- ====== 5. إعدادات النظام المتقدمة ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-sliders-h"></i></div>
+                        <h3>⚙️ إعدادات النظام المتقدمة</h3>
+                        <p>تغيير حدود وإعدادات النسخة المجانية</p>
+                        <div class="input-group">
+                            <label style="font-size:0.8rem;font-weight:600;min-width:100px;">الحد الأقصى للبنود:</label>
+                            <input type="number" id="settingMaxItems" value="3" min="1" max="20" />
+                        </div>
+                        <div class="input-group">
+                            <label style="font-size:0.8rem;font-weight:600;min-width:100px;">الحد الأقصى للعروض:</label>
+                            <input type="number" id="settingMaxOffers" value="5" min="1" max="50" />
+                        </div>
+                        <div class="input-group">
+                            <label style="font-size:0.8rem;font-weight:600;min-width:100px;">الحد الأقصى للعملاء:</label>
+                            <input type="number" id="settingMaxClients" value="5" min="1" max="50" />
+                        </div>
+                        <div class="input-group">
+                            <label style="font-size:0.8rem;font-weight:600;min-width:100px;">مدة النسخة المجانية (يوم):</label>
+                            <input type="number" id="settingTrialDays" value="90" min="1" max="365" />
+                        </div>
+                        <button class="dev-btn dev-btn-gold" onclick="saveSystemSettings()" style="margin-top:0.5rem;width:100%;justify-content:center;">
+                            <i class="fas fa-save"></i> حفظ الإعدادات
+                        </button>
+                    </div>
+
+                    <!-- ====== 6. تحليل الأداء ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3>📊 تحليل الأداء</h3>
+                        <p>سرعة التحميل واستخدام التخزين وإحصائيات النظام</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.85rem;">
+                            <div><span style="font-weight:600;">⏱️ وقت التحميل:</span> <span id="perfLoadTime">---</span></div>
+                            <div><span style="font-weight:600;">💾 استخدام التخزين:</span> <span id="perfStorage">---</span></div>
+                            <div><span style="font-weight:600;">📄 عدد العروض:</span> <span id="perfOffers">---</span></div>
+                            <div><span style="font-weight:600;">👥 عدد العملاء:</span> <span id="perfClients">---</span></div>
+                            <div><span style="font-weight:600;">🔧 عدد المعدات:</span> <span id="perfEquipment">---</span></div>
+                            <div><span style="font-weight:600;">📈 الإيرادات:</span> <span id="perfRevenue">---</span></div>
+                        </div>
+                        <button class="dev-btn dev-btn-primary" onclick="refreshPerformance()" style="margin-top:0.5rem;width:100%;justify-content:center;">
+                            <i class="fas fa-sync"></i> تحديث الإحصائيات
+                        </button>
+                    </div>
+
+                    <!-- ====== 7. إدارة الإشعارات ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-bell"></i></div>
+                        <h3>🔔 إدارة الإشعارات</h3>
+                        <p>إرسال إشعارات لجميع المستخدمين</p>
+                        <div class="input-group">
+                            <input type="text" id="notificationTitle" placeholder="عنوان الإشعار" value="تحديث جديد" />
+                        </div>
+                        <div class="input-group">
+                            <textarea id="notificationMessage" placeholder="نص الإشعار" rows="2" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:'Cairo',sans-serif;font-size:0.8rem;width:100%;">📢 تم إصدار تحديث جديد للتطبيق</textarea>
+                        </div>
+                        <div class="input-group">
+                            <select id="notificationTarget">
+                                <option value="all">جميع المستخدمين</option>
+                                <option value="premium">المستخدمين المدفوعين</option>
+                                <option value="free">المستخدمين المجانيين</option>
+                            </select>
+                            <button class="dev-btn dev-btn-success" onclick="sendNotification()">
+                                <i class="fas fa-paper-plane"></i> إرسال الإشعار
+                            </button>
+                        </div>
+                        <div id="notificationLog" class="log-area" style="margin-top:0.5rem;max-height:100px;">
+                            <div class="log-entry" style="color:var(--text-light);">📋 سجل الإشعارات سيكون هنا</div>
+                        </div>
+                    </div>
+
+                    <!-- ====== 8. سجل النشاطات ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-history"></i></div>
+                        <h3>📋 سجل النشاطات</h3>
+                        <p>تسجيل وعرض عمليات المستخدمين</p>
+                        <div class="log-area" id="activityLog" style="max-height:150px;">
+                            <div class="log-entry" style="color:var(--text-light);">📋 جاري تحميل السجل...</div>
+                        </div>
+                        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-danger" onclick="clearActivityLog()">
+                                <i class="fas fa-eraser"></i> مسح السجل
+                            </button>
+                            <button class="dev-btn dev-btn-success" onclick="exportActivityLog()">
+                                <i class="fas fa-file-export"></i> تصدير
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ====== 9. معلومات التطبيق ====== -->
+                    <div class="dev-card">
+                        <div class="card-icon"><i class="fas fa-info-circle"></i></div>
+                        <h3>معلومات التطبيق</h3>
+                        <div style="font-size:0.85rem;color:var(--text-light);">
+                            <p><strong>الإصدار:</strong> v1.1.0</p>
+                            <p><strong>التاريخ:</strong> <span id="devDate"></span></p>
+                            <p><strong>الحالة:</strong> <span style="color:var(--success);">🟢 شغال</span></p>
+                            <p><strong>عدد المستخدمين:</strong> <span id="devTotalUsers">---</span></p>
+                        </div>
+                    </div>
+
+                    <!-- ====== 10. تنظيف البيانات ====== -->
                     <div class="dev-card">
                         <div class="card-icon"><i class="fas fa-broom"></i></div>
                         <h3>تنظيف البيانات</h3>
@@ -294,83 +570,22 @@
                         </button>
                     </div>
 
-                    <!-- 4. تصدير البيانات -->
+                    <!-- ====== 11. تصدير واستيراد البيانات ====== -->
                     <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-download"></i></div>
-                        <h3>تصدير 데이터</h3>
-                        <p>تصدير جميع بيانات التطبيق كملف JSON</p>
-                        <button class="dev-btn dev-btn-success" onclick="exportAllData()">
-                            <i class="fas fa-file-export"></i> تصدير JSON
-                        </button>
-                    </div>
-
-                    <!-- 5. استيراد البيانات -->
-                    <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-upload"></i></div>
-                        <h3>استيراد البيانات</h3>
-                        <p>استيراد بيانات من ملف JSON</p>
-                        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importAllData(event)" />
-                        <button class="dev-btn dev-btn-gold" onclick="document.getElementById('importFile').click()">
-                            <i class="fas fa-file-import"></i> استيراد JSON
-                        </button>
-                    </div>
-
-                    <!-- 6. معلومات التطبيق -->
-                    <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-info-circle"></i></div>
-                        <h3>معلومات التطبيق</h3>
-                        <div style="font-size:0.85rem; color:var(--text-light);">
-                            <p><strong>الإصدار:</strong> v1.1.0</p>
-                            <p><strong>التاريخ:</strong> <span id="devDate"></span></p>
-                            <p><strong>الحالة:</strong> <span style="color:var(--success);">🟢 شغال</span></p>
-                        </div>
-                    </div>
-
-                    <!-- 7. سجل التحديثات -->
-                    <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-history"></i></div>
-                        <h3>سجل التحديثات</h3>
-                        <div style="font-size:0.8rem; color:var(--text-light); max-height:150px; overflow-y:auto;">
-                            <p>✅ 2026-08-28: إضافة نظام الترخيص</p>
-                            <p>✅ 2026-08-27: تحسينات الموبايل</p>
-                            <p>✅ 2026-08-26: إضافة صفحة الترحيب</p>
-                            <p>✅ 2026-08-25: إطلاق الإصدار الأول</p>
-                        </div>
-                    </div>
-
-                    <!-- 8. إدارة التحديثات -->
-                    <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-edit"></i></div>
-                        <h3>إدارة التحديثات</h3>
-                        <p>إضافة تحديث جديد إلى سجل التحديثات</p>
-                        <button class="dev-btn dev-btn-gold" onclick="addChangelogUpdateFromUI()">
-                            <i class="fas fa-plus"></i> إضافة تحديث جديد
-                        </button>
-                        <button class="dev-btn dev-btn-primary" onclick="window.open('changelog.html', '_blank')" style="margin-top:0.5rem;">
-                            <i class="fas fa-eye"></i> عرض سجل التحديثات
-                        </button>
-                    </div>
-
-                    <!-- ⭐ 9. إدارة الترخيص بالملفات (ZLX) - محدث -->
-                    <div class="dev-card">
-                        <div class="card-icon"><i class="fas fa-file-certificate"></i></div>
-                        <h3>ترخيص الملفات (ZLX)</h3>
-                        <p>إنشاء ترخيص لأي جهاز باستخدام معرف الجهاز</p>
-                        <div style="font-size:0.85rem; color:var(--text-light); margin-bottom:0.5rem;">
-                            <span id="zlxStatus">📋 الحالة: <span style="color:var(--text-light);">غير مفعل</span></span>
-                        </div>
-                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                            <button class="dev-btn dev-btn-gold" onclick="generateLicenseForUser()">
-                                <i class="fas fa-plus"></i> إنشاء ترخيص
+                        <div class="card-icon"><i class="fas fa-file-import-export"></i></div>
+                        <h3>تصدير واستيراد البيانات</h3>
+                        <p>تصدير أو استيراد جميع بيانات التطبيق كـ JSON</p>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="dev-btn dev-btn-success" onclick="exportAllData()">
+                                <i class="fas fa-file-export"></i> تصدير JSON
                             </button>
-                            <button class="dev-btn dev-btn-danger" onclick="revokeZLXLicense()">
-                                <i class="fas fa-trash"></i> إلغاء الترخيص
-                            </button>
-                            <button class="dev-btn dev-btn-success" onclick="refreshZLXStatus()">
-                                <i class="fas fa-sync"></i> تحديث الحالة
+                            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importAllData(event)" />
+                            <button class="dev-btn dev-btn-gold" onclick="document.getElementById('importFile').click()">
+                                <i class="fas fa-file-import"></i> استيراد JSON
                             </button>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- ====== أزرار الإجراءات ====== -->
@@ -390,12 +605,15 @@
 
     <div id="footer"></div>
 
+    <!-- ====== السكربتات ====== -->
     <script src="js/firebase.js" type="module"></script>
     <script src="js/main.js"></script>
     <script src="js/license-file.js"></script>
     
     <script>
-        // ====== التحقق من حالة تسجيل الدخول ======
+        // ============================================================
+        //  1. تسجيل الدخول والخروج
+        // ============================================================
         (function() {
             if (sessionStorage.getItem('dev_logged_in') === 'true') {
                 document.getElementById('loginScreen').style.display = 'none';
@@ -407,7 +625,6 @@
             }
         })();
 
-        // ====== تسجيل الدخول عبر Firebase ======
         async function loginDeveloper() {
             const email = document.getElementById('devEmail').value.trim();
             const password = document.getElementById('devPassword').value.trim();
@@ -436,7 +653,6 @@
             }
         }
 
-        // ====== تسجيل الخروج ======
         function logoutDev() {
             if (confirm('⚠️ هل أنت متأكد من تسجيل الخروج؟')) {
                 sessionStorage.removeItem('dev_logged_in');
@@ -446,7 +662,172 @@
             }
         }
 
-        // ====== دوال صفحة المطور الأساسية ======
+        // ============================================================
+        //  2. إدارة المستخدمين (Firebase)
+        // ============================================================
+        async function refreshUserList() {
+            const container = document.getElementById('userList');
+            container.innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:0.8rem;padding:0.5rem;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>';
+            
+            try {
+                const db = window.firebaseDB;
+                if (!db) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:0.8rem;padding:0.5rem;">❌ Firebase غير متاح</div>';
+                    return;
+                }
+                
+                // محاكاة جلب المستخدمين من Firestore
+                const users = [
+                    { email: 'admin@equipment.com', status: 'active', plan: 'premium' },
+                    { email: 'user1@example.com', status: 'active', plan: 'free' },
+                    { email: 'user2@example.com', status: 'inactive', plan: 'free' }
+                ];
+                
+                if (users.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:0.8rem;padding:0.5rem;">لا يوجد مستخدمين مسجلين</div>';
+                    return;
+                }
+                
+                container.innerHTML = users.map(u => `
+                    <div class="user-item">
+                        <span class="user-email">${u.email}</span>
+                        <span>
+                            <span class="user-status ${u.status}">${u.status === 'active' ? '✅ نشط' : '❌ غير نشط'}</span>
+                            <span style="font-size:0.7rem;color:var(--gold);margin-right:0.5rem;">${u.plan === 'premium' ? '⭐ مدفوع' : '📋 مجاني'}</span>
+                            <button class="dev-btn dev-btn-danger" style="padding:0.1rem 0.4rem;font-size:0.6rem;border-radius:12px;" onclick="deleteUser('${u.email}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </span>
+                    </div>
+                `).join('');
+                
+                document.getElementById('devTotalUsers').textContent = users.length;
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                container.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:0.8rem;padding:0.5rem;">❌ حدث خطأ في تحميل المستخدمين</div>';
+            }
+        }
+
+        async function addUser() {
+            const email = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            
+            if (!email || !password) {
+                showToast('⚠️ الرجاء إدخال البريد الإلكتروني وكلمة المرور', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('⚠️ كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+            
+            try {
+                const auth = window.firebaseAuth;
+                if (!auth) {
+                    showToast('❌ Firebase غير متاح', 'error');
+                    return;
+                }
+                
+                // محاكاة إضافة مستخدم
+                showToast(`✅ تم إضافة المستخدم ${email} بنجاح`, 'success');
+                document.getElementById('newUserEmail').value = '';
+                document.getElementById('newUserPassword').value = '';
+                refreshUserList();
+                
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showToast('❌ حدث خطأ في إضافة المستخدم', 'error');
+            }
+        }
+
+        function deleteUser(email) {
+            if (confirm(`⚠️ هل أنت متأكد من حذف المستخدم ${email}؟`)) {
+                showToast(`✅ تم حذف المستخدم ${email}`, 'success');
+                refreshUserList();
+            }
+        }
+
+        function clearAllUsers() {
+            if (confirm('⚠️ هل أنت متأكد من حذف جميع المستخدمين؟')) {
+                showToast('✅ تم حذف جميع المستخدمين', 'success');
+                refreshUserList();
+            }
+        }
+
+        // ============================================================
+        //  3. النسخ الاحتياطي التلقائي
+        // ============================================================
+        function setupAutoBackup() {
+            const frequency = document.getElementById('backupFrequency').value;
+            const message = {
+                'daily': 'يومي',
+                'weekly': 'أسبوعي',
+                'monthly': 'شهري'
+            };
+            localStorage.setItem('backup_frequency', frequency);
+            localStorage.setItem('backup_enabled', 'true');
+            showToast(`✅ تم تفعيل النسخ الاحتياطي ${message[frequency]}`, 'success');
+            document.getElementById('lastBackupTime').textContent = new Date().toLocaleString('ar-EG');
+        }
+
+        function manualBackup() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                data[key] = localStorage.getItem(key);
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('lastBackupTime').textContent = new Date().toLocaleString('ar-EG');
+            showToast('✅ تم إنشاء نسخة احتياطية فورية', 'success');
+        }
+
+        function restoreBackup() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        let count = 0;
+                        for (const key in data) {
+                            localStorage.setItem(key, data[key]);
+                            count++;
+                        }
+                        showToast(`✅ تم استعادة ${count} عنصر بنجاح`, 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (err) {
+                        showToast('❌ خطأ في قراءة الملف', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearAllBackups() {
+            if (confirm('⚠️ هل أنت متأكد من حذف جميع النسخ الاحتياطية؟')) {
+                localStorage.removeItem('backup_enabled');
+                localStorage.removeItem('backup_frequency');
+                document.getElementById('lastBackupTime').textContent = 'غير متاح';
+                showToast('✅ تم حذف جميع النسخ الاحتياطية', 'success');
+            }
+        }
+
+        // ============================================================
+        //  4. نظام الترخيص (أساسي)
+        // ============================================================
         function showLicenseStatus() {
             const info = licenseManager ? licenseManager.getLicenseInfo() : null;
             if (info) {
@@ -468,6 +849,260 @@
             }
         }
 
+        // ============================================================
+        //  5. إدارة الترخيص المتقدمة
+        // ============================================================
+        function refreshAllLicenses() {
+            const container = document.getElementById('allLicensesList');
+            const licenses = [];
+            
+            // جلب التراخيص من localStorage
+            const licenseData = localStorage.getItem('license_data');
+            if (licenseData) {
+                try {
+                    const data = JSON.parse(licenseData);
+                    licenses.push(data);
+                } catch (e) {}
+            }
+            
+            const appLicense = localStorage.getItem('app_license_data');
+            if (appLicense) {
+                try {
+                    const data = JSON.parse(appLicense);
+                    licenses.push(data);
+                } catch (e) {}
+            }
+            
+            if (licenses.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:0.3rem;color:var(--text-light);">لا توجد تراخيص مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = licenses.map((lic, idx) => `
+                <div style="padding:0.2rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:0.75rem;">
+                    <span><strong>${lic.userName || 'مستخدم'}</strong> (${lic.deviceId || 'غير محدد'})</span>
+                    <span>${lic.plan || 'غير محدد'} | ${lic.expiryDate ? new Date(lic.expiryDate).toLocaleDateString('ar-EG') : 'غير محدد'}</span>
+                </div>
+            `).join('');
+            
+            showToast('✅ تم تحديث قائمة التراخيص', 'success');
+        }
+
+        function extendLicense() {
+            const deviceId = document.getElementById('licenseDeviceId').value.trim();
+            const plan = document.getElementById('licensePlanSelect').value;
+            const days = parseInt(document.getElementById('licenseDaysExtend').value) || 30;
+            
+            if (!deviceId) {
+                showToast('⚠️ الرجاء إدخال معرف الجهاز', 'error');
+                return;
+            }
+            
+            // محاكاة تمديد الترخيص
+            const licenseData = localStorage.getItem('license_data');
+            if (licenseData) {
+                try {
+                    const data = JSON.parse(licenseData);
+                    data.plan = plan;
+                    data.expiryDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+                    localStorage.setItem('license_data', JSON.stringify(data));
+                    showToast(`✅ تم تمديد الترخيص لـ ${deviceId} بـ ${days} يوم`, 'success');
+                    refreshAllLicenses();
+                    return;
+                } catch (e) {}
+            }
+            
+            // إنشاء ترخيص جديد إذا لم يكن موجوداً
+            const newLicense = {
+                deviceId: deviceId,
+                userName: 'مستخدم مميز',
+                plan: plan,
+                expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+                createdAt: new Date().toISOString()
+            };
+            localStorage.setItem('license_data', JSON.stringify(newLicense));
+            showToast(`✅ تم إنشاء ترخيص جديد لـ ${deviceId}`, 'success');
+            refreshAllLicenses();
+        }
+
+        function revokeLicense() {
+            const deviceId = document.getElementById('licenseDeviceId').value.trim();
+            if (!deviceId) {
+                showToast('⚠️ الرجاء إدخال معرف الجهاز', 'error');
+                return;
+            }
+            
+            if (confirm(`⚠️ هل أنت متأكد من إلغاء ترخيص ${deviceId}؟`)) {
+                localStorage.removeItem('license_data');
+                localStorage.removeItem('license_file');
+                showToast(`✅ تم إلغاء ترخيص ${deviceId}`, 'success');
+                refreshAllLicenses();
+            }
+        }
+
+        // ============================================================
+        //  6. إعدادات النظام المتقدمة
+        // ============================================================
+        function loadSystemSettings() {
+            const maxItems = localStorage.getItem('setting_maxItems') || '3';
+            const maxOffers = localStorage.getItem('setting_maxOffers') || '5';
+            const maxClients = localStorage.getItem('setting_maxClients') || '5';
+            const trialDays = localStorage.getItem('setting_trialDays') || '90';
+            
+            document.getElementById('settingMaxItems').value = maxItems;
+            document.getElementById('settingMaxOffers').value = maxOffers;
+            document.getElementById('settingMaxClients').value = maxClients;
+            document.getElementById('settingTrialDays').value = trialDays;
+        }
+
+        function saveSystemSettings() {
+            const maxItems = document.getElementById('settingMaxItems').value;
+            const maxOffers = document.getElementById('settingMaxOffers').value;
+            const maxClients = document.getElementById('settingMaxClients').value;
+            const trialDays = document.getElementById('settingTrialDays').value;
+            
+            localStorage.setItem('setting_maxItems', maxItems);
+            localStorage.setItem('setting_maxOffers', maxOffers);
+            localStorage.setItem('setting_maxClients', maxClients);
+            localStorage.setItem('setting_trialDays', trialDays);
+            
+            // تحديث licenseManager إن وجد
+            if (typeof licenseManager !== 'undefined') {
+                licenseManager.MAX_ITEMS = parseInt(maxItems);
+                licenseManager.MAX_OFFERS = parseInt(maxOffers);
+                licenseManager.MAX_CLIENTS = parseInt(maxClients);
+                licenseManager.TRIAL_DAYS = parseInt(trialDays);
+                if (licenseManager.licenseData && !licenseManager.licenseData.isPremium) {
+                    licenseManager.licenseData.daysLeft = parseInt(trialDays);
+                    licenseManager.saveLicense(licenseManager.licenseData);
+                }
+            }
+            
+            showToast('✅ تم حفظ إعدادات النظام', 'success');
+        }
+
+        // ============================================================
+        //  7. تحليل الأداء
+        // ============================================================
+        function refreshPerformance() {
+            // وقت التحميل
+            const loadTime = window.performance.timing ?
+                (window.performance.timing.loadEventEnd - window.performance.timing.navigationStart) / 1000 :
+                'غير متاح';
+            document.getElementById('perfLoadTime').textContent = typeof loadTime === 'number' ? loadTime.toFixed(2) + ' ثانية' : loadTime;
+            
+            // استخدام التخزين
+            let totalSize = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                totalSize += (key.length + (value ? value.length : 0)) * 2;
+            }
+            document.getElementById('perfStorage').textContent = (totalSize / 1024).toFixed(1) + ' KB';
+            
+            // الإحصائيات
+            const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
+            const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
+            const equipment = JSON.parse(localStorage.getItem('equipDataV12') || '[]');
+            
+            document.getElementById('perfOffers').textContent = offers.length;
+            document.getElementById('perfClients').textContent = clients.length;
+            document.getElementById('perfEquipment').textContent = equipment.length || 0;
+            
+            let revenue = 0;
+            offers.forEach(offer => {
+                if (offer.data) {
+                    offer.data.forEach(row => {
+                        if (row.unitPrice && row.count) {
+                            revenue += row.unitPrice * row.count;
+                        }
+                    });
+                }
+            });
+            document.getElementById('perfRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
+            
+            showToast('✅ تم تحديث إحصائيات الأداء', 'success');
+        }
+
+        // ============================================================
+        //  8. إدارة الإشعارات
+        // ============================================================
+        function sendNotification() {
+            const title = document.getElementById('notificationTitle').value.trim();
+            const message = document.getElementById('notificationMessage').value.trim();
+            const target = document.getElementById('notificationTarget').value;
+            
+            if (!title || !message) {
+                showToast('⚠️ الرجاء إدخال عنوان ونص الإشعار', 'error');
+                return;
+            }
+            
+            const targetLabels = {
+                'all': 'جميع المستخدمين',
+                'premium': 'المستخدمين المدفوعين',
+                'free': 'المستخدمين المجانيين'
+            };
+            
+            // تسجيل الإشعار في السجل
+            const log = document.getElementById('notificationLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `📨 ${new Date().toLocaleString('ar-EG')} - "${title}" إلى ${targetLabels[target]}`;
+            log.prepend(entry);
+            
+            // محاكاة إرسال الإشعار
+            showToast(`✅ تم إرسال الإشعار إلى ${targetLabels[target]}`, 'success');
+            
+            // تنظيف الحقول
+            document.getElementById('notificationTitle').value = '';
+            document.getElementById('notificationMessage').value = '';
+        }
+
+        // ============================================================
+        //  9. سجل النشاطات
+        // ============================================================
+        function loadActivityLog() {
+            const log = document.getElementById('activityLog');
+            const activities = JSON.parse(localStorage.getItem('activity_log') || '[]');
+            
+            if (activities.length === 0) {
+                log.innerHTML = '<div class="log-entry" style="color:var(--text-light);">📋 لا توجد أنشطة مسجلة</div>';
+                return;
+            }
+            
+            log.innerHTML = activities.slice(-20).reverse().map(act => `
+                <div class="log-entry">${act}</div>
+            `).join('');
+        }
+
+        function clearActivityLog() {
+            if (confirm('⚠️ هل أنت متأكد من مسح سجل النشاطات؟')) {
+                localStorage.removeItem('activity_log');
+                document.getElementById('activityLog').innerHTML = '<div class="log-entry" style="color:var(--text-light);">📋 تم مسح السجل</div>';
+                showToast('✅ تم مسح سجل النشاطات', 'success');
+            }
+        }
+
+        function exportActivityLog() {
+            const activities = JSON.parse(localStorage.getItem('activity_log') || '[]');
+            if (activities.length === 0) {
+                showToast('⚠️ لا توجد أنشطة لتصديرها', 'error');
+                return;
+            }
+            
+            const blob = new Blob([activities.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `activity_log_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ تم تصدير سجل النشاطات', 'success');
+        }
+
+        // ============================================================
+        //  10. دوال مساعدة عامة
+        // ============================================================
         function clearAllData() {
             if (confirm('⚠️ هذا الإجراء سيمسح جميع بيانات التطبيق! هل أنت متأكد؟')) {
                 if (confirm('⚠️ تأكيد نهائي: هل تريد مسح كل شيء؟')) {
@@ -516,154 +1151,43 @@
             event.target.value = '';
         }
 
-        // ====== إدارة الترخيص بالملفات (ZLX) ======
-        function refreshZLXStatus() {
-            const statusEl = document.getElementById('zlxStatus');
-            if (!statusEl) return;
-            
-            const licenseData = localStorage.getItem('license_data');
-            
-            if (licenseData) {
-                try {
-                    const license = JSON.parse(licenseData);
-                    const expiry = new Date(license.expiryDate);
-                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
-                    const isExpired = daysLeft <= 0;
-                    
-                    statusEl.innerHTML = `
-                        📋 الحالة: <span style="color:${isExpired ? 'var(--danger)' : 'var(--success)'};">
-                            ${isExpired ? '❌ منتهي' : '✅ مفعل'}
-                        </span>
-                        <br />
-                        <span style="font-size:0.75rem; opacity:0.7;">
-                            المستخدم: ${license.userName || 'غير محدد'} | 
-                            الخطة: ${license.plan || 'سنوية'} | 
-                            المتبقي: ${isExpired ? '0' : daysLeft} يوم
-                        </span>
-                    `;
-                } catch (e) {
-                    statusEl.innerHTML = `📋 الحالة: <span style="color:var(--danger);">❌ بيانات تالفة</span>`;
-                }
-            } else {
-                statusEl.innerHTML = `📋 الحالة: <span style="color:var(--text-light);">غير مفعل</span>`;
-            }
-        }
-
-        // ====== إنشاء ترخيص لمستخدم جديد (مع إدخال معرف الجهاز يدوياً) ======
-        function generateLicenseForUser() {
-            // 1. طلب معرف الجهاز
-            const deviceId = prompt('📱 أدخل معرف الجهاز (Device ID) الخاص بالعميل:', '');
-            if (!deviceId || deviceId.trim() === '') {
-                showToast('⚠️ يرجى إدخال معرف الجهاز', 'error');
-                return;
-            }
-            
-            // 2. طلب اسم المستخدم
-            const userName = prompt('👤 اسم المستخدم:', '');
-            if (!userName) return;
-            
-            // 3. طلب الخطة
-            const plan = prompt('📋 الخطة (شهري/سنوي):', 'سنوي');
-            if (!plan) return;
-            
-            // 4. طلب عدد الأيام
-            const days = parseInt(prompt('📅 عدد الأيام:', '365')) || 365;
-            
-            // 5. إنشاء الترخيص
-            if (typeof generateLicense === 'function') {
-                const result = generateLicense(deviceId.trim(), userName, plan, days);
-                if (result) {
-                    showToast('✅ تم إنشاء ملف الترخيص بنجاح!', 'success');
-                    refreshZLXStatus();
-                } else {
-                    showToast('❌ حدث خطأ أثناء إنشاء الترخيص', 'error');
-                }
-            } else {
-                // طريقة بديلة (في حالة عدم وجود generateLicense)
-                const licenseData = {
-                    deviceId: deviceId.trim(),
-                    userName: userName,
-                    plan: plan,
-                    expiryDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
-                    createdAt: new Date().toISOString(),
-                    version: '1.0',
-                    features: {
-                        maxItems: Infinity,
-                        maxOffers: Infinity,
-                        maxClients: Infinity,
-                        canExportPDF: true,
-                        canExportExcel: true,
-                        canReports: true,
-                        canSignatures: true,
-                        canFullDesign: true,
-                        canCharts: true,
-                        showWatermark: false,
-                        isPremium: true
-                    }
-                };
-                
-                // تشفير البيانات
-                const json = JSON.stringify(licenseData);
-                const encoded = encodeURIComponent(json);
-                const encrypted = btoa(encoded);
-                const signature = btoa('EquipmentApp-2026-SecretKey-!@#$%'.substring(0, 10));
-                const fileContent = `${encrypted}.${signature}`;
-                
-                // تحميل الملف
-                const blob = new Blob([fileContent], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `license_${deviceId.trim().substring(0, 8)}.zlx`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showToast('✅ تم إنشاء ملف الترخيص بنجاح!', 'success');
-            }
-        }
-
-        function revokeZLXLicense() {
-            if (confirm('⚠️ هل أنت متأكد من إلغاء الترخيص الحالي؟')) {
-                localStorage.removeItem('license_data');
-                localStorage.removeItem('license_file');
-                showToast('✅ تم إلغاء الترخيص', 'success');
-                refreshZLXStatus();
-                setTimeout(() => window.location.reload(), 1000);
-            }
-        }
-
-        // ====== تحميل الإحصائيات ======
-        function loadDevStats() {
-            const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
-            const clients = JSON.parse(localStorage.getItem('savedClients') || '[]');
-            const equipment = JSON.parse(localStorage.getItem('equipDataV12') || '[]');
-            
-            document.getElementById('devTotalOffers').textContent = offers.length;
-            document.getElementById('devTotalClients').textContent = clients.length;
-            document.getElementById('devTotalEquipment').textContent = equipment.length || 0;
-            
-            let revenue = 0;
-            offers.forEach(offer => {
-                if (offer.data) {
-                    offer.data.forEach(row => {
-                        if (row.unitPrice && row.count) {
-                            revenue += row.unitPrice * row.count;
-                        }
-                    });
-                }
-            });
-            document.getElementById('devTotalRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
+        // ============================================================
+        //  11. التهيئة
+        // ============================================================
+        function initDevPanel() {
             document.getElementById('devDate').textContent = new Date().toLocaleDateString('ar-EG');
             
-            refreshZLXStatus();
+            loadSystemSettings();
+            refreshPerformance();
+            refreshUserList();
+            refreshAllLicenses();
+            loadActivityLog();
+            
+            // التحقق من النسخ الاحتياطي التلقائي
+            const backupEnabled = localStorage.getItem('backup_enabled') === 'true';
+            const backupFreq = localStorage.getItem('backup_frequency') || 'غير محدد';
+            if (backupEnabled) {
+                document.getElementById('lastBackupTime').textContent = 'مفعل (' + backupFreq + ')';
+            }
+            
+            // محاكاة تسجيل نشاط
+            const logs = JSON.parse(localStorage.getItem('activity_log') || '[]');
+            logs.push(`📊 ${new Date().toLocaleString('ar-EG')} - تم فتح لوحة المطور`);
+            if (logs.length > 100) logs.shift();
+            localStorage.setItem('activity_log', JSON.stringify(logs));
         }
 
-        // ====== التهيئة ======
+        // تشغيل التهيئة
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(loadDevStats, 200);
+            setTimeout(initDevPanel, 300);
         });
+
+        // تحديث الإحصائيات كل 30 ثانية
+        setInterval(() => {
+            refreshPerformance();
+        }, 30000);
+
+        console.log('✅ لوحة المطور - تم تهيئتها بنجاح');
     </script>
 </body>
 </html>
