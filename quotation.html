@@ -78,11 +78,14 @@
                     <button class="btn btn-success" onclick="saveCurrentOffer()">
                         <i class="fas fa-save"></i> حفظ
                     </button>
-                    <button class="btn btn-gold" onclick="savePDF()">
-                        <i class="fas fa-file-pdf"></i> PDF
+                    <button class="btn btn-gold" onclick="convertToInvoice()">
+                        <i class="fas fa-file-invoice"></i> تحويل إلى فاتورة
                     </button>
                     <button class="btn btn-primary" onclick="openPreview()">
                         <i class="fas fa-eye"></i> معاينة
+                    </button>
+                    <button class="btn btn-gold" onclick="savePDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
                     </button>
                 </div>
             </div>
@@ -270,6 +273,7 @@
                 { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
                 { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
                 { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'invoices.html', icon: 'fa-file-invoice', text: 'الفواتير' },
                 { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
                 { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
                 { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
