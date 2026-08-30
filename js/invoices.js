@@ -1,4 +1,4 @@
-// js/invoices.js - كود إدارة الفواتير
+// js/invoices.js - كود إدارة الفواتير (محدث مع التحقق من وجود العناصر)
 
 // ====== المتغيرات ======
 let invoices = [];
@@ -12,13 +12,22 @@ function loadInvoices() {
     } catch (e) {
         invoices = [];
     }
-    renderInvoices();
+    
+    // ✅ التحقق من وجود الجدول قبل التعديل
+    const tbody = document.getElementById('invoicesTableBody');
+    if (tbody) {
+        renderInvoices();
+    }
     updateStats();
 }
 
 // ====== عرض الفواتير ======
 function renderInvoices(filteredData) {
     const tbody = document.getElementById('invoicesTableBody');
+    
+    // ✅ التحقق من وجود العنصر
+    if (!tbody) return;
+    
     const data = filteredData || invoices;
     
     if (data.length === 0) {
@@ -35,10 +44,10 @@ function renderInvoices(filteredData) {
     
     tbody.innerHTML = data.map(inv => {
         const statusMap = {
-            'paid': { class: 'success', label: '✅ مدفوعة' },
-            'unpaid': { class: 'warning', label: '⏳ غير مدفوعة' },
-            'overdue': { class: 'danger', label: '🔴 متأخرة' },
-            'cancelled': { class: 'secondary', label: '❌ ملغية' }
+            'paid': { class: 'paid', label: '✅ مدفوعة' },
+            'unpaid': { class: 'unpaid', label: '⏳ غير مدفوعة' },
+            'overdue': { class: 'overdue', label: '🔴 متأخرة' },
+            'cancelled': { class: 'cancelled', label: '❌ ملغية' }
         };
         const status = statusMap[inv.status] || statusMap['unpaid'];
         const total = inv.total || 0;
@@ -79,10 +88,15 @@ function updateStats() {
     const unpaid = invoices.filter(i => i.status === 'unpaid' || i.status === 'overdue').length;
     const revenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total || 0), 0);
     
-    document.getElementById('totalInvoices').textContent = total;
-    document.getElementById('paidInvoices').textContent = paid;
-    document.getElementById('unpaidInvoices').textContent = unpaid;
-    document.getElementById('totalRevenue').textContent = revenue.toLocaleString('en-US') + ' ج.م';
+    const totalEl = document.getElementById('totalInvoices');
+    const paidEl = document.getElementById('paidInvoices');
+    const unpaidEl = document.getElementById('unpaidInvoices');
+    const revenueEl = document.getElementById('totalRevenue');
+    
+    if (totalEl) totalEl.textContent = total;
+    if (paidEl) paidEl.textContent = paid;
+    if (unpaidEl) unpaidEl.textContent = unpaid;
+    if (revenueEl) revenueEl.textContent = revenue.toLocaleString('en-US') + ' ج.م';
 }
 
 // ====== إنشاء فاتورة جديدة من العرض ======
@@ -90,7 +104,11 @@ function createInvoiceFromOffer() {
     const modal = document.getElementById('invoiceModal');
     const select = document.getElementById('offerSelect');
     
-    // جلب العروض المحفوظة
+    if (!modal || !select) {
+        showToast('⚠️ عناصر الصفحة غير مكتملة', 'error');
+        return;
+    }
+    
     const offers = JSON.parse(localStorage.getItem('savedOffers') || '[]');
     select.innerHTML = '<option value="">-- اختر عرض --</option>';
     offers.forEach(offer => {
@@ -100,25 +118,33 @@ function createInvoiceFromOffer() {
         select.appendChild(opt);
     });
     
-    // توليد رقم فاتورة تلقائي
     const nextNum = invoices.length + 1;
-    document.getElementById('invoiceNumber').value = `INV-2026-${String(nextNum).padStart(3, '0')}`;
+    const invoiceNumEl = document.getElementById('invoiceNumber');
+    if (invoiceNumEl) {
+        invoiceNumEl.value = `INV-2026-${String(nextNum).padStart(3, '0')}`;
+    }
     
-    // تاريخ الاستحقاق (بعد 30 يوم)
     const due = new Date();
     due.setDate(due.getDate() + 30);
-    document.getElementById('invoiceDueDate').value = due.toISOString().split('T')[0];
+    const dueEl = document.getElementById('invoiceDueDate');
+    if (dueEl) {
+        dueEl.value = due.toISOString().split('T')[0];
+    }
     
-    document.getElementById('offerPreview').style.display = 'none';
-    modal.classList.add('active');
+    const previewEl = document.getElementById('offerPreview');
+    if (previewEl) previewEl.style.display = 'none';
+    if (modal) modal.classList.add('active');
 }
 
 // ====== تحميل بيانات العرض ======
 function loadOfferData() {
     const select = document.getElementById('offerSelect');
+    if (!select) return;
+    
     const name = select.value;
     if (!name) {
-        document.getElementById('offerPreview').style.display = 'none';
+        const previewEl = document.getElementById('offerPreview');
+        if (previewEl) previewEl.style.display = 'none';
         return;
     }
     
@@ -127,7 +153,9 @@ function loadOfferData() {
     if (!offer) return;
     
     currentOfferData = offer;
-    document.getElementById('previewClient').textContent = offer.targetCompany || 'غير محدد';
+    
+    const clientEl = document.getElementById('previewClient');
+    if (clientEl) clientEl.textContent = offer.targetCompany || 'غير محدد';
     
     let total = 0;
     if (offer.data && Array.isArray(offer.data)) {
@@ -137,16 +165,21 @@ function loadOfferData() {
             }
         });
     }
-    document.getElementById('previewTotal').textContent = total.toLocaleString('en-US') + ' ج.م';
-    document.getElementById('previewItems').textContent = (offer.data ? offer.data.length : 0);
-    document.getElementById('offerPreview').style.display = 'block';
+    
+    const totalEl = document.getElementById('previewTotal');
+    const itemsEl = document.getElementById('previewItems');
+    const previewEl = document.getElementById('offerPreview');
+    
+    if (totalEl) totalEl.textContent = total.toLocaleString('en-US') + ' ج.م';
+    if (itemsEl) itemsEl.textContent = (offer.data ? offer.data.length : 0);
+    if (previewEl) previewEl.style.display = 'block';
 }
 
 // ====== حفظ الفاتورة ======
 function saveInvoice() {
-    const offerName = document.getElementById('offerSelect').value;
-    const number = document.getElementById('invoiceNumber').value;
-    const dueDate = document.getElementById('invoiceDueDate').value;
+    const offerName = document.getElementById('offerSelect')?.value;
+    const number = document.getElementById('invoiceNumber')?.value;
+    const dueDate = document.getElementById('invoiceDueDate')?.value;
     
     if (!offerName) {
         showToast('⚠️ الرجاء اختيار عرض', 'error');
@@ -171,7 +204,7 @@ function saveInvoice() {
     
     const invoice = {
         id: 'inv_' + Date.now(),
-        number: number,
+        number: number || `INV-2026-${String(invoices.length + 1).padStart(3, '0')}`,
         offerName: offerName,
         client: offer.targetCompany || 'غير محدد',
         data: offer.data || [],
@@ -195,7 +228,10 @@ function saveInvoice() {
 // ====== عرض الفاتورة ======
 function viewInvoice(id) {
     const inv = invoices.find(i => i.id === id);
-    if (!inv) return;
+    if (!inv) {
+        showToast('❌ الفاتورة غير موجودة', 'error');
+        return;
+    }
     
     let itemsHtml = '';
     if (inv.data && Array.isArray(inv.data)) {
@@ -282,7 +318,6 @@ function viewInvoice(id) {
         </div>
     `;
     
-    // عرض في مودال مؤقت
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.innerHTML = `
@@ -299,37 +334,47 @@ function viewInvoice(id) {
 function openPaymentModal(invoiceId) {
     currentInvoiceId = invoiceId;
     const modal = document.getElementById('paymentModal');
-    document.getElementById('paymentAmount').value = '';
-    document.getElementById('paymentMethod').value = 'cash';
-    document.getElementById('paymentNote').value = '';
-    document.getElementById('paymentResult').innerHTML = '';
+    if (!modal) {
+        showToast('⚠️ مودال الدفع غير موجود', 'error');
+        return;
+    }
+    
+    const amountEl = document.getElementById('paymentAmount');
+    const methodEl = document.getElementById('paymentMethod');
+    const noteEl = document.getElementById('paymentNote');
+    const resultEl = document.getElementById('paymentResult');
+    
+    if (amountEl) amountEl.value = '';
+    if (methodEl) methodEl.value = 'cash';
+    if (noteEl) noteEl.value = '';
+    if (resultEl) resultEl.innerHTML = '';
+    
     modal.classList.add('active');
 }
 
 // ====== حفظ الدفع ======
 function savePayment() {
-    const amount = parseFloat(document.getElementById('paymentAmount').value);
-    const method = document.getElementById('paymentMethod').value;
-    const note = document.getElementById('paymentNote').value.trim();
+    const amount = parseFloat(document.getElementById('paymentAmount')?.value);
+    const method = document.getElementById('paymentMethod')?.value;
+    const note = document.getElementById('paymentNote')?.value.trim();
     const resultDiv = document.getElementById('paymentResult');
     
     if (!amount || amount <= 0) {
-        resultDiv.innerHTML = '<span style="color:var(--danger);">⚠️ الرجاء إدخال مبلغ صحيح</span>';
+        if (resultDiv) resultDiv.innerHTML = '<span style="color:var(--danger);">⚠️ الرجاء إدخال مبلغ صحيح</span>';
         return;
     }
     
     const inv = invoices.find(i => i.id === currentInvoiceId);
     if (!inv) {
-        resultDiv.innerHTML = '<span style="color:var(--danger);">❌ الفاتورة غير موجودة</span>';
+        if (resultDiv) resultDiv.innerHTML = '<span style="color:var(--danger);">❌ الفاتورة غير موجودة</span>';
         return;
     }
     
     if (amount > (inv.total - (inv.paid || 0))) {
-        resultDiv.innerHTML = `<span style="color:var(--danger);">⚠️ المبلغ أكبر من المتبقي (${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ج.م)</span>`;
+        if (resultDiv) resultDiv.innerHTML = `<span style="color:var(--danger);">⚠️ المبلغ أكبر من المتبقي (${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ج.م)</span>`;
         return;
     }
     
-    // تسجيل الدفع
     inv.paid = (inv.paid || 0) + amount;
     inv.payments = inv.payments || [];
     inv.payments.push({
@@ -339,12 +384,10 @@ function savePayment() {
         date: new Date().toISOString()
     });
     
-    // تحديث الحالة
     if (inv.paid >= inv.total) {
         inv.status = 'paid';
     } else {
         inv.status = 'unpaid';
-        // التحقق من التأخر
         if (new Date(inv.dueDate) < new Date()) {
             inv.status = 'overdue';
         }
@@ -369,19 +412,21 @@ function deleteInvoice(id) {
 
 // ====== إغلاق المودالات ======
 function closeInvoiceModal() {
-    document.getElementById('invoiceModal').classList.remove('active');
+    const modal = document.getElementById('invoiceModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function closePaymentModal() {
-    document.getElementById('paymentModal').classList.remove('active');
+    const modal = document.getElementById('paymentModal');
+    if (modal) modal.classList.remove('active');
     currentInvoiceId = null;
 }
 
 // ====== الفلترة ======
 function applyFilter() {
-    const from = document.getElementById('filterFrom').value;
-    const to = document.getElementById('filterTo').value;
-    const status = document.getElementById('filterStatus').value;
+    const from = document.getElementById('filterFrom')?.value;
+    const to = document.getElementById('filterTo')?.value;
+    const status = document.getElementById('filterStatus')?.value;
     
     let filtered = [...invoices];
     
@@ -401,7 +446,6 @@ function applyFilter() {
 
 // ====== تصدير PDF ======
 function exportInvoicesPDF() {
-    // فتح نافذة الطباعة
     window.print();
 }
 
@@ -510,9 +554,30 @@ function printInvoice(id) {
     printWindow.document.close();
 }
 
-// ====== التهيئة ======
+// ============================================================
+//  ✅ جعل الدوال متاحة عالمياً
+// ============================================================
+window.loadInvoices = loadInvoices;
+window.renderInvoices = renderInvoices;
+window.updateStats = updateStats;
+window.createInvoiceFromOffer = createInvoiceFromOffer;
+window.loadOfferData = loadOfferData;
+window.saveInvoice = saveInvoice;
+window.viewInvoice = viewInvoice;
+window.openPaymentModal = openPaymentModal;
+window.savePayment = savePayment;
+window.deleteInvoice = deleteInvoice;
+window.closeInvoiceModal = closeInvoiceModal;
+window.closePaymentModal = closePaymentModal;
+window.applyFilter = applyFilter;
+window.exportInvoicesPDF = exportInvoicesPDF;
+window.exportInvoicesExcel = exportInvoicesExcel;
+window.printInvoice = printInvoice;
+
+// ============================================================
+//  ✅ التهيئة
+// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    // تحديث السايدبار ليشمل الفواتير
     setTimeout(function() {
         loadInvoices();
     }, 200);
