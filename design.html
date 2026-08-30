@@ -14,10 +14,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/design.css" />
-    
-    <!-- ✅ تحميل FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
     
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
@@ -25,85 +22,227 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#1a6b8a" />
-
+    
     <style>
-        /* ====== ✅ إجبار FontAwesome على الظهور ====== */
-        .fas,
-        .fa,
-        .far,
-        .fal,
-        .fab,
-        .fa-solid,
-        .fa-regular,
-        .fa-light,
-        .fa-thin,
-        .fa-duotone {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
-            display: inline-block !important;
-            font-style: normal !important;
-            font-variant: normal !important;
-            text-rendering: auto !important;
-            -webkit-font-smoothing: antialiased !important;
+        /* ====== تحسينات إضافية لصفحة التصميم ====== */
+        .color-grid-advanced {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
         }
-
-        /* ====== أيقونات الأزرار ====== */
-        .btn i,
-        .btn .fas,
-        .btn .fa {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
-            font-size: 0.95rem !important;
+        .color-item-advanced {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            background: var(--bg-light);
+            padding: 0.5rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
         }
-
-        /* ====== أيقونات الهيدر ====== */
-        .header-hamburger .logo h1 i,
-        .header-hamburger .header-actions .btn-icon i,
-        .hamburger-btn i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
+        .color-item-advanced label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
-        /* ====== أيقونات السايدبار ====== */
-        .sidebar-links a i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
+        .color-item-advanced .color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
         }
-
-        /* ====== أيقونات الألوان ====== */
-        .color-item label i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
+        .color-item-advanced input[type="color"] {
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 2px;
+            background: transparent;
+            flex-shrink: 0;
         }
-
-        /* ====== أيقونات صفحة التصميم ====== */
-        .icon-item i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
-            font-size: 2.5rem !important;
-            display: inline-block !important;
-            width: 60px !important;
-            height: 60px !important;
-            line-height: 60px !important;
-            text-align: center !important;
-            color: var(--icon-color, #1a6b8a);
+        .color-item-advanced input[type="text"] {
+            width: 70px;
+            padding: 0.15rem 0.3rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-size: 0.6rem;
+            font-family: monospace;
+            color: var(--text);
         }
-
-        .icon-item {
-            min-height: 110px !important;
-            justify-content: center !important;
+        body.dark-mode .color-item-advanced {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
         }
-
-        /* ====== أيقونات المعاينة ====== */
-        .preview-box i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
+        body.dark-mode .color-item-advanced label {
+            color: #d4c8a0;
         }
-
-        /* ====== أيقونات الفوتر ====== */
-        #footer i {
-            font-family: 'Font Awesome 6 Free' !important;
-            font-weight: 900 !important;
+        body.dark-mode .color-item-advanced input[type="text"] {
+            background: rgba(0,0,0,0.3);
+            color: #d4c8a0;
+            border-color: rgba(255,255,255,0.06);
+        }
+        
+        .theme-presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .theme-preset-btn {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            background: var(--bg-light);
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+            color: var(--text);
+        }
+        .theme-preset-btn:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        .theme-preset-btn.active {
+            border-color: var(--gold);
+            background: var(--gold);
+            color: #fff;
+        }
+        body.dark-mode .theme-preset-btn {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+            color: #d4c8a0;
+        }
+        body.dark-mode .theme-preset-btn.active {
+            background: var(--gold);
+            color: #1a1410;
+        }
+        
+        .live-preview-area {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px dashed var(--border);
+            background: var(--body-bg);
+            transition: all 0.3s;
+        }
+        .live-preview-area .preview-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .live-preview-area .preview-box {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--bg-light);
+            color: var(--text);
+        }
+        .live-preview-area .preview-box.primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.gold {
+            background: var(--gold);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.success {
+            background: var(--success);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.warning {
+            background: var(--warning);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.purple {
+            background: var(--purple);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.pink {
+            background: var(--pink);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.teal {
+            background: var(--teal);
+            color: #fff;
+        }
+        .live-preview-area .preview-box.info {
+            background: var(--info);
+            color: #fff;
+        }
+        .preview-card-sample {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-light);
+            color: var(--text);
+            margin-top: 0.5rem;
+        }
+        .preview-card-sample .sample-title {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .preview-card-sample .sample-text {
+            color: var(--text-light);
+        }
+        body.dark-mode .preview-card-sample {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        body.dark-mode .preview-card-sample .sample-title {
+            color: var(--gold);
+        }
+        body.dark-mode .preview-card-sample .sample-text {
+            color: #a09880;
+        }
+        
+        .design-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .design-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .color-grid-advanced {
+                grid-template-columns: 1fr 1fr;
+            }
+            .color-item-advanced input[type="text"] {
+                width: 50px;
+                font-size: 0.5rem;
+            }
+            .theme-presets {
+                justify-content: center;
+            }
+            .live-preview-area .preview-row {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .color-grid-advanced {
+                grid-template-columns: 1fr;
+            }
+            .design-actions .btn {
+                min-width: auto;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -154,15 +293,33 @@
     <div class="dashboard">
         <div class="design-container">
             <div class="page-header">
-                <h1><i class="fas fa-palette"></i> إعدادات التصميم</h1>
-                <p class="page-subtitle">تخصيص مظهر وواجهة التطبيق</p>
+                <h1><i class="fas fa-palette"></i> إعدادات التصميم المتقدمة</h1>
+                <p class="page-subtitle">تحكم كامل في ألوان ومظهر التطبيق</p>
             </div>
 
-            <!-- قسم الألوان -->
+            <!-- ====== أنماط جاهزة ====== -->
             <div class="section-card">
                 <div class="section-header">
-                    <h2><i class="fas fa-paint-brush"></i> الألوان</h2>
-                    <button class="btn btn-danger" onclick="resetDesignColors()">
+                    <h2><i class="fas fa-swatchbook"></i> أنماط جاهزة</h2>
+                    <span style="font-size:0.7rem;color:var(--text-light);">اختر نمطاً ثم عدل عليه</span>
+                </div>
+                <div class="theme-presets">
+                    <button class="theme-preset-btn" onclick="loadTheme('classic')">🟦 كلاسيكي</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('modern')">🔵 عصري</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('luxury')">✨ فاخر</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('warm')">🟤 دافئ</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('cool')">🟢 بارد</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('minimal')">⚪ بسيط</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('vibrant')">🔴 مبهج</button>
+                    <button class="theme-preset-btn" onclick="loadTheme('elegant')">⬛ أنيق</button>
+                </div>
+            </div>
+
+            <!-- ====== الألوان الأساسية ====== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-paint-brush"></i> الألوان الأساسية</h2>
+                    <button class="btn btn-danger" onclick="resetAllColors()">
                         <i class="fas fa-undo"></i> إعادة تعيين
                     </button>
                 </div>
@@ -177,62 +334,158 @@
                         <input type="color" id="goldColor" value="#c9a84c" onchange="changeGold(this.value)" />
                         <input type="text" id="goldColorText" value="#c9a84c" onchange="document.getElementById('goldColor').value=this.value;changeGold(this.value)" />
                     </div>
-                    <div class="color-item">
-                        <label><i class="fas fa-circle" style="color:#f0f4f8;"></i> لون الخلفية</label>
-                        <input type="color" id="bgColor" value="#f0f4f8" onchange="changeBgColor(this.value)" />
-                        <input type="text" id="bgColorText" value="#f0f4f8" onchange="document.getElementById('bgColor').value=this.value;changeBgColor(this.value)" />
-                    </div>
-                    <div class="color-item">
-                        <label><i class="fas fa-circle" style="color:#1a2a3a;"></i> لون النصوص</label>
-                        <input type="color" id="textColor" value="#1a2a3a" onchange="changeTextColor(this.value)" />
-                        <input type="text" id="textColorText" value="#1a2a3a" onchange="document.getElementById('textColor').value=this.value;changeTextColor(this.value)" />
-                    </div>
-                    <div class="color-item">
-                        <label><i class="fas fa-circle" style="color:#888888;"></i> لون الأيقونات</label>
-                        <input type="color" id="iconColor" value="#888888" onchange="changeIconColor(this.value)" />
-                        <input type="text" id="iconColorText" value="#888888" onchange="document.getElementById('iconColor').value=this.value;changeIconColor(this.value)" />
-                    </div>
-                </div>
-                <div class="color-preview">
-                    <div class="preview-box" style="background:var(--primary);">أساسي</div>
-                    <div class="preview-box" style="background:var(--gold);">ذهبي</div>
-                    <div class="preview-box" style="background:var(--body-bg);color:var(--text);">خلفية</div>
-                    <div class="preview-box" style="background:var(--text);">نص</div>
-                    <div class="preview-box" style="background:var(--icon-color);">أيقونة</div>
                 </div>
             </div>
 
-            <!-- قسم الخطوط -->
+            <!-- ====== الألوان المتقدمة (جديد) ====== -->
             <div class="section-card">
                 <div class="section-header">
-                    <h2><i class="fas fa-font"></i> الخطوط</h2>
+                    <h2><i class="fas fa-palette"></i> ألوان متقدمة</h2>
+                    <span style="font-size:0.7rem;color:var(--text-light);">تحكم كامل في كل جزء</span>
                 </div>
-                <div class="font-options">
-                    <div class="font-item">
-                        <label>نوع الخط الرئيسي</label>
-                        <select id="mainFont" onchange="changeFont(this.value)">
-                            <option value="Cairo">Cairo</option>
-                            <option value="Tajawal">Tajawal</option>
-                            <option value="Amiri">Amiri</option>
-                            <option value="Noto Kufi Arabic">Noto Kufi Arabic</option>
-                            <option value="IBM Plex Sans Arabic">IBM Plex Sans Arabic</option>
-                        </select>
+                <div class="color-grid-advanced">
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#f0f4f8;"></i> خلفية الصفحة</label>
+                        <div class="color-row">
+                            <input type="color" id="bgColor" value="#f0f4f8" onchange="changeBgColor(this.value)" />
+                            <input type="text" id="bgColorText" value="#f0f4f8" onchange="document.getElementById('bgColor').value=this.value;changeBgColor(this.value)" />
+                        </div>
                     </div>
-                    <div class="font-item">
-                        <label>حجم الخط الأساسي</label>
-                        <div class="font-size-control">
-                            <input type="range" id="fontSize" min="14" max="22" value="16" oninput="changeFontSize(this.value)" />
-                            <span id="fontSizeDisplay">16px</span>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#ffffff;"></i> خلفية البطاقات</label>
+                        <div class="color-row">
+                            <input type="color" id="dashBg" value="#ffffff" onchange="changeDashBg(this.value)" />
+                            <input type="text" id="dashBgText" value="#ffffff" onchange="document.getElementById('dashBg').value=this.value;changeDashBg(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#1a2a3a;"></i> لون النصوص</label>
+                        <div class="color-row">
+                            <input type="color" id="textColor" value="#1a2a3a" onchange="changeTextColor(this.value)" />
+                            <input type="text" id="textColorText" value="#1a2a3a" onchange="document.getElementById('textColor').value=this.value;changeTextColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#4a5a6a;"></i> النصوص الخفيفة</label>
+                        <div class="color-row">
+                            <input type="color" id="textLightColor" value="#4a5a6a" onchange="changeTextLightColor(this.value)" />
+                            <input type="text" id="textLightColorText" value="#4a5a6a" onchange="document.getElementById('textLightColor').value=this.value;changeTextLightColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#e0e8ec;"></i> لون الحدود</label>
+                        <div class="color-row">
+                            <input type="color" id="borderColor" value="#e0e8ec" onchange="changeBorderColor(this.value)" />
+                            <input type="text" id="borderColorText" value="#e0e8ec" onchange="document.getElementById('borderColor').value=this.value;changeBorderColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#888888;"></i> لون الأيقونات</label>
+                        <div class="color-row">
+                            <input type="color" id="iconColor" value="#888888" onchange="changeIconColor(this.value)" />
+                            <input type="text" id="iconColorText" value="#888888" onchange="document.getElementById('iconColor').value=this.value;changeIconColor(this.value)" />
                         </div>
                     </div>
                 </div>
-                <div class="font-preview">
-                    <p style="font-size:16px;">مرحباً، هذا مثال على شكل الخط في التطبيق</p>
-                    <p style="font-size:14px; opacity:0.6;">نظام عروض أسعار المعدات - تصميم عصري</p>
+            </div>
+
+            <!-- ====== ألوان الحالة ====== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-circle"></i> ألوان الحالة (Status Colors)</h2>
+                </div>
+                <div class="color-grid-advanced">
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#2d8f4a;"></i> نجاح (Success)</label>
+                        <div class="color-row">
+                            <input type="color" id="successColor" value="#2d8f4a" onchange="changeSuccessColor(this.value)" />
+                            <input type="text" id="successColorText" value="#2d8f4a" onchange="document.getElementById('successColor').value=this.value;changeSuccessColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#c0392b;"></i> خطأ (Danger)</label>
+                        <div class="color-row">
+                            <input type="color" id="dangerColor" value="#c0392b" onchange="changeDangerColor(this.value)" />
+                            <input type="text" id="dangerColorText" value="#c0392b" onchange="document.getElementById('dangerColor').value=this.value;changeDangerColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#e67e22;"></i> تحذير (Warning)</label>
+                        <div class="color-row">
+                            <input type="color" id="warningColor" value="#e67e22" onchange="changeWarningColor(this.value)" />
+                            <input type="text" id="warningColorText" value="#e67e22" onchange="document.getElementById('warningColor').value=this.value;changeWarningColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#6c3483;"></i> بنفسجي (Purple)</label>
+                        <div class="color-row">
+                            <input type="color" id="purpleColor" value="#6c3483" onchange="changePurpleColor(this.value)" />
+                            <input type="text" id="purpleColorText" value="#6c3483" onchange="document.getElementById('purpleColor').value=this.value;changePurpleColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#d3546a;"></i> وردي (Pink)</label>
+                        <div class="color-row">
+                            <input type="color" id="pinkColor" value="#d3546a" onchange="changePinkColor(this.value)" />
+                            <input type="text" id="pinkColorText" value="#d3546a" onchange="document.getElementById('pinkColor').value=this.value;changePinkColor(this.value)" />
+                        </div>
+                    </div>
+                    <div class="color-item-advanced">
+                        <label><i class="fas fa-circle" style="color:#1abc9c;"></i> فيروزي (Teal)</label>
+                        <div class="color-row">
+                            <input type="color" id="tealColor" value="#1abc9c" onchange="changeTealColor(this.value)" />
+                            <input type="text" id="tealColorText" value="#1abc9c" onchange="document.getElementById('tealColor').value=this.value;changeTealColor(this.value)" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- قسم الأيقونات (محدث) -->
+            <!-- ====== معاينة مباشرة ====== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-eye"></i> معاينة مباشرة</h2>
+                </div>
+                <div class="live-preview-area">
+                    <div class="preview-row">
+                        <span class="preview-box primary">أساسي</span>
+                        <span class="preview-box gold">ذهبي</span>
+                        <span class="preview-box success">نجاح</span>
+                        <span class="preview-box danger">خطأ</span>
+                        <span class="preview-box warning">تحذير</span>
+                        <span class="preview-box purple">بنفسجي</span>
+                        <span class="preview-box pink">وردي</span>
+                        <span class="preview-box teal">فيروزي</span>
+                        <span class="preview-box info">معلومات</span>
+                    </div>
+                    <div class="preview-card-sample">
+                        <div class="sample-title">🔹 عنوان البطاقة</div>
+                        <div class="sample-text">هذا نص تجريبي لمعاينة شكل البطاقة والألوان في التطبيق</div>
+                        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+                            <button class="btn btn-primary btn-sm">زر أساسي</button>
+                            <button class="btn btn-gold btn-sm">زر ذهبي</button>
+                            <button class="btn btn-success btn-sm">زر نجاح</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== أزرار التحكم ====== -->
+            <div class="design-actions">
+                <button class="btn btn-success" onclick="saveAllColors()">
+                    <i class="fas fa-save"></i> حفظ الإعدادات
+                </button>
+                <button class="btn btn-primary" onclick="exportColorSettings()">
+                    <i class="fas fa-file-export"></i> تصدير
+                </button>
+                <button class="btn btn-gold" onclick="importColorSettings()">
+                    <i class="fas fa-file-import"></i> استيراد
+                </button>
+                <button class="btn btn-danger" onclick="resetAllColors()">
+                    <i class="fas fa-undo"></i> إعادة تعيين الكل
+                </button>
+            </div>
+
+            <!-- ====== الأيقونات والمظهر (موجود سابقاً) ====== -->
             <div class="section-card">
                 <div class="section-header">
                     <h2><i class="fas fa-icons"></i> أيقونات المعدات</h2>
@@ -243,30 +496,30 @@
                         <span>رافعة مقصية</span>
                         <input type="radio" name="iconSelect" value="fa-arrow-up" checked />
                     </div>
-                    <div class="icon-item" onclick="selectIcon('fa-building')">
-                        <i class="fas fa-building"></i>
+                    <div class="icon-item" onclick="selectIcon('fa-tower-crane')">
+                        <i class="fas fa-tower-crane"></i>
                         <span>ونش أحمال</span>
-                        <input type="radio" name="iconSelect" value="fa-building" />
+                        <input type="radio" name="iconSelect" value="fa-tower-crane" />
                     </div>
                     <div class="icon-item" onclick="selectIcon('fa-truck')">
                         <i class="fas fa-truck"></i>
                         <span>فورك لفت</span>
                         <input type="radio" name="iconSelect" value="fa-truck" />
                     </div>
-                    <div class="icon-item" onclick="selectIcon('fa-hand-holding')">
-                        <i class="fas fa-hand-holding"></i>
+                    <div class="icon-item" onclick="selectIcon('fa-hand-holding-heart')">
+                        <i class="fas fa-hand-holding-heart"></i>
                         <span>مانليفت</span>
-                        <input type="radio" name="iconSelect" value="fa-hand-holding" />
+                        <input type="radio" name="iconSelect" value="fa-hand-holding-heart" />
                     </div>
-                    <div class="icon-item" onclick="selectIcon('fa-shield-alt')">
-                        <i class="fas fa-shield-alt"></i>
+                    <div class="icon-item" onclick="selectIcon('fa-hard-hat')">
+                        <i class="fas fa-hard-hat"></i>
                         <span>معدات أمان</span>
-                        <input type="radio" name="iconSelect" value="fa-shield-alt" />
+                        <input type="radio" name="iconSelect" value="fa-hard-hat" />
                     </div>
-                    <div class="icon-item" onclick="selectIcon('fa-arrows-alt')">
-                        <i class="fas fa-arrows-alt"></i>
+                    <div class="icon-item" onclick="selectIcon('fa-up-down-left-right')">
+                        <i class="fas fa-up-down-left-right"></i>
                         <span>مكبس هيدروليكي</span>
-                        <input type="radio" name="iconSelect" value="fa-arrows-alt" />
+                        <input type="radio" name="iconSelect" value="fa-up-down-left-right" />
                     </div>
                 </div>
                 <div class="icon-actions">
@@ -279,7 +532,7 @@
                 </div>
             </div>
 
-            <!-- قسم المظهر -->
+            <!-- ====== المظهر ====== -->
             <div class="section-card">
                 <div class="section-header">
                     <h2><i class="fas fa-moon"></i> المظهر</h2>
@@ -302,12 +555,13 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <div id="footer"></div>
 
-    <!-- ====== كود السايدبار ====== -->
+    <!-- ====== السايدبار ====== -->
     <script>
         (function() {
             const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -322,6 +576,7 @@
                 { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
                 { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
                 { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'invoices.html', icon: 'fa-file-invoice', text: 'الفواتير' },
                 { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
                 { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
                 { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
@@ -413,8 +668,381 @@
         })();
     </script>
 
+    <!-- ====== JavaScript الرئيسي ====== -->
     <script src="js/license.js"></script>
     <script src="js/main.js"></script>
     <script src="js/design.js"></script>
+    
+    <script>
+        // ============================================================
+        //  دوال الألوان المتقدمة (جديد)
+        // ============================================================
+
+        // ====== تغيير خلفية البطاقات ======
+        function changeDashBg(color) {
+            document.documentElement.style.setProperty('--dash-bg', color);
+            document.documentElement.style.setProperty('--bg-light', color);
+            localStorage.setItem('dashBg', color);
+            document.getElementById('dashBgText').value = color;
+        }
+
+        // ====== تغيير لون النصوص الخفيفة ======
+        function changeTextLightColor(color) {
+            document.documentElement.style.setProperty('--text-light', color);
+            localStorage.setItem('textLightColor', color);
+            document.getElementById('textLightColorText').value = color;
+        }
+
+        // ====== تغيير لون الحدود ======
+        function changeBorderColor(color) {
+            document.documentElement.style.setProperty('--border', color);
+            localStorage.setItem('borderColor', color);
+            document.getElementById('borderColorText').value = color;
+        }
+
+        // ====== تغيير ألوان الحالة ======
+        function changeSuccessColor(color) {
+            document.documentElement.style.setProperty('--success', color);
+            localStorage.setItem('successColor', color);
+            document.getElementById('successColorText').value = color;
+        }
+
+        function changeDangerColor(color) {
+            document.documentElement.style.setProperty('--danger', color);
+            localStorage.setItem('dangerColor', color);
+            document.getElementById('dangerColorText').value = color;
+        }
+
+        function changeWarningColor(color) {
+            document.documentElement.style.setProperty('--warning', color);
+            localStorage.setItem('warningColor', color);
+            document.getElementById('warningColorText').value = color;
+        }
+
+        function changePurpleColor(color) {
+            document.documentElement.style.setProperty('--purple', color);
+            localStorage.setItem('purpleColor', color);
+            document.getElementById('purpleColorText').value = color;
+        }
+
+        function changePinkColor(color) {
+            document.documentElement.style.setProperty('--pink', color);
+            localStorage.setItem('pinkColor', color);
+            document.getElementById('pinkColorText').value = color;
+        }
+
+        function changeTealColor(color) {
+            document.documentElement.style.setProperty('--teal', color);
+            localStorage.setItem('tealColor', color);
+            document.getElementById('tealColorText').value = color;
+        }
+
+        // ====== تحميل الألوان المتقدمة ======
+        function loadAdvancedColors() {
+            const colors = {
+                dashBg: localStorage.getItem('dashBg'),
+                textLight: localStorage.getItem('textLightColor'),
+                border: localStorage.getItem('borderColor'),
+                success: localStorage.getItem('successColor'),
+                danger: localStorage.getItem('dangerColor'),
+                warning: localStorage.getItem('warningColor'),
+                purple: localStorage.getItem('purpleColor'),
+                pink: localStorage.getItem('pinkColor'),
+                teal: localStorage.getItem('tealColor')
+            };
+
+            if (colors.dashBg) {
+                document.documentElement.style.setProperty('--dash-bg', colors.dashBg);
+                document.documentElement.style.setProperty('--bg-light', colors.dashBg);
+                document.getElementById('dashBg').value = colors.dashBg;
+                document.getElementById('dashBgText').value = colors.dashBg;
+            }
+            if (colors.textLight) {
+                document.documentElement.style.setProperty('--text-light', colors.textLight);
+                document.getElementById('textLightColor').value = colors.textLight;
+                document.getElementById('textLightColorText').value = colors.textLight;
+            }
+            if (colors.border) {
+                document.documentElement.style.setProperty('--border', colors.border);
+                document.getElementById('borderColor').value = colors.border;
+                document.getElementById('borderColorText').value = colors.border;
+            }
+            if (colors.success) {
+                document.documentElement.style.setProperty('--success', colors.success);
+                document.getElementById('successColor').value = colors.success;
+                document.getElementById('successColorText').value = colors.success;
+            }
+            if (colors.danger) {
+                document.documentElement.style.setProperty('--danger', colors.danger);
+                document.getElementById('dangerColor').value = colors.danger;
+                document.getElementById('dangerColorText').value = colors.danger;
+            }
+            if (colors.warning) {
+                document.documentElement.style.setProperty('--warning', colors.warning);
+                document.getElementById('warningColor').value = colors.warning;
+                document.getElementById('warningColorText').value = colors.warning;
+            }
+            if (colors.purple) {
+                document.documentElement.style.setProperty('--purple', colors.purple);
+                document.getElementById('purpleColor').value = colors.purple;
+                document.getElementById('purpleColorText').value = colors.purple;
+            }
+            if (colors.pink) {
+                document.documentElement.style.setProperty('--pink', colors.pink);
+                document.getElementById('pinkColor').value = colors.pink;
+                document.getElementById('pinkColorText').value = colors.pink;
+            }
+            if (colors.teal) {
+                document.documentElement.style.setProperty('--teal', colors.teal);
+                document.getElementById('tealColor').value = colors.teal;
+                document.getElementById('tealColorText').value = colors.teal;
+            }
+        }
+
+        // ====== حفظ جميع الألوان ======
+        function saveAllColors() {
+            const colorKeys = [
+                'primaryColor', 'goldColor', 'bgColor', 'dashBg', 
+                'textColor', 'textLightColor', 'borderColor', 'iconColor',
+                'successColor', 'dangerColor', 'warningColor', 
+                'purpleColor', 'pinkColor', 'tealColor'
+            ];
+            
+            colorKeys.forEach(key => {
+                const el = document.getElementById(key);
+                if (el) {
+                    localStorage.setItem(key, el.value);
+                }
+            });
+            
+            showToast('✅ تم حفظ جميع إعدادات الألوان', 'success');
+        }
+
+        // ====== إعادة تعيين جميع الألوان ======
+        function resetAllColors() {
+            if (!confirm('⚠️ هل أنت متأكد من إعادة تعيين جميع الألوان إلى الإعدادات الافتراضية؟')) return;
+            
+            const defaults = {
+                primaryColor: '#1a6b8a',
+                goldColor: '#c9a84c',
+                bgColor: '#f0f4f8',
+                dashBg: '#ffffff',
+                textColor: '#1a2a3a',
+                textLightColor: '#4a5a6a',
+                borderColor: '#e0e8ec',
+                iconColor: '#888888',
+                successColor: '#2d8f4a',
+                dangerColor: '#c0392b',
+                warningColor: '#e67e22',
+                purpleColor: '#6c3483',
+                pinkColor: '#d3546a',
+                tealColor: '#1abc9c'
+            };
+            
+            Object.keys(defaults).forEach(key => {
+                const el = document.getElementById(key);
+                const textEl = document.getElementById(key + 'Text');
+                if (el) {
+                    el.value = defaults[key];
+                    el.onchange(el.value);
+                }
+                if (textEl) {
+                    textEl.value = defaults[key];
+                }
+                localStorage.removeItem(key);
+            });
+            
+            // إعادة تحميل الصفحة لتطبيق التغييرات
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+
+        // ====== تحميل أنماط جاهزة ======
+        function loadTheme(theme) {
+            const themes = {
+                classic: {
+                    primary: '#1a6b8a', gold: '#c9a84c', bg: '#f0f4f8',
+                    dashBg: '#ffffff', text: '#1a2a3a', textLight: '#4a5a6a',
+                    border: '#e0e8ec', icon: '#888888'
+                },
+                modern: {
+                    primary: '#0d47a1', gold: '#f9a825', bg: '#e8eaf6',
+                    dashBg: '#ffffff', text: '#1a237e', textLight: '#5c6bc0',
+                    border: '#c5cae9', icon: '#5c6bc0'
+                },
+                luxury: {
+                    primary: '#1a1a2e', gold: '#d4af37', bg: '#16213e',
+                    dashBg: '#1e2a4a', text: '#e0d5c1', textLight: '#a09880',
+                    border: '#2a3a5a', icon: '#c9a84c'
+                },
+                warm: {
+                    primary: '#6d4c41', gold: '#bf8f4a', bg: '#f5ede6',
+                    dashBg: '#ffffff', text: '#3e2723', textLight: '#8d6e63',
+                    border: '#d7ccc8', icon: '#8d6e63'
+                },
+                cool: {
+                    primary: '#00695c', gold: '#ffb300', bg: '#e0f2f1',
+                    dashBg: '#ffffff', text: '#004d40', textLight: '#26a69a',
+                    border: '#b2dfdb', icon: '#26a69a'
+                },
+                minimal: {
+                    primary: '#2c3e50', gold: '#e67e22', bg: '#f7f9fc',
+                    dashBg: '#ffffff', text: '#2c3e50', textLight: '#7f8c8d',
+                    border: '#dfe6e9', icon: '#7f8c8d'
+                },
+                vibrant: {
+                    primary: '#d32f2f', gold: '#fbc02d', bg: '#fff8e1',
+                    dashBg: '#ffffff', text: '#4e342e', textLight: '#f57c00',
+                    border: '#ffe0b2', icon: '#f57c00'
+                },
+                elegant: {
+                    primary: '#37474f', gold: '#78909c', bg: '#eceff1',
+                    dashBg: '#ffffff', text: '#263238', textLight: '#607d8b',
+                    border: '#cfd8dc', icon: '#607d8b'
+                }
+            };
+
+            const t = themes[theme];
+            if (!t) return;
+
+            // تطبيق الألوان
+            document.documentElement.style.setProperty('--primary', t.primary);
+            document.documentElement.style.setProperty('--gold', t.gold);
+            document.documentElement.style.setProperty('--body-bg', t.bg);
+            document.documentElement.style.setProperty('--dash-bg', t.dashBg);
+            document.documentElement.style.setProperty('--bg-light', t.dashBg);
+            document.documentElement.style.setProperty('--text', t.text);
+            document.documentElement.style.setProperty('--text-light', t.textLight);
+            document.documentElement.style.setProperty('--border', t.border);
+            document.documentElement.style.setProperty('--icon-color', t.icon);
+
+            // تحديث الحقول
+            const map = {
+                primaryColor: t.primary, goldColor: t.gold, bgColor: t.bg,
+                dashBg: t.dashBg, textColor: t.text, textLightColor: t.textLight,
+                borderColor: t.border, iconColor: t.icon
+            };
+            
+            Object.keys(map).forEach(key => {
+                const el = document.getElementById(key);
+                const textEl = document.getElementById(key + 'Text');
+                if (el) el.value = map[key];
+                if (textEl) textEl.value = map[key];
+                localStorage.setItem(key, map[key]);
+            });
+
+            showToast(`✅ تم تطبيق النمط ${theme}`, 'success');
+        }
+
+        // ====== تصدير الإعدادات ======
+        function exportColorSettings() {
+            const settings = {};
+            const keys = [
+                'primaryColor', 'goldColor', 'bgColor', 'dashBg',
+                'textColor', 'textLightColor', 'borderColor', 'iconColor',
+                'successColor', 'dangerColor', 'warningColor',
+                'purpleColor', 'pinkColor', 'tealColor'
+            ];
+            
+            keys.forEach(key => {
+                settings[key] = localStorage.getItem(key) || document.getElementById(key)?.value || '';
+            });
+            
+            const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `color_settings_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ تم تصدير إعدادات الألوان', 'success');
+        }
+
+        // ====== استيراد الإعدادات ======
+        function importColorSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const settings = JSON.parse(ev.target.result);
+                        Object.keys(settings).forEach(key => {
+                            const el = document.getElementById(key);
+                            const textEl = document.getElementById(key + 'Text');
+                            if (el) {
+                                el.value = settings[key];
+                                el.onchange(settings[key]);
+                            }
+                            if (textEl) textEl.value = settings[key];
+                            localStorage.setItem(key, settings[key]);
+                        });
+                        showToast('✅ تم استيراد إعدادات الألوان', 'success');
+                        setTimeout(() => window.location.reload(), 500);
+                    } catch (err) {
+                        showToast('❌ خطأ في قراءة الملف', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ====== التهيئة ======
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل الألوان المتقدمة
+            setTimeout(() => {
+                loadAdvancedColors();
+                // تحديث حقول الألوان الأساسية
+                const primary = localStorage.getItem('primaryColor');
+                const gold = localStorage.getItem('goldColor');
+                const bg = localStorage.getItem('bgColor');
+                const text = localStorage.getItem('textColor');
+                const icon = localStorage.getItem('iconColorPicker');
+                
+                if (primary) {
+                    document.getElementById('primaryColor').value = primary;
+                    document.getElementById('primaryColorText').value = primary;
+                }
+                if (gold) {
+                    document.getElementById('goldColor').value = gold;
+                    document.getElementById('goldColorText').value = gold;
+                }
+                if (bg) {
+                    document.getElementById('bgColor').value = bg;
+                    document.getElementById('bgColorText').value = bg;
+                }
+                if (text) {
+                    document.getElementById('textColor').value = text;
+                    document.getElementById('textColorText').value = text;
+                }
+                if (icon) {
+                    document.getElementById('iconColor').value = icon;
+                    document.getElementById('iconColorText').value = icon;
+                }
+            }, 100);
+        });
+
+        // جعل الدوال متاحة عالمياً
+        window.changeDashBg = changeDashBg;
+        window.changeTextLightColor = changeTextLightColor;
+        window.changeBorderColor = changeBorderColor;
+        window.changeSuccessColor = changeSuccessColor;
+        window.changeDangerColor = changeDangerColor;
+        window.changeWarningColor = changeWarningColor;
+        window.changePurpleColor = changePurpleColor;
+        window.changePinkColor = changePinkColor;
+        window.changeTealColor = changeTealColor;
+        window.loadAdvancedColors = loadAdvancedColors;
+        window.saveAllColors = saveAllColors;
+        window.resetAllColors = resetAllColors;
+        window.loadTheme = loadTheme;
+        window.exportColorSettings = exportColorSettings;
+        window.importColorSettings = importColorSettings;
+    </script>
 </body>
 </html>
