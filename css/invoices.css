@@ -1,0 +1,416 @@
+/* css/invoices.css - أنماط صفحة إدارة الفواتير */
+
+/* ====== حاوية الفواتير ====== */
+.invoices-container .page-header {
+    margin-bottom: 1.5rem;
+}
+
+.invoices-container .page-header h1 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    font-family: 'Cairo', sans-serif;
+}
+
+.invoices-container .page-header h1 i {
+    color: var(--gold);
+    margin-left: 10px;
+}
+
+/* ====== الإحصائيات ====== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1.2rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+body.dark-mode .stat-card {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.06);
+}
+
+.stat-card .stat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.stat-card .stat-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+}
+
+.stat-card .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 0.2rem;
+}
+
+body.dark-mode .stat-card .stat-number {
+    color: #d4c8a0;
+}
+
+/* ====== الفلتر ====== */
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 140px;
+}
+
+.filter-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.filter-group label i {
+    color: var(--gold);
+    font-size: 0.75rem;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.4rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    min-height: 38px;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,107,138,0.1);
+}
+
+body.dark-mode .filter-group label {
+    color: #d4c8a0;
+}
+
+body.dark-mode .filter-group input,
+body.dark-mode .filter-group select {
+    background: rgba(0,0,0,0.3);
+    color: #d4c8a0;
+    border-color: rgba(255,255,255,0.06);
+}
+
+.filter-section .btn {
+    min-height: 38px;
+    padding: 0.4rem 1.2rem;
+}
+
+/* ====== أزرار الجدول ====== */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ====== شارات الحالة ====== */
+.status-badge {
+    padding: 0.2rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.status-badge.paid,
+.status-badge.success {
+    background: rgba(45,143,74,0.1);
+    color: var(--success);
+}
+
+.status-badge.unpaid,
+.status-badge.warning {
+    background: rgba(230,126,34,0.1);
+    color: var(--warning);
+}
+
+.status-badge.overdue,
+.status-badge.danger {
+    background: rgba(192,57,43,0.1);
+    color: var(--danger);
+}
+
+.status-badge.cancelled,
+.status-badge.secondary {
+    background: rgba(0,0,0,0.05);
+    color: var(--text-light);
+}
+
+/* ====== الجدول ====== */
+#invoicesTableBody tr {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#invoicesTableBody tr:hover td {
+    background: var(--primary-light);
+}
+
+body.dark-mode #invoicesTableBody tr:hover td {
+    background: rgba(255,255,255,0.03);
+}
+
+#invoicesTableBody td .btn {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    min-height: 28px;
+}
+
+#invoicesTableBody td .btn i {
+    font-size: 0.7rem;
+}
+
+/* ====== المودالات ====== */
+.modal-body {
+    padding: 0.5rem 0;
+}
+
+.modal-body .form-group {
+    margin-bottom: 1rem;
+}
+
+.modal-body .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+}
+
+.modal-body .form-group label i {
+    color: var(--gold);
+    margin-left: 4px;
+}
+
+.modal-body .form-group input,
+.modal-body .form-group select {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.9rem;
+    min-height: 42px;
+}
+
+.modal-body .form-group input:focus,
+.modal-body .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,107,138,0.1);
+}
+
+body.dark-mode .modal-body .form-group label {
+    color: #d4c8a0;
+}
+
+body.dark-mode .modal-body .form-group input,
+body.dark-mode .modal-body .form-group select {
+    background: rgba(0,0,0,0.3);
+    color: #d4c8a0;
+    border-color: rgba(255,255,255,0.06);
+}
+
+.modal-body .btn {
+    min-height: 44px;
+    font-size: 0.95rem;
+}
+
+/* ====== معاينة العرض ====== */
+#offerPreview {
+    background: var(--bg-light);
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+body.dark-mode #offerPreview {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.06);
+}
+
+#offerPreview p {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+body.dark-mode #offerPreview p {
+    color: #d4c8a0;
+}
+
+#offerPreview p strong {
+    color: var(--primary);
+}
+
+body.dark-mode #offerPreview p strong {
+    color: var(--gold);
+}
+
+/* ====== تحسينات الموبايل ====== */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+    
+    .stat-card {
+        padding: 0.8rem;
+    }
+    
+    .stat-card .stat-number {
+        font-size: 1.4rem;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        min-width: auto;
+    }
+    
+    .table-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .table-actions .btn {
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 98%;
+        padding: 1rem;
+    }
+    
+    #invoicesTableBody td .btn {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+        min-height: 24px;
+    }
+    
+    #invoicesTableBody td .btn i {
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+    }
+    
+    .stat-card {
+        padding: 0.5rem;
+    }
+    
+    .stat-card .stat-number {
+        font-size: 1.1rem;
+    }
+    
+    .stat-card .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    .stat-card .stat-icon {
+        font-size: 1.2rem;
+    }
+    
+    .invoices-container .page-header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .invoices-container .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .invoices-container .page-header .btn {
+        justify-content: center;
+    }
+}
+
+/* ====== تحسينات الطباعة ====== */
+@media print {
+    .header-hamburger,
+    .sidebar,
+    .sidebar-overlay,
+    .back-home-btn,
+    .table-actions,
+    .filter-section,
+    .invoice-actions,
+    .no-print {
+        display: none !important;
+    }
+    
+    .dashboard {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0.5rem !important;
+        background: #fff !important;
+    }
+    
+    body {
+        background: #fff !important;
+        padding: 0.2rem !important;
+    }
+    
+    .stat-card {
+        border: 1px solid #ddd !important;
+        background: #f8f8f8 !important;
+    }
+    
+    .section-card {
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+    }
+    
+    .status-badge {
+        border: 1px solid #ddd !important;
+    }
+    
+    #footer {
+        display: none !important;
+    }
+}
