@@ -414,11 +414,11 @@
     
     <script>
         // ============================================================
-        //  كود صفحة تفاصيل الفاتورة
+        //  كود صفحة تفاصيل الفاتورة (محدث - بدون تعارض)
         // ============================================================
 
-        let currentInvoiceId = null;
-        let currentInvoiceData = null;
+        let currentInvoiceIdDetail = null;
+        let currentInvoiceDataDetail = null;
 
         // ====== تحميل الفاتورة من URL ======
         function loadInvoiceFromUrl() {
@@ -431,12 +431,12 @@
                 return;
             }
             
-            currentInvoiceId = id;
-            loadInvoiceData(id);
+            currentInvoiceIdDetail = id;
+            loadInvoiceDataDetail(id);
         }
 
         // ====== تحميل بيانات الفاتورة ======
-        function loadInvoiceData(id) {
+        function loadInvoiceDataDetail(id) {
             const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
             const inv = invoices.find(i => i.id === id);
             
@@ -446,7 +446,7 @@
                 return;
             }
             
-            currentInvoiceData = inv;
+            currentInvoiceDataDetail = inv;
             renderInvoiceDetail(inv);
         }
 
@@ -550,7 +550,7 @@
 
         // ====== فتح مودال الدفع ======
         function openPaymentModalFromDetail() {
-            if (!currentInvoiceData) return;
+            if (!currentInvoiceDataDetail) return;
             const modal = document.getElementById('paymentModal');
             document.getElementById('paymentAmount').value = '';
             document.getElementById('paymentMethod').value = 'cash';
@@ -572,7 +572,7 @@
             }
             
             const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
-            const invIndex = invoices.findIndex(i => i.id === currentInvoiceId);
+            const invIndex = invoices.findIndex(i => i.id === currentInvoiceIdDetail);
             if (invIndex === -1) {
                 resultDiv.innerHTML = '<span style="color:var(--danger);">❌ الفاتورة غير موجودة</span>';
                 return;
@@ -609,7 +609,7 @@
             localStorage.setItem('invoices', JSON.stringify(invoices));
             
             // تحديث العرض
-            currentInvoiceData = inv;
+            currentInvoiceDataDetail = inv;
             renderInvoiceDetail(inv);
             
             closePaymentModal();
@@ -626,7 +626,7 @@
             if (!confirm('⚠️ هل أنت متأكد من حذف هذه الفاتورة؟')) return;
             
             let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
-            invoices = invoices.filter(i => i.id !== currentInvoiceId);
+            invoices = invoices.filter(i => i.id !== currentInvoiceIdDetail);
             localStorage.setItem('invoices', JSON.stringify(invoices));
             
             showToast('✅ تم حذف الفاتورة', 'success');
