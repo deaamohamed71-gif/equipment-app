@@ -1,4 +1,4 @@
-// js/license-file.js - نظام الترخيص بالملفات (محدث مع Firebase Auth)
+// js/license-file.js - نظام الترخيص بالملفات (محدث مع Firebase Auth و userId)
 
 // ====== مفتاح التشفير ======
 const ENCRYPTION_KEY = atob('RXF1aXBtZW50QXBwLTIwMjYtU2VjcmV0S2V5LSEhQCMk');
@@ -202,7 +202,7 @@ async function ensureAnonymousAuth() {
 }
 
 // ============================================================
-//  حفظ الترخيص في Firebase (باستخدام المصادقة المجهولة)
+//  حفظ الترخيص في Firebase (باستخدام المصادقة المجهولة + userId)
 // ============================================================
 
 async function saveLicenseToFirestore(licenseData) {
@@ -221,7 +221,10 @@ async function saveLicenseToFirestore(licenseData) {
             return { success: false, error: 'Firestore not available', localOnly: true };
         }
         
-        // 3️⃣ حفظ الترخيص في Firestore
+        // ✅ 3️⃣ إضافة userId للمستند
+        const userId = authResult.user.uid;
+        
+        // 4️⃣ حفظ الترخيص في Firestore
         const docRef = window.doc(db, 'licenses', licenseData.deviceId);
         await window.setDoc(docRef, {
             deviceId: licenseData.deviceId,
@@ -232,10 +235,11 @@ async function saveLicenseToFirestore(licenseData) {
             createdAt: licenseData.createdAt || new Date().toISOString(),
             status: 'active',
             activatedAt: new Date().toISOString(),
-            activatedBy: authResult.user ? authResult.user.uid : 'unknown'
+            activatedBy: userId,
+            userId: userId // ✅ إضافة userId للقواعد الجديدة
         });
         
-        console.log('✅ تم حفظ الترخيص في Firebase');
+        console.log('✅ تم حفظ الترخيص في Firebase مع userId:', userId);
         return { success: true };
         
     } catch (error) {
@@ -685,3 +689,4 @@ window.ensureAnonymousAuth = ensureAnonymousAuth;
 
 console.log('✅ نظام الترخيص بالملفات (ZLX) تم تهيئته بنجاح');
 console.log('✅ المستخدم العادي سيسجل دخول مجهول للكتابة في Firebase');
+console.log('✅ تم إضافة userId للحفاظ على أمان البيانات');
