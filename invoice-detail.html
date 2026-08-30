@@ -1,0 +1,709 @@
+<!-- invoice-detail.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <base href="/equipment-app/" />
+    <title>تفاصيل الفاتورة</title>
+    
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/invoices.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
+    
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1a6b8a" />
+    
+    <style>
+        .invoice-detail-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        body.dark-mode .invoice-header {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .invoice-header .invoice-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .invoice-header .invoice-number i {
+            color: var(--gold);
+        }
+        .invoice-status {
+            padding: 0.3rem 1.2rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .invoice-status.paid {
+            background: rgba(45,143,74,0.1);
+            color: var(--success);
+        }
+        .invoice-status.unpaid {
+            background: rgba(230,126,34,0.1);
+            color: var(--warning);
+        }
+        .invoice-status.overdue {
+            background: rgba(192,57,43,0.1);
+            color: var(--danger);
+        }
+        .invoice-status.cancelled {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-light);
+        }
+        .invoice-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        body.dark-mode .invoice-info-grid {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .invoice-info-item label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            display: block;
+        }
+        .invoice-info-item .value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 0.2rem;
+        }
+        body.dark-mode .invoice-info-item .value {
+            color: #d4c8a0;
+        }
+        .invoice-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .invoice-items-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.6rem;
+            text-align: center;
+        }
+        .invoice-items-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        body.dark-mode .invoice-items-table td {
+            color: #d4c8a0;
+            border-bottom-color: rgba(255,255,255,0.04);
+        }
+        .invoice-totals {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        body.dark-mode .invoice-totals {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .invoice-totals .total-item {
+            font-size: 1.1rem;
+        }
+        .invoice-totals .total-item .label {
+            color: var(--text-light);
+        }
+        .invoice-totals .total-item .amount {
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .invoice-totals .total-item .amount.paid-amount {
+            color: var(--success);
+        }
+        .invoice-totals .total-item .amount.remaining-amount {
+            color: var(--danger);
+        }
+        .invoice-totals .total-item .amount.remaining-amount.zero {
+            color: var(--success);
+        }
+        .payments-section {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        body.dark-mode .payments-section {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.06);
+        }
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+        .payment-item .payment-amount {
+            font-weight: 700;
+            color: var(--success);
+        }
+        .payment-item .payment-method {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .payment-item .payment-date {
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+        .invoice-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .invoice-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+        @media (max-width: 768px) {
+            .invoice-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .invoice-info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .invoice-totals {
+                flex-direction: column;
+                text-align: center;
+            }
+            .invoice-actions .btn {
+                min-width: auto;
+            }
+        }
+        @media (max-width: 480px) {
+            .invoice-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">تم بنجاح</span>
+    </div>
+
+    <!-- ====== زر العودة ====== -->
+    <div class="back-home-btn">
+        <a href="invoices.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-arrow-right"></i> العودة للفواتير
+        </a>
+    </div>
+
+    <!-- ====== الهيدر ====== -->
+    <header class="header-hamburger" id="headerHamburger">
+        <div class="logo" onclick="goHome()">
+            <img id="headerLogo" src="" alt="الشعار" style="display:none;" />
+            <h1><i class="fas fa-crown"></i> عروض المعدات</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleMode()" id="modeToggle" title="تبديل الوضع">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="hamburger-btn" id="hamburgerBtn" title="القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== السايدبار ====== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text"><i class="fas fa-crown"></i> عروض المعدات</span>
+            <button class="close-btn" id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-links" id="sidebarLinks">
+            <!-- سيتم تعبئته بواسطة JavaScript -->
+        </div>
+        <div class="sidebar-footer">
+            <span class="license-status" id="sidebarLicenseStatus">📋 النسخة المجانية</span>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="invoice-detail-container" id="invoiceDetailContainer">
+            
+            <!-- ====== حالة التحميل ====== -->
+            <div id="loadingState" style="text-align:center;padding:3rem;color:var(--text-light);">
+                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                <p>جاري تحميل بيانات الفاتورة...</p>
+            </div>
+
+            <!-- ====== محتوى الفاتورة ====== -->
+            <div id="invoiceContent" style="display:none;">
+                
+                <!-- رأس الفاتورة -->
+                <div class="invoice-header">
+                    <div class="invoice-number">
+                        <i class="fas fa-file-invoice"></i> <span id="invNumber">---</span>
+                    </div>
+                    <div>
+                        <span class="invoice-status" id="invStatus">---</span>
+                    </div>
+                </div>
+
+                <!-- معلومات الفاتورة -->
+                <div class="invoice-info-grid">
+                    <div class="invoice-info-item">
+                        <label>العميل</label>
+                        <div class="value" id="invClient">---</div>
+                    </div>
+                    <div class="invoice-info-item">
+                        <label>العرض المرتبط</label>
+                        <div class="value" id="invOffer">---</div>
+                    </div>
+                    <div class="invoice-info-item">
+                        <label>تاريخ الإصدار</label>
+                        <div class="value" id="invDate">---</div>
+                    </div>
+                    <div class="invoice-info-item">
+                        <label>تاريخ الاستحقاق</label>
+                        <div class="value" id="invDueDate">---</div>
+                    </div>
+                    <div class="invoice-info-item">
+                        <label>عدد الأيام المتبقية</label>
+                        <div class="value" id="invDaysLeft">---</div>
+                    </div>
+                </div>
+
+                <!-- جدول البنود -->
+                <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);">
+                    <table class="invoice-items-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40%;">المعدة</th>
+                                <th style="width:15%;">العدد</th>
+                                <th style="width:20%;">سعر الوحدة</th>
+                                <th style="width:25%;">الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invItemsBody">
+                            <tr><td colspan="4" style="text-align:center;color:var(--text-light);">لا توجد بنود</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- الإجماليات -->
+                <div class="invoice-totals">
+                    <div class="total-item">
+                        <span class="label">الإجمالي:</span>
+                        <span class="amount" id="invTotal">0 ج.م</span>
+                    </div>
+                    <div class="total-item">
+                        <span class="label">المدفوع:</span>
+                        <span class="amount paid-amount" id="invPaid">0 ج.م</span>
+                    </div>
+                    <div class="total-item">
+                        <span class="label">المتبقي:</span>
+                        <span class="amount remaining-amount" id="invRemaining">0 ج.م</span>
+                    </div>
+                </div>
+
+                <!-- سجل المدفوعات -->
+                <div class="payments-section" id="paymentsSection">
+                    <h3><i class="fas fa-history"></i> سجل المدفوعات</h3>
+                    <div id="paymentsList">
+                        <div style="text-align:center;color:var(--text-light);padding:1rem;">
+                            لا توجد مدفوعات مسجلة
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الأزرار -->
+                <div class="invoice-actions">
+                    <button class="btn btn-primary" onclick="printInvoicePage()">
+                        <i class="fas fa-print"></i> طباعة
+                    </button>
+                    <button class="btn btn-success" id="payBtn" onclick="openPaymentModalFromDetail()">
+                        <i class="fas fa-money-bill-wave"></i> تسجيل دفعة
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteInvoiceFromDetail()">
+                        <i class="fas fa-trash"></i> حذف الفاتورة
+                    </button>
+                    <a href="invoices.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right"></i> العودة للقائمة
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <!-- ====== مودال الدفع ====== -->
+    <div class="modal-overlay" id="paymentModal" onclick="if(event.target===this) closePaymentModal()">
+        <div class="modal-content" style="max-width:500px;">
+            <button class="close-modal" onclick="closePaymentModal()"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-money-bill-wave"></i> تسجيل دفعة</h3>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>المبلغ</label>
+                    <input type="number" id="paymentAmount" placeholder="المبلغ" min="0" step="0.01" style="width:100%;padding:0.6rem;border-radius:10px;border:1px solid var(--border);" />
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>طريقة الدفع</label>
+                    <select id="paymentMethod" style="width:100%;padding:0.6rem;border-radius:10px;border:1px solid var(--border);">
+                        <option value="cash">كاش</option>
+                        <option value="bank">تحويل بنكي</option>
+                        <option value="cheque">شيك</option>
+                        <option value="card">بطاقة ائتمان</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>ملاحظات</label>
+                    <input type="text" id="paymentNote" placeholder="ملاحظات الدفع" style="width:100%;padding:0.6rem;border-radius:10px;border:1px solid var(--border);" />
+                </div>
+                <button class="btn btn-success" onclick="savePaymentFromDetail()" style="width:100%;justify-content:center;">
+                    <i class="fas fa-check"></i> تأكيد الدفع
+                </button>
+                <div id="paymentResult" style="margin-top:0.5rem;font-size:0.9rem;text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== السكربتات ====== -->
+    <script src="js/license.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/invoices.js"></script>
+    
+    <script>
+        // ============================================================
+        //  كود صفحة تفاصيل الفاتورة
+        // ============================================================
+
+        let currentInvoiceId = null;
+        let currentInvoiceData = null;
+
+        // ====== تحميل الفاتورة من URL ======
+        function loadInvoiceFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            
+            if (!id) {
+                showToast('⚠️ لم يتم تحديد رقم الفاتورة', 'error');
+                setTimeout(() => { window.location.href = 'invoices.html'; }, 1500);
+                return;
+            }
+            
+            currentInvoiceId = id;
+            loadInvoiceData(id);
+        }
+
+        // ====== تحميل بيانات الفاتورة ======
+        function loadInvoiceData(id) {
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const inv = invoices.find(i => i.id === id);
+            
+            if (!inv) {
+                showToast('❌ الفاتورة غير موجودة', 'error');
+                setTimeout(() => { window.location.href = 'invoices.html'; }, 1500);
+                return;
+            }
+            
+            currentInvoiceData = inv;
+            renderInvoiceDetail(inv);
+        }
+
+        // ====== عرض تفاصيل الفاتورة ======
+        function renderInvoiceDetail(inv) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('invoiceContent').style.display = 'block';
+            
+            // رقم الفاتورة
+            document.getElementById('invNumber').textContent = inv.number || '---';
+            
+            // الحالة
+            const statusMap = {
+                'paid': { class: 'paid', label: '✅ مدفوعة' },
+                'unpaid': { class: 'unpaid', label: '⏳ غير مدفوعة' },
+                'overdue': { class: 'overdue', label: '🔴 متأخرة' },
+                'cancelled': { class: 'cancelled', label: '❌ ملغية' }
+            };
+            const status = statusMap[inv.status] || statusMap['unpaid'];
+            const statusEl = document.getElementById('invStatus');
+            statusEl.textContent = status.label;
+            statusEl.className = 'invoice-status ' + status.class;
+            
+            // العميل
+            document.getElementById('invClient').textContent = inv.client || 'غير محدد';
+            document.getElementById('invOffer').textContent = inv.offerName || '---';
+            
+            // التواريخ
+            if (inv.date) {
+                document.getElementById('invDate').textContent = new Date(inv.date).toLocaleDateString('ar-EG');
+            }
+            if (inv.dueDate) {
+                const due = new Date(inv.dueDate);
+                document.getElementById('invDueDate').textContent = due.toLocaleDateString('ar-EG');
+                
+                const now = new Date();
+                const daysLeft = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+                const daysEl = document.getElementById('invDaysLeft');
+                if (daysLeft > 0) {
+                    daysEl.textContent = daysLeft + ' يوم';
+                    daysEl.style.color = 'var(--success)';
+                } else if (daysLeft === 0) {
+                    daysEl.textContent = 'اليوم';
+                    daysEl.style.color = 'var(--warning)';
+                } else {
+                    daysEl.textContent = 'متأخر ' + Math.abs(daysLeft) + ' يوم';
+                    daysEl.style.color = 'var(--danger)';
+                }
+            }
+            
+            // بنود الفاتورة
+            const itemsBody = document.getElementById('invItemsBody');
+            if (inv.data && Array.isArray(inv.data) && inv.data.length > 0) {
+                itemsBody.innerHTML = inv.data.map(row => `
+                    <tr>
+                        <td>${row.name || 'غير محدد'}</td>
+                        <td>${row.count || 0}</td>
+                        <td>${(row.unitPrice || 0).toLocaleString('en-US')}</td>
+                        <td>${((row.count || 0) * (row.unitPrice || 0)).toLocaleString('en-US')}</td>
+                    </tr>
+                `).join('');
+            } else {
+                itemsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);">لا توجد بنود</td></tr>';
+            }
+            
+            // الإجماليات
+            const total = inv.total || 0;
+            const paid = inv.paid || 0;
+            const remaining = total - paid;
+            
+            document.getElementById('invTotal').textContent = total.toLocaleString('en-US') + ' ج.م';
+            document.getElementById('invPaid').textContent = paid.toLocaleString('en-US') + ' ج.م';
+            
+            const remainingEl = document.getElementById('invRemaining');
+            remainingEl.textContent = remaining.toLocaleString('en-US') + ' ج.م';
+            remainingEl.className = 'amount remaining-amount' + (remaining <= 0 ? ' zero' : '');
+            
+            // سجل المدفوعات
+            const paymentsList = document.getElementById('paymentsList');
+            if (inv.payments && inv.payments.length > 0) {
+                paymentsList.innerHTML = inv.payments.map(p => `
+                    <div class="payment-item">
+                        <span class="payment-amount">${p.amount.toLocaleString('en-US')} ج.م</span>
+                        <span class="payment-method">${p.method}</span>
+                        <span class="payment-date">${new Date(p.date).toLocaleDateString('ar-EG')}</span>
+                        <span style="font-size:0.7rem;color:var(--text-light);">${p.note || ''}</span>
+                    </div>
+                `).join('');
+            } else {
+                paymentsList.innerHTML = '<div style="text-align:center;color:var(--text-light);padding:1rem;">لا توجد مدفوعات مسجلة</div>';
+            }
+            
+            // إخفاء زر الدفع إذا كانت مدفوعة بالكامل
+            const payBtn = document.getElementById('payBtn');
+            if (inv.status === 'paid') {
+                payBtn.style.display = 'none';
+            } else {
+                payBtn.style.display = 'inline-flex';
+            }
+        }
+
+        // ====== فتح مودال الدفع ======
+        function openPaymentModalFromDetail() {
+            if (!currentInvoiceData) return;
+            const modal = document.getElementById('paymentModal');
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('paymentMethod').value = 'cash';
+            document.getElementById('paymentNote').value = '';
+            document.getElementById('paymentResult').innerHTML = '';
+            modal.classList.add('active');
+        }
+
+        // ====== حفظ الدفع ======
+        function savePaymentFromDetail() {
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const method = document.getElementById('paymentMethod').value;
+            const note = document.getElementById('paymentNote').value.trim();
+            const resultDiv = document.getElementById('paymentResult');
+            
+            if (!amount || amount <= 0) {
+                resultDiv.innerHTML = '<span style="color:var(--danger);">⚠️ الرجاء إدخال مبلغ صحيح</span>';
+                return;
+            }
+            
+            const invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const invIndex = invoices.findIndex(i => i.id === currentInvoiceId);
+            if (invIndex === -1) {
+                resultDiv.innerHTML = '<span style="color:var(--danger);">❌ الفاتورة غير موجودة</span>';
+                return;
+            }
+            
+            const inv = invoices[invIndex];
+            const remaining = inv.total - (inv.paid || 0);
+            
+            if (amount > remaining) {
+                resultDiv.innerHTML = `<span style="color:var(--danger);">⚠️ المبلغ أكبر من المتبقي (${remaining.toLocaleString('en-US')} ج.م)</span>`;
+                return;
+            }
+            
+            // تسجيل الدفع
+            inv.paid = (inv.paid || 0) + amount;
+            inv.payments = inv.payments || [];
+            inv.payments.push({
+                amount: amount,
+                method: method,
+                note: note,
+                date: new Date().toISOString()
+            });
+            
+            // تحديث الحالة
+            if (inv.paid >= inv.total) {
+                inv.status = 'paid';
+            } else {
+                inv.status = 'unpaid';
+                if (new Date(inv.dueDate) < new Date()) {
+                    inv.status = 'overdue';
+                }
+            }
+            
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+            
+            // تحديث العرض
+            currentInvoiceData = inv;
+            renderInvoiceDetail(inv);
+            
+            closePaymentModal();
+            showToast(`✅ تم تسجيل دفعة ${amount.toLocaleString('en-US')} ج.م`, 'success');
+        }
+
+        // ====== إغلاق مودال الدفع ======
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        // ====== حذف الفاتورة ======
+        function deleteInvoiceFromDetail() {
+            if (!confirm('⚠️ هل أنت متأكد من حذف هذه الفاتورة؟')) return;
+            
+            let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            invoices = invoices.filter(i => i.id !== currentInvoiceId);
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+            
+            showToast('✅ تم حذف الفاتورة', 'success');
+            setTimeout(() => { window.location.href = 'invoices.html'; }, 1000);
+        }
+
+        // ====== طباعة الفاتورة ======
+        function printInvoicePage() {
+            window.print();
+        }
+
+        // ====== السايدبار ======
+        (function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('closeSidebar');
+            const sidebarLinks = document.getElementById('sidebarLinks');
+
+            const links = [
+                { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
+                { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
+                { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
+                { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
+                { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'invoices.html', icon: 'fa-file-invoice', text: 'الفواتير' },
+                { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
+                { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
+                { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
+                { href: 'settings.html', icon: 'fa-tools', text: 'المطور' },
+                { href: 'activation-license.html', icon: 'fa-file-certificate', text: 'ترخيص الملفات' },
+                { href: 'activation.html', icon: 'fa-key', text: 'التفعيل' }
+            ];
+
+            const currentPage = window.location.pathname.split('/').pop() || 'invoice-detail.html';
+            sidebarLinks.innerHTML = links.map(link => `
+                <a href="${link.href}" class="${link.href === currentPage ? 'active' : ''}">
+                    <i class="fas ${link.icon}"></i>
+                    ${link.text}
+                </a>
+            `).join('');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            hamburgerBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            document.querySelectorAll('.sidebar-links a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            console.log('✅ قائمة الهامبورجر في invoice-detail.html تم تهيئتها بنجاح');
+        })();
+
+        // ====== التهيئة ======
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                loadInvoiceFromUrl();
+            }, 200);
+            
+            console.log('📄 صفحة تفاصيل الفاتورة - تم تهيئتها بنجاح');
+        });
+    </script>
+</body>
+</html>
