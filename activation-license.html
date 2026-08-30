@@ -1,3 +1,4 @@
+<!-- activation-license.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -365,6 +366,13 @@
                 <div class="hint">مثال: أحمد محمد علي</div>
             </div>
 
+            <!-- ✅ حقل البريد الإلكتروني (جديد) -->
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> البريد الإلكتروني <span class="required">*</span></label>
+                <input type="email" id="userEmail" placeholder="أدخل بريدك الإلكتروني" required />
+                <div class="hint">مثال: example@gmail.com</div>
+            </div>
+
             <div class="form-group">
                 <label><i class="fas fa-phone"></i> رقم الهاتف <span class="required">*</span></label>
                 <input type="tel" id="userPhone" placeholder="أدخل رقم هاتفك المحمول" required />
@@ -420,6 +428,10 @@
                     <span class="info-value" id="infoUser">---</span>
                 </div>
                 <div class="info-row">
+                    <span class="info-label">البريد الإلكتروني</span>
+                    <span class="info-value" id="infoEmail">---</span>
+                </div>
+                <div class="info-row">
                     <span class="info-label">الهاتف</span>
                     <span class="info-value" id="infoPhone">---</span>
                 </div>
@@ -455,5 +467,312 @@
     <script src="js/license.js"></script>
     <script src="js/main.js"></script>
     <script src="js/license-file.js"></script>
+    
+    <script>
+        // ====== التحقق من صحة بيانات المستخدم (محدث مع الإيميل) ======
+        function validateUserData() {
+            const fullName = document.getElementById('userFullName')?.value.trim();
+            const email = document.getElementById('userEmail')?.value.trim();
+            const phone = document.getElementById('userPhone')?.value.trim();
+            const plan = document.getElementById('userPlan')?.value;
+            const deviceId = document.getElementById('deviceId')?.textContent || localStorage.getItem('device_id') || '';
+            
+            let errors = [];
+            
+            if (!fullName || fullName.split(' ').length < 2) {
+                errors.push('الاسم الثلاثي (يجب أن يتكون من اسمين على الأقل)');
+            }
+            
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                errors.push('البريد الإلكتروني (يجب أن يكون صحيحاً)');
+            }
+            
+            if (!phone || phone.length < 10) {
+                errors.push('رقم الهاتف (يجب أن يكون 10 أرقام على الأقل)');
+            }
+            
+            if (!plan || plan === '') {
+                errors.push('الخطة (يجب اختيار خطة)');
+            }
+            
+            if (!deviceId || deviceId === 'جاري التحميل...') {
+                errors.push('معرف الجهاز (لم يتم تحميله بعد)');
+            }
+            
+            return {
+                valid: errors.length === 0,
+                errors: errors,
+                data: { fullName, email, phone, plan, deviceId }
+            };
+        }
+
+        // ====== إرسال البيانات للمطور عبر WhatsApp (محدث مع الإيميل) ======
+        function sendToWhatsApp() {
+            const validation = validateUserData();
+            
+            if (validation.data.plan === 'مجانية') {
+                startFreeTrialFromUI();
+                return;
+            }
+            
+            if (!validation.valid) {
+                const errorMsg = '⚠️ يرجى إكمال البيانات التالية:\n\n• ' + validation.errors.join('\n• ');
+                alert(errorMsg);
+                showToast('⚠️ يرجى إكمال جميع البيانات المطلوبة', 'error');
+                return;
+            }
+            
+            const { fullName, email, phone, plan, deviceId } = validation.data;
+            
+            const message = 
+                `📋 *طلب تفعيل النسخة الاحترافية*\n\n` +
+                `👤 *الاسم:* ${fullName}\n` +
+                `📧 *البريد الإلكتروني:* ${email}\n` +
+                `📱 *الهاتف:* ${phone}\n` +
+                `📅 *الخطة:* ${plan}\n` +
+                `🆔 *معرف الجهاز:* ${deviceId}\n\n` +
+                `📌 *يرجى إرسال ملف الترخيص لهذا المستخدم*`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/201096597825?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+            showToast('✅ جاري فتح واتساب لإرسال البيانات', 'success');
+        }
+
+        // ====== عرض معلومات الترخيص (محدث مع الإيميل) ======
+        function displayLicenseInfo(license) {
+            try {
+                const userEl = document.getElementById('infoUser');
+                const emailEl = document.getElementById('infoEmail');
+                const phoneEl = document.getElementById('infoPhone');
+                const planEl = document.getElementById('infoPlan');
+                const deviceIdEl = document.getElementById('infoDeviceId');
+                const expiryEl = document.getElementById('infoExpiry');
+                const daysEl = document.getElementById('infoDays');
+                
+                if (userEl) userEl.textContent = license.userName || '---';
+                if (emailEl) emailEl.textContent = license.userEmail || '---';
+                if (phoneEl) phoneEl.textContent = license.userPhone || '---';
+                if (planEl) planEl.textContent = license.plan || '---';
+                if (deviceIdEl) deviceIdEl.textContent = license.deviceId || '---';
+                
+                if (expiryEl) {
+                    const expiry = new Date(license.expiryDate);
+                    expiryEl.textContent = expiry.toLocaleDateString('ar-EG');
+                }
+                
+                if (daysEl) {
+                    const expiry = new Date(license.expiryDate);
+                    const daysLeft = Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24));
+                    daysEl.textContent = daysLeft > 0 ? `${daysLeft} يوم متبقي` : '⛔ انتهى الترخيص';
+                    daysEl.style.color = daysLeft <= 0 ? 'var(--danger)' : daysLeft < 7 ? 'var(--warning)' : 'var(--success)';
+                }
+            } catch (error) {
+                console.error('Display license info error:', error);
+            }
+        }
+
+        // ====== حفظ الترخيص في Firebase (محدث مع الإيميل) ======
+        async function saveLicenseToFirestore(licenseData) {
+            try {
+                const authResult = await ensureAnonymousAuth();
+                if (!authResult.success) {
+                    console.warn('⚠️ فشل تسجيل الدخول المجهول');
+                    return { success: false, error: 'Auth failed', localOnly: true };
+                }
+                
+                const db = window.firebaseDB;
+                if (!db) {
+                    console.warn('⚠️ Firestore غير متاح');
+                    return { success: false, error: 'Firestore not available', localOnly: true };
+                }
+                
+                const userId = authResult.user.uid;
+                const docRef = window.doc(db, 'licenses', licenseData.deviceId);
+                
+                await window.setDoc(docRef, {
+                    deviceId: licenseData.deviceId,
+                    userName: licenseData.userName || 'مستخدم',
+                    userEmail: licenseData.userEmail || '',
+                    userPhone: licenseData.userPhone || '',
+                    plan: licenseData.plan || 'سنوية',
+                    expiryDate: licenseData.expiryDate,
+                    createdAt: licenseData.createdAt || new Date().toISOString(),
+                    status: 'active',
+                    activatedAt: new Date().toISOString(),
+                    activatedBy: userId,
+                    userId: userId
+                });
+                
+                console.log('✅ تم حفظ الترخيص في Firebase مع userId:', userId);
+                return { success: true };
+                
+            } catch (error) {
+                console.error('❌ خطأ في حفظ الترخيص:', error);
+                return { success: false, error: error.message, localOnly: true };
+            }
+        }
+
+        // ====== دالة التفعيل (محدثة مع الإيميل) ======
+        async function activateLicense() {
+            try {
+                let savedLicense = localStorage.getItem('license_data');
+                if (!savedLicense) {
+                    showToast('⚠️ يرجى رفع ملف الترخيص أولاً', 'error');
+                    return;
+                }
+                
+                const license = JSON.parse(savedLicense);
+                const deviceId = localStorage.getItem('device_id') || '';
+                
+                const expiry = new Date(license.expiryDate);
+                if (expiry < new Date()) {
+                    showToast('❌ انتهت صلاحية الترخيص!', 'error');
+                    return;
+                }
+                
+                if (license.deviceId !== deviceId) {
+                    showToast('❌ هذا الترخيص ليس لهذا الجهاز!', 'error');
+                    return;
+                }
+                
+                showToast('⏳ جاري حفظ الترخيص في قاعدة البيانات...', 'success');
+                
+                let firebaseSaved = false;
+                const result = await saveLicenseToFirestore(license);
+                
+                if (result.success) {
+                    firebaseSaved = true;
+                    showToast('✅ تم حفظ الترخيص في قاعدة البيانات', 'success');
+                } else if (result.localOnly) {
+                    showToast('⚠️ فشل الحفظ في Firebase، سيتم التفعيل محلياً', 'warning');
+                } else {
+                    showToast('⚠️ فشل الحفظ في Firebase، سيتم التفعيل محلياً', 'warning');
+                }
+                
+                const applyResult = applyLicenseToSystem(license);
+                
+                if (applyResult.success) {
+                    showToast(`🎉 تم تفعيل النسخة الاحترافية بنجاح!`, 'success');
+                    localStorage.setItem('active_license_id', license.deviceId);
+                    localStorage.setItem('license_firebase_saved', firebaseSaved ? 'true' : 'false');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showToast('❌ حدث خطأ أثناء التفعيل: ' + applyResult.error, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Activation error:', error);
+                showToast('❌ حدث خطأ أثناء التفعيل: ' + error.message, 'error');
+            }
+        }
+
+        // ====== نسخ معرف الجهاز ======
+        function copyDeviceId() {
+            const deviceIdEl = document.getElementById('deviceId');
+            if (!deviceIdEl) return;
+            
+            const deviceId = deviceIdEl.textContent;
+            if (!deviceId || deviceId === 'جاري التحميل...') {
+                showToast('⚠️ المعرف غير جاهز بعد، يرجى الانتظار', 'error');
+                return;
+            }
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(deviceId)
+                    .then(() => {
+                        showToast('✅ تم نسخ معرف الجهاز بنجاح!', 'success');
+                        const btn = document.querySelector('.device-id-box .btn-copy');
+                        if (btn) {
+                            btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+                            btn.style.background = 'var(--success)';
+                            setTimeout(() => {
+                                btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
+                                btn.style.background = '';
+                            }, 2000);
+                        }
+                    })
+                    .catch(() => {
+                        fallbackCopy(deviceId);
+                    });
+            } else {
+                fallbackCopy(deviceId);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ تم نسخ معرف الجهاز بنجاح!', 'success');
+            } catch (err) {
+                showToast('❌ فشل النسخ، يرجى نسخه يدوياً', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ====== بدء النسخة المجانية ======
+        function startFreeTrialFromUI() {
+            if (confirm('🆓 هل تريد بدء النسخة المجانية لمدة 90 يوم؟')) {
+                const trialData = licenseManager.startFreeTrial();
+                if (trialData) {
+                    showToast(`✅ تم بدء النسخة المجانية! متبقي ${trialData.daysLeft} يوم`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                }
+            }
+        }
+
+        // ====== التحقق من صحة بيانات المستخدم (جعلها متاحة عالمياً) ======
+        window.validateUserData = validateUserData;
+        window.sendToWhatsApp = sendToWhatsApp;
+        window.copyDeviceId = copyDeviceId;
+        window.activateLicense = activateLicense;
+        window.displayLicenseInfo = displayLicenseInfo;
+        window.startFreeTrialFromUI = startFreeTrialFromUI;
+
+        // ====== التهيئة ======
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                let deviceId = localStorage.getItem('device_id');
+                if (!deviceId) {
+                    deviceId = generateDeviceId();
+                    localStorage.setItem('device_id', deviceId);
+                }
+                const deviceIdEl = document.getElementById('deviceId');
+                if (deviceIdEl) {
+                    deviceIdEl.textContent = deviceId;
+                }
+                
+                const savedLicense = localStorage.getItem('license_data');
+                if (savedLicense) {
+                    try {
+                        const license = JSON.parse(savedLicense);
+                        displayLicenseInfo(license);
+                        const infoEl = document.getElementById('licenseInfo');
+                        if (infoEl) infoEl.style.display = 'block';
+                        
+                        const activateBtn = document.getElementById('activateBtn');
+                        if (activateBtn) activateBtn.style.display = 'flex';
+                    } catch (e) {
+                        console.warn('Invalid saved license data');
+                    }
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
