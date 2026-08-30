@@ -1,11 +1,39 @@
-// js/invoices.js - كود إدارة الفواتير (محدث مع التحقق من وجود العناصر)
+// js/invoices.js - كود إدارة الفواتير (محدث مع html2pdf.js للتصدير الاحترافي)
 
 // ====== المتغيرات ======
 let invoices = [];
 let currentInvoiceId = null;
 let currentOfferData = null;
 
-// ====== تحميل الفواتير ======
+// ============================================================
+//  ✅ دوال مساعدة لجلب بيانات الشركة والإعدادات
+// ============================================================
+
+function getCompanyData() {
+    return {
+        name: localStorage.getItem('field_companyName') || 'شركة المعدات الحديثة',
+        phone: localStorage.getItem('field_companyPhone') || '',
+        address: localStorage.getItem('field_companyAddress') || '',
+        commercial: localStorage.getItem('field_companyCommercial') || '',
+        tax: localStorage.getItem('field_companyTax') || '',
+        logo: localStorage.getItem('companyLogo') || '',
+        sigEmployee: localStorage.getItem('sig_sigEmployee') || '',
+        sigClient: localStorage.getItem('sig_sigClient') || '',
+        primaryColor: localStorage.getItem('primaryColor') || '#1a6b8a',
+        goldColor: localStorage.getItem('goldColor') || '#c9a84c',
+        primaryLight: localStorage.getItem('primaryColor') ? localStorage.getItem('primaryColor') + '20' : '#e8f4f8',
+        isDarkMode: document.body.classList.contains('dark-mode') || false
+    };
+}
+
+function getCurrencySymbol() {
+    return 'ج.م';
+}
+
+// ============================================================
+//  ✅ دوال تحميل وعرض الفواتير
+// ============================================================
+
 function loadInvoices() {
     try {
         invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
@@ -13,7 +41,6 @@ function loadInvoices() {
         invoices = [];
     }
     
-    // ✅ التحقق من وجود الجدول قبل التعديل
     const tbody = document.getElementById('invoicesTableBody');
     if (tbody) {
         renderInvoices();
@@ -21,11 +48,8 @@ function loadInvoices() {
     updateStats();
 }
 
-// ====== عرض الفواتير ======
 function renderInvoices(filteredData) {
     const tbody = document.getElementById('invoicesTableBody');
-    
-    // ✅ التحقق من وجود العنصر
     if (!tbody) return;
     
     const data = filteredData || invoices;
@@ -61,9 +85,9 @@ function renderInvoices(filteredData) {
                 <td>${inv.offerName || '---'}</td>
                 <td>${inv.date ? new Date(inv.date).toLocaleDateString('ar-EG') : '---'}</td>
                 <td>${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('ar-EG') : '---'}</td>
-                <td>${total.toLocaleString('en-US')} ج.م</td>
-                <td>${paid.toLocaleString('en-US')} ج.م</td>
-                <td>${remaining.toLocaleString('en-US')} ج.م</td>
+                <td>${total.toLocaleString('en-US')} ${getCurrencySymbol()}</td>
+                <td>${paid.toLocaleString('en-US')} ${getCurrencySymbol()}</td>
+                <td>${remaining.toLocaleString('en-US')} ${getCurrencySymbol()}</td>
                 <td><span class="status-badge ${status.class}">${status.label}</span></td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="viewInvoice('${inv.id}')" title="عرض">
@@ -71,6 +95,9 @@ function renderInvoices(filteredData) {
                     </button>
                     <button class="btn btn-sm btn-success" onclick="openPaymentModal('${inv.id}')" title="دفع">
                         <i class="fas fa-money-bill-wave"></i>
+                    </button>
+                    <button class="btn btn-sm btn-gold" onclick="exportInvoicePDF('${inv.id}')" title="PDF">
+                        <i class="fas fa-file-pdf"></i>
                     </button>
                     <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${inv.id}')" title="حذف">
                         <i class="fas fa-trash"></i>
@@ -81,7 +108,6 @@ function renderInvoices(filteredData) {
     }).join('');
 }
 
-// ====== تحديث الإحصائيات ======
 function updateStats() {
     const total = invoices.length;
     const paid = invoices.filter(i => i.status === 'paid').length;
@@ -96,10 +122,13 @@ function updateStats() {
     if (totalEl) totalEl.textContent = total;
     if (paidEl) paidEl.textContent = paid;
     if (unpaidEl) unpaidEl.textContent = unpaid;
-    if (revenueEl) revenueEl.textContent = revenue.toLocaleString('en-US') + ' ج.م';
+    if (revenueEl) revenueEl.textContent = revenue.toLocaleString('en-US') + ' ' + getCurrencySymbol();
 }
 
-// ====== إنشاء فاتورة جديدة من العرض ======
+// ============================================================
+//  ✅ إنشاء فاتورة جديدة
+// ============================================================
+
 function createInvoiceFromOffer() {
     const modal = document.getElementById('invoiceModal');
     const select = document.getElementById('offerSelect');
@@ -136,7 +165,6 @@ function createInvoiceFromOffer() {
     if (modal) modal.classList.add('active');
 }
 
-// ====== تحميل بيانات العرض ======
 function loadOfferData() {
     const select = document.getElementById('offerSelect');
     if (!select) return;
@@ -170,12 +198,11 @@ function loadOfferData() {
     const itemsEl = document.getElementById('previewItems');
     const previewEl = document.getElementById('offerPreview');
     
-    if (totalEl) totalEl.textContent = total.toLocaleString('en-US') + ' ج.م';
+    if (totalEl) totalEl.textContent = total.toLocaleString('en-US') + ' ' + getCurrencySymbol();
     if (itemsEl) itemsEl.textContent = (offer.data ? offer.data.length : 0);
     if (previewEl) previewEl.style.display = 'block';
 }
 
-// ====== حفظ الفاتورة ======
 function saveInvoice() {
     const offerName = document.getElementById('offerSelect')?.value;
     const number = document.getElementById('invoiceNumber')?.value;
@@ -214,7 +241,7 @@ function saveInvoice() {
         dueDate: dueDate || new Date(Date.now() + 30*24*60*60*1000).toISOString(),
         status: 'unpaid',
         payments: [],
-        notes: ''
+        notes: offer.notes || []
     };
     
     invoices.push(invoice);
@@ -225,7 +252,10 @@ function saveInvoice() {
     showToast('✅ تم إنشاء الفاتورة بنجاح', 'success');
 }
 
-// ====== عرض الفاتورة ======
+// ============================================================
+//  ✅ عرض الفاتورة
+// ============================================================
+
 function viewInvoice(id) {
     const inv = invoices.find(i => i.id === id);
     if (!inv) {
@@ -279,15 +309,15 @@ function viewInvoice(id) {
                     <tfoot>
                         <tr>
                             <td colspan="3" style="text-align:left;font-weight:bold;">الإجمالي</td>
-                            <td style="font-weight:bold;color:var(--primary);">${inv.total.toLocaleString('en-US')} ج.م</td>
+                            <td style="font-weight:bold;color:var(--primary);">${inv.total.toLocaleString('en-US')} ${getCurrencySymbol()}</td>
                         </tr>
                         <tr>
                             <td colspan="3" style="text-align:left;">المدفوع</td>
-                            <td style="color:var(--success);">${(inv.paid || 0).toLocaleString('en-US')} ج.م</td>
+                            <td style="color:var(--success);">${(inv.paid || 0).toLocaleString('en-US')} ${getCurrencySymbol()}</td>
                         </tr>
                         <tr>
                             <td colspan="3" style="text-align:left;font-weight:bold;">المتبقي</td>
-                            <td style="font-weight:bold;color:${(inv.total - (inv.paid || 0)) > 0 ? 'var(--danger)' : 'var(--success)'};">${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ج.م</td>
+                            <td style="font-weight:bold;color:${(inv.total - (inv.paid || 0)) > 0 ? 'var(--danger)' : 'var(--success)'};">${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ${getCurrencySymbol()}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -297,7 +327,7 @@ function viewInvoice(id) {
                 <h4>سجل المدفوعات</h4>
                 ${inv.payments.map(p => `
                     <div style="display:flex;justify-content:space-between;padding:0.2rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;">
-                        <span>${p.amount.toLocaleString('en-US')} ج.م</span>
+                        <span>${p.amount.toLocaleString('en-US')} ${getCurrencySymbol()}</span>
                         <span>${p.method}</span>
                         <span>${new Date(p.date).toLocaleDateString('ar-EG')}</span>
                         <span style="font-size:0.75rem;color:var(--text-light);">${p.note || ''}</span>
@@ -307,6 +337,9 @@ function viewInvoice(id) {
             <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
                 <button class="btn btn-sm btn-primary" onclick="printInvoice('${inv.id}')">
                     <i class="fas fa-print"></i> طباعة
+                </button>
+                <button class="btn btn-sm btn-gold" onclick="exportInvoicePDF('${inv.id}')">
+                    <i class="fas fa-file-pdf"></i> PDF
                 </button>
                 <button class="btn btn-sm btn-success" onclick="openPaymentModal('${inv.id}')">
                     <i class="fas fa-money-bill-wave"></i> دفع
@@ -330,7 +363,10 @@ function viewInvoice(id) {
     document.body.appendChild(modal);
 }
 
-// ====== فتح مودال الدفع ======
+// ============================================================
+//  ✅ إدارة المدفوعات
+// ============================================================
+
 function openPaymentModal(invoiceId) {
     currentInvoiceId = invoiceId;
     const modal = document.getElementById('paymentModal');
@@ -352,7 +388,6 @@ function openPaymentModal(invoiceId) {
     modal.classList.add('active');
 }
 
-// ====== حفظ الدفع ======
 function savePayment() {
     const amount = parseFloat(document.getElementById('paymentAmount')?.value);
     const method = document.getElementById('paymentMethod')?.value;
@@ -371,7 +406,7 @@ function savePayment() {
     }
     
     if (amount > (inv.total - (inv.paid || 0))) {
-        if (resultDiv) resultDiv.innerHTML = `<span style="color:var(--danger);">⚠️ المبلغ أكبر من المتبقي (${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ج.م)</span>`;
+        if (resultDiv) resultDiv.innerHTML = `<span style="color:var(--danger);">⚠️ المبلغ أكبر من المتبقي (${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ${getCurrencySymbol()})</span>`;
         return;
     }
     
@@ -397,10 +432,19 @@ function savePayment() {
     renderInvoices();
     updateStats();
     closePaymentModal();
-    showToast(`✅ تم تسجيل دفعة ${amount.toLocaleString('en-US')} ج.م`, 'success');
+    showToast(`✅ تم تسجيل دفعة ${amount.toLocaleString('en-US')} ${getCurrencySymbol()}`, 'success');
 }
 
-// ====== حذف فاتورة ======
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) modal.classList.remove('active');
+    currentInvoiceId = null;
+}
+
+// ============================================================
+//  ✅ حذف فاتورة
+// ============================================================
+
 function deleteInvoice(id) {
     if (!confirm('⚠️ هل أنت متأكد من حذف هذه الفاتورة؟')) return;
     invoices = invoices.filter(i => i.id !== id);
@@ -410,19 +454,10 @@ function deleteInvoice(id) {
     showToast('✅ تم حذف الفاتورة', 'success');
 }
 
-// ====== إغلاق المودالات ======
-function closeInvoiceModal() {
-    const modal = document.getElementById('invoiceModal');
-    if (modal) modal.classList.remove('active');
-}
+// ============================================================
+//  ✅ الفلترة
+// ============================================================
 
-function closePaymentModal() {
-    const modal = document.getElementById('paymentModal');
-    if (modal) modal.classList.remove('active');
-    currentInvoiceId = null;
-}
-
-// ====== الفلترة ======
 function applyFilter() {
     const from = document.getElementById('filterFrom')?.value;
     const to = document.getElementById('filterTo')?.value;
@@ -444,12 +479,396 @@ function applyFilter() {
     showToast(`✅ تم التصفية (${filtered.length} فاتورة)`, 'success');
 }
 
-// ====== تصدير PDF ======
-function exportInvoicesPDF() {
-    window.print();
+// ============================================================
+//  ✅ تصدير PDF باستخدام html2pdf.js (محسّن)
+// ============================================================
+
+function exportInvoicePDF(invoiceId) {
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (!inv) {
+        showToast('❌ الفاتورة غير موجودة', 'error');
+        return;
+    }
+
+    // التحقق من الترخيص
+    if (typeof licenseManager !== 'undefined') {
+        const features = licenseManager.getFeatures();
+        if (!features.canExportPDF) {
+            showToast('⚠️ تصدير PDF متاح فقط في النسخة المدفوعة', 'error');
+            licenseManager.showActivationPrompt();
+            return;
+        }
+    }
+
+    showToast('📄 جاري تجهيز ملف PDF...', 'success');
+
+    // ====== جلب بيانات الشركة ======
+    const company = getCompanyData();
+    
+    // ====== إنشاء HTML القالب ======
+    const htmlContent = generateInvoicePDFHTML(company, inv);
+
+    // ====== إنشاء عنصر مؤقت ======
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;top:-9999px;left:0;width:210mm;padding:0;background:#fff;z-index:99999;';
+    container.innerHTML = htmlContent;
+    document.body.appendChild(container);
+
+    // ====== تحويل إلى PDF ======
+    const opt = {
+        margin:        [8, 8, 8, 8],
+        filename:      `${inv.number || 'فاتورة'}.pdf`,
+        image:         { type: 'jpeg', quality: 0.98 },
+        html2canvas:   { 
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            letterRendering: true,
+            allowTaint: true
+        },
+        jsPDF:         { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
+
+    if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(container).save().then(() => {
+            document.body.removeChild(container);
+            showToast('✅ تم تصدير PDF بنجاح', 'success');
+        }).catch((err) => {
+            console.error('PDF Error:', err);
+            document.body.removeChild(container);
+            showToast('❌ حدث خطأ أثناء تصدير PDF', 'error');
+        });
+    } else {
+        // خطة بديلة: استخدام الطباعة
+        showToast('⚠️ مكتبة PDF غير متاحة، سيتم استخدام الطباعة', 'warning');
+        document.body.removeChild(container);
+        printInvoice(invoiceId);
+    }
 }
 
-// ====== تصدير Excel ======
+// ============================================================
+//  ✅ إنشاء HTML قالب الفاتورة
+// ============================================================
+
+function generateInvoicePDFHTML(company, inv) {
+    const statusMap = {
+        'paid': '✅ مدفوعة',
+        'unpaid': '⏳ غير مدفوعة',
+        'overdue': '🔴 متأخرة',
+        'cancelled': '❌ ملغية'
+    };
+
+    const itemsRows = (inv.data || []).map((item, index) => `
+        <tr style="background-color: ${index % 2 === 0 ? '#f8fafc' : '#ffffff'};">
+            <td style="padding: 5px 4px; border: 0.5px solid #ddd; text-align: center; font-size: 8pt;">${item.name || '---'}</td>
+            <td style="padding: 5px 4px; border: 0.5px solid #ddd; text-align: center; font-size: 8pt;">${item.count || 0}</td>
+            <td style="padding: 5px 4px; border: 0.5px solid #ddd; text-align: center; font-size: 8pt;">${Number(item.unitPrice || 0).toLocaleString('en-US')}</td>
+            <td style="padding: 5px 4px; border: 0.5px solid #ddd; text-align: center; font-size: 8pt; font-weight: bold; color: ${company.primaryColor};">
+                ${((item.count || 0) * (item.unitPrice || 0)).toLocaleString('en-US')}
+            </td>
+        </tr>
+    `).join('');
+
+    const primaryColor = company.primaryColor || '#1a6b8a';
+    const goldColor = company.goldColor || '#c9a84c';
+    const isDark = company.isDarkMode;
+
+    // حساب المتبقي
+    const remaining = (inv.total || 0) - (inv.paid || 0);
+    const remainingColor = remaining > 0 ? '#c0392b' : '#2d8f4a';
+
+    return `
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+            <meta charset="UTF-8">
+            <title>فاتورة - ${inv.number}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: 'Cairo', 'Segoe UI', sans-serif;
+                    background: #ffffff;
+                    color: #1a2a3a;
+                    font-size: 9pt;
+                    line-height: 1.5;
+                    padding: 5mm;
+                }
+                .page {
+                    width: 190mm;
+                    margin: 0 auto;
+                    background: #fff;
+                }
+                
+                /* ====== الهيدر ====== */
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    padding-bottom: 8px;
+                    border-bottom: 3px solid ${primaryColor};
+                    margin-bottom: 12px;
+                }
+                .header .company-info {
+                    flex: 1;
+                }
+                .header .company-info .logo-img {
+                    max-height: 45px;
+                    max-width: 80px;
+                    border-radius: 4px;
+                    border: 1px solid #eee;
+                    padding: 2px;
+                    margin-bottom: 4px;
+                }
+                .header .company-info h2 {
+                    font-size: 13pt;
+                    color: ${primaryColor};
+                    margin: 0;
+                }
+                .header .company-info p {
+                    font-size: 7pt;
+                    color: #666;
+                    margin: 1px 0;
+                }
+                .header .invoice-title {
+                    text-align: left;
+                    flex-shrink: 0;
+                }
+                .header .invoice-title h1 {
+                    font-size: 16pt;
+                    color: ${goldColor};
+                    margin: 0;
+                }
+                .header .invoice-title .status {
+                    display: inline-block;
+                    padding: 1px 8px;
+                    border-radius: 10px;
+                    font-size: 7pt;
+                    font-weight: 700;
+                    background: ${inv.status === 'paid' ? 'rgba(45,143,74,0.1)' : 'rgba(192,57,43,0.1)'};
+                    color: ${inv.status === 'paid' ? '#2d8f4a' : '#c0392b'};
+                    margin-top: 2px;
+                }
+                .header .invoice-title p {
+                    font-size: 8pt;
+                    color: #666;
+                    margin: 1px 0;
+                }
+                
+                /* ====== معلومات الفاتورة ====== */
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr 1fr;
+                    gap: 6px;
+                    padding: 8px 10px;
+                    background: #f8fafc;
+                    border-radius: 4px;
+                    border: 0.5px solid #e0e8ec;
+                    margin-bottom: 10px;
+                }
+                .info-grid .info-item label {
+                    font-size: 6pt;
+                    color: #999;
+                    text-transform: uppercase;
+                    display: block;
+                }
+                .info-grid .info-item .value {
+                    font-size: 9pt;
+                    font-weight: 700;
+                    color: ${primaryColor};
+                }
+                
+                /* ====== الجدول ====== */
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 6px 0;
+                }
+                table th {
+                    background: ${primaryColor};
+                    color: #fff;
+                    padding: 5px 4px;
+                    text-align: center;
+                    font-size: 7pt;
+                    font-weight: 700;
+                    border: 0.5px solid ${primaryColor};
+                }
+                table td {
+                    padding: 4px 3px;
+                    border: 0.5px solid #ddd;
+                    text-align: center;
+                    font-size: 8pt;
+                }
+                
+                /* ====== الإجماليات ====== */
+                .totals {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 15px;
+                    padding: 8px 12px;
+                    background: #f8fafc;
+                    border-radius: 4px;
+                    border: 0.5px solid #e0e8ec;
+                    margin: 8px 0;
+                }
+                .totals .total-item {
+                    text-align: center;
+                }
+                .totals .total-item .label {
+                    font-size: 7pt;
+                    color: #666;
+                }
+                .totals .total-item .amount {
+                    font-weight: 700;
+                    font-size: 10pt;
+                }
+                .totals .total-item .amount.paid { color: #2d8f4a; }
+                .totals .total-item .amount.remaining { color: ${remainingColor}; }
+                
+                /* ====== الملاحظات ====== */
+                .notes {
+                    margin-top: 8px;
+                    padding: 8px 10px;
+                    background: #f8fafc;
+                    border: 0.5px solid #e0e8ec;
+                    border-right: 3px solid ${goldColor};
+                    border-radius: 4px;
+                }
+                .notes h4 {
+                    font-size: 8pt;
+                    color: ${primaryColor};
+                    margin: 0 0 3px 0;
+                }
+                .notes p {
+                    font-size: 7pt;
+                    color: #444;
+                    margin: 1px 0;
+                }
+                
+                /* ====== الفوتر ====== */
+                .footer {
+                    margin-top: 10px;
+                    text-align: center;
+                    color: #999;
+                    font-size: 6pt;
+                    border-top: 0.5px solid #eee;
+                    padding-top: 6px;
+                }
+                
+                @media print {
+                    body { padding: 0; margin: 0; }
+                    .page { width: 100%; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="page">
+                <!-- الهيدر -->
+                <div class="header">
+                    <div class="company-info">
+                        ${company.logo ? `<img src="${company.logo}" class="logo-img" alt="الشعار" />` : ''}
+                        <h2>${company.name}</h2>
+                        ${company.address ? `<p>📍 ${company.address}</p>` : ''}
+                        ${company.phone ? `<p>📞 ${company.phone}</p>` : ''}
+                        ${company.commercial || company.tax ? `<p>${company.commercial ? `سجل تجاري: ${company.commercial}` : ''} ${company.tax ? `| رقم ضريبي: ${company.tax}` : ''}</p>` : ''}
+                    </div>
+                    <div class="invoice-title">
+                        <h1>فاتورة</h1>
+                        <p><strong>رقم:</strong> ${inv.number}</p>
+                        <p><strong>التاريخ:</strong> ${new Date(inv.date).toLocaleDateString('ar-EG')}</p>
+                        <span class="status">${statusMap[inv.status] || inv.status}</span>
+                    </div>
+                </div>
+
+                <!-- معلومات الفاتورة -->
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>العميل</label>
+                        <div class="value">${inv.client || 'غير محدد'}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>العرض المرتبط</label>
+                        <div class="value">${inv.offerName || '---'}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>تاريخ الاستحقاق</label>
+                        <div class="value">${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('ar-EG') : '---'}</div>
+                    </div>
+                    <div class="info-item">
+                        <label>المتبقي</label>
+                        <div class="value" style="color:${remainingColor};">${remaining.toLocaleString('en-US')} ${getCurrencySymbol()}</div>
+                    </div>
+                </div>
+
+                <!-- جدول البنود -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40%;">المعدة</th>
+                            <th style="width:15%;">العدد</th>
+                            <th style="width:20%;">سعر الوحدة</th>
+                            <th style="width:25%;">الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody>${itemsRows}</tbody>
+                </table>
+
+                <!-- الإجماليات -->
+                <div class="totals">
+                    <div class="total-item">
+                        <div class="label">الإجمالي</div>
+                        <div class="amount">${(inv.total || 0).toLocaleString('en-US')} ${getCurrencySymbol()}</div>
+                    </div>
+                    <div class="total-item">
+                        <div class="label">المدفوع</div>
+                        <div class="amount paid">${(inv.paid || 0).toLocaleString('en-US')} ${getCurrencySymbol()}</div>
+                    </div>
+                    <div class="total-item">
+                        <div class="label">المتبقي</div>
+                        <div class="amount remaining">${remaining.toLocaleString('en-US')} ${getCurrencySymbol()}</div>
+                    </div>
+                </div>
+
+                <!-- الملاحظات -->
+                ${inv.notes && inv.notes.length > 0 ? `
+                <div class="notes">
+                    <h4>📋 ملاحظات:</h4>
+                    ${inv.notes.map(n => `<p>• ${n}</p>`).join('')}
+                </div>
+                ` : ''}
+
+                <!-- الفوتر -->
+                <div class="footer">
+                    تم إنشاء هذه الفاتورة بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+}
+
+// ============================================================
+//  ✅ دوال الطباعة والتصدير الأخرى
+// ============================================================
+
+function closeInvoiceModal() {
+    const modal = document.getElementById('invoiceModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function exportInvoicesPDF() {
+    if (invoices.length === 0) {
+        showToast('⚠️ لا توجد فواتير للتصدير', 'error');
+        return;
+    }
+    // تصدير جميع الفواتير (يمكن تطويرها لاحقاً)
+    showToast('⚠️ تصدير جميع الفواتير قيد التطوير', 'warning');
+}
+
 function exportInvoicesExcel() {
     if (typeof XLSX === 'undefined') {
         showToast('⚠️ مكتبة Excel غير متاحة', 'error');
@@ -478,85 +897,18 @@ function exportInvoicesExcel() {
     showToast('📊 تم تصدير الفواتير Excel', 'success');
 }
 
-// ====== طباعة فاتورة ======
 function printInvoice(id) {
     const inv = invoices.find(i => i.id === id);
     if (!inv) return;
     
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        showToast('⚠️ يرجى السماح بفتح النوافذ المنبثقة', 'error');
-        return;
-    }
-    
-    let itemsHtml = '';
-    if (inv.data && Array.isArray(inv.data)) {
-        inv.data.forEach(row => {
-            itemsHtml += `
-                <tr>
-                    <td>${row.name || 'غير محدد'}</td>
-                    <td>${row.count || 0}</td>
-                    <td>${(row.unitPrice || 0).toLocaleString('en-US')}</td>
-                    <td>${((row.count || 0) * (row.unitPrice || 0)).toLocaleString('en-US')}</td>
-                </tr>
-            `;
-        });
-    }
-    
-    printWindow.document.write(`
-        <html dir="rtl" lang="ar">
-        <head><meta charset="UTF-8"><title>فاتورة ${inv.number}</title>
-        <style>
-            body{font-family:'Cairo',sans-serif;padding:20px;}
-            .header{text-align:center;border-bottom:2px solid #1a6b8a;padding-bottom:10px;margin-bottom:20px;}
-            .header h1{color:#1a6b8a;margin:0;}
-            .info{display:flex;justify-content:space-between;margin-bottom:20px;}
-            table{width:100%;border-collapse:collapse;margin:10px 0;}
-            th{background:#1a6b8a;color:#fff;padding:6px;text-align:center;}
-            td{padding:6px;border:1px solid #ddd;text-align:center;}
-            .total{font-weight:bold;font-size:1.2em;text-align:left;padding:10px 0;}
-            .footer{text-align:center;margin-top:20px;color:#999;font-size:0.8rem;}
-            @media print{body{padding:10px;}}
-        </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>فاتورة</h1>
-                <p>${inv.number}</p>
-            </div>
-            <div class="info">
-                <div><strong>العميل:</strong> ${inv.client}</div>
-                <div><strong>التاريخ:</strong> ${new Date(inv.date).toLocaleDateString('ar-EG')}</div>
-                <div><strong>تاريخ الاستحقاق:</strong> ${new Date(inv.dueDate).toLocaleDateString('ar-EG')}</div>
-            </div>
-            <table>
-                <thead><tr><th>المعدة</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead>
-                <tbody>${itemsHtml}</tbody>
-            </table>
-            <div class="total">الإجمالي: ${inv.total.toLocaleString('en-US')} ج.م</div>
-            <div style="display:flex;justify-content:space-between;border-top:1px solid #ddd;padding-top:10px;">
-                <div><strong>المدفوع:</strong> ${(inv.paid || 0).toLocaleString('en-US')} ج.م</div>
-                <div><strong>المتبقي:</strong> ${(inv.total - (inv.paid || 0)).toLocaleString('en-US')} ج.م</div>
-                <div><strong>الحالة:</strong> ${inv.status === 'paid' ? '✅ مدفوعة' : inv.status === 'overdue' ? '🔴 متأخرة' : '⏳ غير مدفوعة'}</div>
-            </div>
-            <div class="footer">تم إنشاء هذه الفاتورة بواسطة نظام عروض أسعار المعدات</div>
-            <script>
-                window.onload = function() {
-                    setTimeout(function() {
-                        window.print();
-                        window.close();
-                    }, 500);
-                };
-            <\/script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+    // استخدام التصدير المحسن بدلاً من الطباعة المباشرة
+    exportInvoicePDF(id);
 }
 
 // ============================================================
 //  ✅ جعل الدوال متاحة عالمياً
 // ============================================================
+
 window.loadInvoices = loadInvoices;
 window.renderInvoices = renderInvoices;
 window.updateStats = updateStats;
@@ -573,14 +925,18 @@ window.applyFilter = applyFilter;
 window.exportInvoicesPDF = exportInvoicesPDF;
 window.exportInvoicesExcel = exportInvoicesExcel;
 window.printInvoice = printInvoice;
+window.exportInvoicePDF = exportInvoicePDF;
+window.getCompanyData = getCompanyData;
+window.getCurrencySymbol = getCurrencySymbol;
 
 // ============================================================
 //  ✅ التهيئة
 // ============================================================
+
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         loadInvoices();
     }, 200);
     
-    console.log('📄 صفحة الفواتير - تم تهيئتها بنجاح');
+    console.log('📄 صفحة الفواتير - تم تهيئتها بنجاح مع دعم PDF المتقدم');
 });
