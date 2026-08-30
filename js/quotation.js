@@ -493,12 +493,13 @@ function removeClient(name) {
 }
 
 // ============================================================
-//  ✅ تحويل العرض إلى فاتورة
+//  ✅ تحويل العرض إلى فاتورة (محدث مع كل البيانات)
 // ============================================================
 function convertToInvoice() {
     // 1. جلب بيانات العرض الحالية
     const currentName = document.getElementById('quotationNumber')?.value || 'عرض غير مسمى';
     const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
+    const welcomeMessage = document.getElementById('welcomeMessage')?.value || '';
     
     // 2. التحقق من وجود بيانات
     if (data.length === 0 || !data.some(row => row.name && row.name.trim())) {
@@ -506,7 +507,7 @@ function convertToInvoice() {
         return;
     }
     
-    // 3. حساب الإجمالي
+    // 3. حساب الإجمالي من البنود
     let total = 0;
     data.forEach(row => {
         if (row.unitPrice && row.count) {
@@ -514,12 +515,31 @@ function convertToInvoice() {
         }
     });
     
-    if (total === 0) {
+    // ✅ 4. جلب الحقول الإضافية
+    const transportGo = parseFloat(document.getElementById('transportGo')?.value) || 0;
+    const transportBack = parseFloat(document.getElementById('transportBack')?.value) || 0;
+    const transportFlatbed = parseFloat(document.getElementById('transportFlatbed')?.value) || 0;
+    const roadCards = parseFloat(document.getElementById('roadCards')?.value) || 0;
+    const fuelCost = parseFloat(document.getElementById('fuelCost')?.value) || 0;
+    
+    // ✅ 5. حساب الإجمالي مع الحقول الإضافية
+    const extrasTotal = transportGo + transportBack + transportFlatbed + roadCards + fuelCost;
+    const totalWithExtras = total + extrasTotal;
+    
+    // ✅ 6. جلب الضريبة
+    const taxRate = parseFloat(document.getElementById('taxRate')?.value) || 0;
+    const taxAmount = totalWithExtras * (taxRate / 100);
+    const grandTotal = totalWithExtras + taxAmount;
+    
+    // ✅ 7. جلب الملاحظات
+    const notesData = notes && notes.length > 0 ? notes : [];
+    
+    if (grandTotal === 0) {
         showToast('⚠️ الإجمالي صفر، لا يمكن إنشاء فاتورة', 'error');
         return;
     }
     
-    // 4. جلب الفواتير الحالية
+    // 8. جلب الفواتير الحالية
     let invoices = [];
     try {
         invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
@@ -527,34 +547,45 @@ function convertToInvoice() {
         invoices = [];
     }
     
-    // 5. توليد رقم فاتورة تلقائي
+    // 9. توليد رقم فاتورة تلقائي
     const nextNum = invoices.length + 1;
     const invoiceNumber = `INV-2026-${String(nextNum).padStart(3, '0')}`;
     
-    // 6. إنشاء الفاتورة
+    // 10. إنشاء الفاتورة (مع كل البيانات)
     const invoice = {
         id: 'inv_' + Date.now(),
         number: invoiceNumber,
         offerName: currentName,
         client: targetCompany,
-        data: data.map(row => ({ ...row })), // نسخ البيانات
+        welcomeMessage: welcomeMessage,
+        data: data.map(row => ({ ...row })), // نسخ البنود
+        // ✅ الحقول الإضافية
+        transportGo: transportGo,
+        transportBack: transportBack,
+        transportFlatbed: transportFlatbed,
+        roadCards: roadCards,
+        fuelCost: fuelCost,
+        extrasTotal: extrasTotal,
+        taxRate: taxRate,
+        taxAmount: taxAmount,
         total: total,
+        totalWithExtras: totalWithExtras,
+        grandTotal: grandTotal,
+        notes: notesData,
         paid: 0,
         date: new Date().toISOString(),
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'unpaid',
         payments: [],
-        notes: ''
+        offerCreatedAt: new Date().toISOString()
     };
     
-    // 7. حفظ الفاتورة
+    // 11. حفظ الفاتورة
     invoices.push(invoice);
     localStorage.setItem('invoices', JSON.stringify(invoices));
     
-    // 8. إعلام المستخدم
     showToast(`✅ تم تحويل العرض "${currentName}" إلى فاتورة رقم ${invoiceNumber}`, 'success');
     
-    // 9. عرض رابط للفاتورة
     if (confirm(`✅ تم إنشاء الفاتورة رقم ${invoiceNumber}\n\nهل تريد عرض تفاصيل الفاتورة الآن؟`)) {
         window.location.href = `invoice-detail.html?id=${invoice.id}`;
     }
