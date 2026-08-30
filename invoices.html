@@ -1,0 +1,303 @@
+<!-- invoices.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <base href="/equipment-app/" />
+    <title>إدارة الفواتير</title>
+    
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/invoices.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a6b8a' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='%23c9a84c'%3E🏗️%3C/text%3E%3C/svg%3E" />
+    
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1a6b8a" />
+</head>
+<body>
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">تم بنجاح</span>
+    </div>
+
+    <!-- ====== زر العودة للرئيسية ====== -->
+    <div class="back-home-btn">
+        <a href="dashboard.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-arrow-right"></i> العودة للرئيسية
+        </a>
+    </div>
+
+    <!-- ====== الهيدر ====== -->
+    <header class="header-hamburger" id="headerHamburger">
+        <div class="logo" onclick="goHome()">
+            <img id="headerLogo" src="" alt="الشعار" style="display:none;" />
+            <h1><i class="fas fa-crown"></i> عروض المعدات</h1>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleMode()" id="modeToggle" title="تبديل الوضع">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="hamburger-btn" id="hamburgerBtn" title="القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== السايدبار ====== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo-text"><i class="fas fa-crown"></i> عروض المعدات</span>
+            <button class="close-btn" id="closeSidebar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-links" id="sidebarLinks">
+            <!-- سيتم تعبئته بواسطة JavaScript -->
+        </div>
+        <div class="sidebar-footer">
+            <span class="license-status" id="sidebarLicenseStatus">📋 النسخة المجانية</span>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="invoices-container">
+            
+            <!-- رأس الصفحة -->
+            <div class="page-header">
+                <h1><i class="fas fa-file-invoice"></i> إدارة الفواتير</h1>
+                <button class="btn btn-primary" onclick="createInvoiceFromOffer()">
+                    <i class="fas fa-plus"></i> فاتورة جديدة
+                </button>
+            </div>
+
+            <!-- الإحصائيات -->
+            <div class="stats-grid" id="invoiceStats">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                    <div class="stat-number" id="totalInvoices">0</div>
+                    <div class="stat-label">إجمالي الفواتير</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle" style="color:var(--success);"></i></div>
+                    <div class="stat-number" id="paidInvoices">0</div>
+                    <div class="stat-label">مدفوعة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock" style="color:var(--warning);"></i></div>
+                    <div class="stat-number" id="unpaidInvoices">0</div>
+                    <div class="stat-label">غير مدفوعة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-number" id="totalRevenue">0</div>
+                    <div class="stat-label">إجمالي الإيرادات</div>
+                </div>
+            </div>
+
+            <!-- الفلتر -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-filter"></i> فلترة الفواتير</h2>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> من</label>
+                        <input type="date" id="filterFrom" />
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar-alt"></i> إلى</label>
+                        <input type="date" id="filterTo" />
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-filter"></i> الحالة</label>
+                        <select id="filterStatus">
+                            <option value="">الكل</option>
+                            <option value="paid">مدفوعة</option>
+                            <option value="unpaid">غير مدفوعة</option>
+                            <option value="overdue">متأخرة</option>
+                            <option value="cancelled">ملغية</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="applyFilter()">
+                        <i class="fas fa-search"></i> بحث
+                    </button>
+                </div>
+            </div>
+
+            <!-- جدول الفواتير -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> قائمة الفواتير</h2>
+                    <div class="table-actions">
+                        <button class="btn btn-gold btn-sm" onclick="exportInvoicesPDF()">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="exportInvoicesExcel()">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>العميل</th>
+                                <th>العرض</th>
+                                <th>التاريخ</th>
+                                <th>تاريخ الاستحقاق</th>
+                                <th>الإجمالي</th>
+                                <th>المدفوع</th>
+                                <th>المتبقي</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody">
+                            <tr>
+                                <td colspan="10" style="text-align:center;color:var(--text-light);">
+                                    <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="footer"></div>
+
+    <!-- ====== مودال إضافة فاتورة ====== -->
+    <div class="modal-overlay" id="invoiceModal" onclick="if(event.target===this) closeInvoiceModal()">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeInvoiceModal()"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-file-invoice"></i> إنشاء فاتورة جديدة</h3>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>اختر العرض</label>
+                    <select id="offerSelect" onchange="loadOfferData()">
+                        <option value="">-- اختر عرض --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>رقم الفاتورة</label>
+                    <input type="text" id="invoiceNumber" readonly />
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الاستحقاق</label>
+                    <input type="date" id="invoiceDueDate" />
+                </div>
+                <div id="offerPreview" style="display:none;background:var(--bg-light);padding:1rem;border-radius:12px;margin-top:1rem;">
+                    <p><strong>العميل:</strong> <span id="previewClient">---</span></p>
+                    <p><strong>الإجمالي:</strong> <span id="previewTotal">---</span></p>
+                    <p><strong>عدد البنود:</strong> <span id="previewItems">---</span></p>
+                </div>
+                <button class="btn btn-success" onclick="saveInvoice()" style="margin-top:1rem;width:100%;">
+                    <i class="fas fa-save"></i> حفظ الفاتورة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== مودال الدفع ====== -->
+    <div class="modal-overlay" id="paymentModal" onclick="if(event.target===this) closePaymentModal()">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePaymentModal()"><i class="fas fa-times"></i></button>
+            <h3><i class="fas fa-money-bill-wave"></i> تسجيل دفعة</h3>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>المبلغ</label>
+                    <input type="number" id="paymentAmount" placeholder="المبلغ" min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label>طريقة الدفع</label>
+                    <select id="paymentMethod">
+                        <option value="cash">كاش</option>
+                        <option value="bank">تحويل بنكي</option>
+                        <option value="cheque">شيك</option>
+                        <option value="card">بطاقة ائتمان</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <input type="text" id="paymentNote" placeholder="ملاحظات الدفع" />
+                </div>
+                <button class="btn btn-success" onclick="savePayment()" style="margin-top:1rem;width:100%;">
+                    <i class="fas fa-check"></i> تأكيد الدفع
+                </button>
+                <div id="paymentResult" style="margin-top:0.5rem;font-size:0.9rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== السكربتات ====== -->
+    <script src="js/license.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/invoices.js"></script>
+    
+    <!-- ====== كود السايدبار ====== -->
+    <script>
+        (function() {
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const closeBtn = document.getElementById('closeSidebar');
+            const sidebarLinks = document.getElementById('sidebarLinks');
+
+            const links = [
+                { href: 'dashboard.html', icon: 'fa-home', text: 'الرئيسية' },
+                { href: 'quotation.html', icon: 'fa-file-invoice', text: 'العرض' },
+                { href: 'company.html', icon: 'fa-building', text: 'الشركة' },
+                { href: 'reports.html', icon: 'fa-chart-bar', text: 'التقارير' },
+                { href: 'design.html', icon: 'fa-palette', text: 'التصميم' },
+                { href: 'invoices.html', icon: 'fa-file-invoice', text: 'الفواتير' },
+                { href: 'sirkat.html', icon: 'fa-clipboard-list', text: 'سركات' },
+                { href: 'changelog.html', icon: 'fa-history', text: 'التحديثات' },
+                { href: 'help.html', icon: 'fa-question-circle', text: 'التعليمات' },
+                { href: 'settings.html', icon: 'fa-tools', text: 'المطور' },
+                { href: 'activation-license.html', icon: 'fa-file-certificate', text: 'ترخيص الملفات' },
+                { href: 'activation.html', icon: 'fa-key', text: 'التفعيل' }
+            ];
+
+            const currentPage = window.location.pathname.split('/').pop() || 'invoices.html';
+            sidebarLinks.innerHTML = links.map(link => `
+                <a href="${link.href}" class="${link.href === currentPage ? 'active' : ''}">
+                    <i class="fas ${link.icon}"></i>
+                    ${link.text}
+                </a>
+            `).join('');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            hamburgerBtn.addEventListener('click', openSidebar);
+            closeBtn.addEventListener('click', closeSidebar);
+            overlay.addEventListener('click', closeSidebar);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            document.querySelectorAll('.sidebar-links a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            console.log('✅ قائمة الهامبورجر في invoices.html تم تهيئتها بنجاح');
+        })();
+    </script>
+</body>
+</html>
