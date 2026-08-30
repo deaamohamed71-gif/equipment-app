@@ -15,9 +15,9 @@ const defaultNotes = [
 
 const iconMap = {
     'رافعة مقصية': 'fa-arrow-up',
-    'ونش أحمال': 'fa-crane',
+    'ونش أحمال': 'fa-tower-crane',
     'فورك لفت': 'fa-truck',
-    'مانليفت': 'fa-hand-holding'
+    'مانليفت': 'fa-hand-holding-heart'
 };
 
 const defaultIcon = 'fa-arrow-up';
@@ -492,6 +492,74 @@ function removeClient(name) {
     showToast('✅ تم حذف العميل', 'success');
 }
 
+// ============================================================
+//  ✅ تحويل العرض إلى فاتورة
+// ============================================================
+function convertToInvoice() {
+    // 1. جلب بيانات العرض الحالية
+    const currentName = document.getElementById('quotationNumber')?.value || 'عرض غير مسمى';
+    const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
+    
+    // 2. التحقق من وجود بيانات
+    if (data.length === 0 || !data.some(row => row.name && row.name.trim())) {
+        showToast('⚠️ لا توجد بيانات في العرض لتحويلها إلى فاتورة', 'error');
+        return;
+    }
+    
+    // 3. حساب الإجمالي
+    let total = 0;
+    data.forEach(row => {
+        if (row.unitPrice && row.count) {
+            total += row.unitPrice * row.count;
+        }
+    });
+    
+    if (total === 0) {
+        showToast('⚠️ الإجمالي صفر، لا يمكن إنشاء فاتورة', 'error');
+        return;
+    }
+    
+    // 4. جلب الفواتير الحالية
+    let invoices = [];
+    try {
+        invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+    } catch (e) {
+        invoices = [];
+    }
+    
+    // 5. توليد رقم فاتورة تلقائي
+    const nextNum = invoices.length + 1;
+    const invoiceNumber = `INV-2026-${String(nextNum).padStart(3, '0')}`;
+    
+    // 6. إنشاء الفاتورة
+    const invoice = {
+        id: 'inv_' + Date.now(),
+        number: invoiceNumber,
+        offerName: currentName,
+        client: targetCompany,
+        data: data.map(row => ({ ...row })), // نسخ البيانات
+        total: total,
+        paid: 0,
+        date: new Date().toISOString(),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        status: 'unpaid',
+        payments: [],
+        notes: ''
+    };
+    
+    // 7. حفظ الفاتورة
+    invoices.push(invoice);
+    localStorage.setItem('invoices', JSON.stringify(invoices));
+    
+    // 8. إعلام المستخدم
+    showToast(`✅ تم تحويل العرض "${currentName}" إلى فاتورة رقم ${invoiceNumber}`, 'success');
+    
+    // 9. عرض رابط للفاتورة
+    if (confirm(`✅ تم إنشاء الفاتورة رقم ${invoiceNumber}\n\nهل تريد عرض تفاصيل الفاتورة الآن؟`)) {
+        window.location.href = `invoice-detail.html?id=${invoice.id}`;
+    }
+}
+
 // ====== تصدير PDF عبر نافذة الطباعة ======
 function savePDF() {
     // التحقق من صلاحية الترخيص
@@ -709,7 +777,7 @@ function savePDF() {
                         window.close();
                     }, 400);
                 };
-            </script>
+            <\/script>
         </body>
         </html>
     `);
@@ -758,6 +826,9 @@ function shareOptions() {
         navigator.clipboard?.writeText(url).then(() => showToast('✅ تم نسخ الرابط', 'success'));
     }
 }
+
+// ====== جعل الدوال متاحة عالمياً ======
+window.convertToInvoice = convertToInvoice;
 
 // ====== التهيئة ======
 function loadQuotationData() {
