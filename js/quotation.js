@@ -1,4 +1,4 @@
-// js/quotation.js - كود صفحة العرض مع دالة PDF عبر الطباعة
+// js/quotation.js - كود صفحة العرض (محدث مع userId)
 
 // ====== البيانات الافتراضية ======
 const defaultData = [
@@ -25,6 +25,19 @@ let data = [];
 let notes = [];
 let selectedRowIndex = -1;
 let isPremium = false;
+
+// ====== الحصول على userId الحالي ======
+function getCurrentUserId() {
+    try {
+        const auth = window.firebaseAuth;
+        if (auth && auth.currentUser) {
+            return auth.currentUser.uid;
+        }
+        return localStorage.getItem('user_id') || 'anonymous';
+    } catch (e) {
+        return 'anonymous';
+    }
+}
 
 // ====== تهيئة الترخيص ======
 function initLicense() {
@@ -334,6 +347,8 @@ function saveOfferDirectly() {
         return;
     }
     
+    const userId = getCurrentUserId();
+    
     savedOffers = savedOffers.filter(o => o.name !== name);
     savedOffers.push({ 
         name, 
@@ -341,7 +356,8 @@ function saveOfferDirectly() {
         notes: notes.filter(n => n.trim().length > 0),
         targetCompany: document.getElementById('targetCompany')?.value || '',
         expiryDate: document.getElementById('validityDate')?.value || '',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        userId: userId // ✅ إضافة userId للقواعد الجديدة
     });
     localStorage.setItem('savedOffers', JSON.stringify(savedOffers));
     loadSavedOffersList();
@@ -441,8 +457,14 @@ function addClient() {
     
     if (!name) { showToast('⚠️ الرجاء إدخال اسم العميل', 'error'); return; }
     
+    const userId = getCurrentUserId();
     let clients = getClients().filter(c => c.name !== name);
-    clients.push({ name, phone, email });
+    clients.push({ 
+        name, 
+        phone, 
+        email,
+        userId: userId // ✅ إضافة userId للقواعد الجديدة
+    });
     localStorage.setItem('savedClients', JSON.stringify(clients));
     loadClientList();
     document.getElementById('newClientName').value = '';
@@ -493,7 +515,7 @@ function removeClient(name) {
 }
 
 // ============================================================
-//  ✅ تحويل العرض إلى فاتورة (محدث مع كل البيانات)
+//  ✅ تحويل العرض إلى فاتورة (محدث مع userId)
 // ============================================================
 function convertToInvoice() {
     // 1. جلب بيانات العرض الحالية
@@ -515,23 +537,23 @@ function convertToInvoice() {
         }
     });
     
-    // ✅ 4. جلب الحقول الإضافية
+    // 4. جلب الحقول الإضافية
     const transportGo = parseFloat(document.getElementById('transportGo')?.value) || 0;
     const transportBack = parseFloat(document.getElementById('transportBack')?.value) || 0;
     const transportFlatbed = parseFloat(document.getElementById('transportFlatbed')?.value) || 0;
     const roadCards = parseFloat(document.getElementById('roadCards')?.value) || 0;
     const fuelCost = parseFloat(document.getElementById('fuelCost')?.value) || 0;
     
-    // ✅ 5. حساب الإجمالي مع الحقول الإضافية
+    // 5. حساب الإجمالي مع الحقول الإضافية
     const extrasTotal = transportGo + transportBack + transportFlatbed + roadCards + fuelCost;
     const totalWithExtras = total + extrasTotal;
     
-    // ✅ 6. جلب الضريبة
+    // 6. جلب الضريبة
     const taxRate = parseFloat(document.getElementById('taxRate')?.value) || 0;
     const taxAmount = totalWithExtras * (taxRate / 100);
     const grandTotal = totalWithExtras + taxAmount;
     
-    // ✅ 7. جلب الملاحظات
+    // 7. جلب الملاحظات
     const notesData = notes && notes.length > 0 ? notes : [];
     
     if (grandTotal === 0) {
@@ -551,15 +573,17 @@ function convertToInvoice() {
     const nextNum = invoices.length + 1;
     const invoiceNumber = `INV-2026-${String(nextNum).padStart(3, '0')}`;
     
-    // 10. إنشاء الفاتورة (مع كل البيانات)
+    // 10. الحصول على userId
+    const userId = getCurrentUserId();
+    
+    // 11. إنشاء الفاتورة (مع كل البيانات + userId)
     const invoice = {
         id: 'inv_' + Date.now(),
         number: invoiceNumber,
         offerName: currentName,
         client: targetCompany,
         welcomeMessage: welcomeMessage,
-        data: data.map(row => ({ ...row })), // نسخ البنود
-        // ✅ الحقول الإضافية
+        data: data.map(row => ({ ...row })),
         transportGo: transportGo,
         transportBack: transportBack,
         transportFlatbed: transportFlatbed,
@@ -577,10 +601,11 @@ function convertToInvoice() {
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         status: 'unpaid',
         payments: [],
-        offerCreatedAt: new Date().toISOString()
+        offerCreatedAt: new Date().toISOString(),
+        userId: userId // ✅ إضافة userId للقواعد الجديدة
     };
     
-    // 11. حفظ الفاتورة
+    // 12. حفظ الفاتورة
     invoices.push(invoice);
     localStorage.setItem('invoices', JSON.stringify(invoices));
     
@@ -604,7 +629,6 @@ function savePDF() {
     }
     
     // ====== جلب جميع البيانات من localStorage ======
-    // 1. بيانات الشركة (المحفوظة من company.js)
     const companyName = localStorage.getItem('field_companyName') || 'شركة المعدات الحديثة';
     const companyPhone = localStorage.getItem('field_companyPhone') || '';
     const companyAddress = localStorage.getItem('field_companyAddress') || '';
@@ -613,43 +637,35 @@ function savePDF() {
     const projectName = localStorage.getItem('field_projectName') || '';
     const logo = localStorage.getItem('companyLogo') || '';
     
-    // 2. معلومات العرض (من حقول الصفحة الحالية)
     const quotationNumber = document.getElementById('quotationNumber')?.value || 'QT-2026-001';
     const issueDate = document.getElementById('issueDate')?.value || new Date().toISOString().split('T')[0];
     const validityDate = document.getElementById('validityDate')?.value || '';
     
-    // 3. العميل والرسالة
     const targetCompany = document.getElementById('targetCompany')?.value || 'غير محدد';
     const welcomeMessage = document.getElementById('welcomeMessage')?.value || 'نشكركم على ثقتكم';
     
-    // 4. الحقول الإضافية
     const transportGo = document.getElementById('transportGo')?.value || '0';
     const transportBack = document.getElementById('transportBack')?.value || '0';
     const transportFlatbed = document.getElementById('transportFlatbed')?.value || '0';
     const roadCards = document.getElementById('roadCards')?.value || '0';
     const fuelCost = document.getElementById('fuelCost')?.value || '0';
     
-    // 5. الضريبة والإجمالي
     const taxRate = document.getElementById('taxRate')?.value || '0';
     const taxAmount = document.getElementById('taxAmount')?.textContent || '0';
     const totalWithTax = document.getElementById('totalWithTax')?.textContent || '0';
     const totalDisplay = document.getElementById('totalDisplay')?.innerHTML || '0 ج.م';
     
-    // 6. التوقيعات (من localStorage)
     const sigEmployee = localStorage.getItem('sig_sigEmployee') || '';
     const sigClient = localStorage.getItem('sig_sigClient') || '';
     
-    // 7. الملاحظات
     const notesData = notes && notes.length > 0 ? notes : defaultNotes;
     
-    // تحديد ما إذا كانت النسخة مجانية للعلامة المائية
     let isFreeVersion = true;
     if (typeof licenseManager !== 'undefined') {
         const features = licenseManager.getFeatures();
         isFreeVersion = !features.isPremium;
     }
 
-    // بناء الجدول
     let itemsHtml = '';
     data.forEach((row, index) => {
         const opTotal = getOperationTotal(row);
@@ -667,7 +683,6 @@ function savePDF() {
         `;
     });
 
-    // العلامة المائية
     let watermarkHtml = '';
     if (isFreeVersion) {
         watermarkHtml = `
@@ -677,7 +692,6 @@ function savePDF() {
         `;
     }
 
-    // فتح نافذة الطباعة
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
         showToast('⚠️ يرجى السماح بفتح النوافذ المنبثقة (Popups) لتحميل الـ PDF', 'error');
@@ -707,8 +721,6 @@ function savePDF() {
         </head>
         <body>
             ${watermarkHtml}
-            
-            <!-- الهيدر -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 3px solid #1a6b8a; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     ${logo ? `<img src="${logo}" style="max-height: 55px; max-width: 75px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;" />` : ''}
@@ -724,16 +736,12 @@ function savePDF() {
                     <p style="font-size: 10px; color: #666; margin: 0;">تاريخ الإصدار: ${issueDate} ${validityDate ? `| الصلاحية: ${validityDate}` : ''}</p>
                 </div>
             </div>
-
-            <!-- العميل -->
             <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 11px; border: 1px solid #e0e8ec;">
                 <span style="font-weight: bold; color: #1a6b8a;">موجه إلى:</span>
                 <span><strong>${targetCompany}</strong></span>
                 <span style="opacity: 0.3;">|</span>
                 <span>${welcomeMessage}</span>
             </div>
-
-            <!-- الجدول -->
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
                 <thead>
                     <tr style="background: #1a6b8a; color: white;">
@@ -751,8 +759,6 @@ function savePDF() {
                     ${itemsHtml}
                 </tbody>
             </table>
-
-            <!-- الحقول الإضافية -->
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; font-size: 10px; border: 1px solid #e0e8ec; text-align: center;">
                 <div>نقل ذهاب: <strong>${Number(transportGo).toLocaleString('en-US')} ج.م</strong></div>
                 <div>نقل عودة: <strong>${Number(transportBack).toLocaleString('en-US')} ج.م</strong></div>
@@ -760,8 +766,6 @@ function savePDF() {
                 <div>كارتات: <strong>${Number(roadCards).toLocaleString('en-US')} ج.م</strong></div>
                 <div>سولار: <strong>${Number(fuelCost).toLocaleString('en-US')} ج.م</strong></div>
             </div>
-
-            <!-- الضريبة والإجمالي -->
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e0e8ec;">
                 <div style="font-size: 10px;">
                     <strong>VAT (${taxRate}%):</strong> قيمة الضريبة: <strong>${taxAmount} ج.م</strong> | الإجمالي شامل الضريبة: <strong>${totalWithTax} ج.م</strong>
@@ -771,16 +775,12 @@ function savePDF() {
                     الإجمالي: ${totalDisplay.replace(/<[^>]*>/g, '').trim()}
                 </div>
             </div>
-
-            <!-- الملاحظات -->
             ${notesData && notesData.length > 0 ? `
                 <div style="margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e0e8ec; border-right: 3px solid #c9a84c; border-radius: 6px;">
                     <h3 style="font-size: 11px; color: #1a6b8a; margin: 0 0 5px 0;">ملاحظات وشروط:</h3>
                     ${notesData.map(note => `<div style="font-size: 10px; padding: 2px 0; color: #444;">• ${note}</div>`).join('')}
                 </div>
             ` : ''}
-
-            <!-- التوقيعات -->
             <div style="display: flex; gap: 20px; margin-top: 20px;">
                 <div style="flex: 1; border: 1px dashed #ccc; padding: 10px; text-align: center; border-radius: 6px;">
                     <h4 style="font-size: 10px; color: #1a6b8a; margin: 0 0 6px 0;">توقيع الموظف</h4>
@@ -795,12 +795,9 @@ function savePDF() {
                     </div>
                 </div>
             </div>
-
-            <!-- الفوتر -->
             <div style="margin-top: 15px; text-align: center; color: #999; font-size: 8px; border-top: 1px solid #eee; padding-top: 8px;">
                 تم إنشاء هذا العرض بواسطة نظام عروض أسعار المعدات | ${new Date().toLocaleDateString('ar-EG')}
             </div>
-
             <script>
                 window.onload = function() {
                     setTimeout(function() {
