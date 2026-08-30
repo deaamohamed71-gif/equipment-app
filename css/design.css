@@ -1,4 +1,4 @@
-/* css/design.css - أنماط صفحة التصميم مع تحسينات الموبايل */
+/* css/design.css - أنماط صفحة التصميم مع تحسينات الأيقونات */
 
 .design-container .page-header {
     margin-bottom: 1.5rem;
@@ -188,7 +188,7 @@ body.dark-mode .font-preview {
     border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* ====== قسم الأيقونات ====== */
+/* ====== ✅ قسم الأيقونات (المحسّن) ====== */
 .icon-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -200,13 +200,16 @@ body.dark-mode .font-preview {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 0.3rem;
-    padding: 0.8rem;
+    padding: 0.8rem 0.5rem;
     border-radius: 12px;
     border: 2px solid var(--border);
     background: var(--bg-light);
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 100px;
+    min-width: 80px;
 }
 
 .icon-item:hover {
@@ -229,23 +232,31 @@ body.dark-mode .icon-item.selected {
     background: rgba(212, 175, 55, 0.1);
 }
 
+/* ✅ تحسين الأيقونات */
 .icon-item i {
-    font-size: 2rem;
-    color: var(--icon-color);
+    font-size: 2.8rem !important;
+    color: var(--icon-color, #1a6b8a);
+    display: inline-block !important;
+    width: 60px !important;
+    height: 60px !important;
+    line-height: 60px !important;
+    text-align: center !important;
+    margin-bottom: 0.2rem;
 }
 
 .icon-item span {
     font-size: 0.7rem;
     color: var(--text);
     text-align: center;
+    word-break: break-word;
+}
+
+body.dark-mode .icon-item i {
+    color: var(--gold);
 }
 
 .icon-item input[type="radio"] {
     display: none;
-}
-
-body.dark-mode .icon-item span {
-    color: #d4c8a0;
 }
 
 .icon-actions {
@@ -372,11 +383,16 @@ body.dark-mode .theme-item span {
     }
     
     .icon-item {
-        padding: 0.5rem;
+        min-height: 90px;
+        min-width: 60px;
+        padding: 0.5rem 0.3rem;
     }
     
     .icon-item i {
-        font-size: 1.5rem;
+        font-size: 2rem !important;
+        width: 45px !important;
+        height: 45px !important;
+        line-height: 45px !important;
     }
     
     .icon-item span {
@@ -407,6 +423,19 @@ body.dark-mode .theme-item span {
     
     .icon-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .icon-item {
+        min-height: 80px;
+        min-width: 50px;
+        padding: 0.4rem 0.2rem;
+    }
+    
+    .icon-item i {
+        font-size: 1.8rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
     }
     
     .theme-options {
